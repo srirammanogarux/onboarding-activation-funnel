@@ -24,9 +24,14 @@ lives in stage 5**.
 | 6 | Situation | **Forks the career scenario set**; profile data elsewhere |
 | 7 | **Scenarios** | Multi-select, keyed to goal. Min 1, no cap, no ordering. **Exam cohorts skip it** |
 
-Every scenario is a **roleplay with a named counterpart** (`who` in `content.js`).
-If you can't name who's on the other side, it's a skill or a place, not a
-scenario — it can't be played, and it doesn't belong in the list.
+Every scenario is a **job, phrased verb-first, with a named counterpart**
+(`who` in `content.js`). Two tests, both of which have to pass:
+
+1. **Can you name who's on the other side?** If not it's a skill or a place,
+   not a scenario, and it can't be played.
+2. **Does the label say what you're trying to get done?** "Talking to my
+   flatmates" is a topic. "Sort things out with my flatmate" is a job.
+   Gerunds are the tell — they name a subject, not an outcome.
 
 **Goal is the primary key; situation refines it via a work mode.** The model
 comes from `usa-onboarding` (`GOALS.jtbd` + `JTBD_MODE`) — India has no JTBD
