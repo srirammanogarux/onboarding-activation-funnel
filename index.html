@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="app">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Stimuler · India Onboarding</title>
+<link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="stage">
+  <div class="mockup" id="mockup">
+  <div class="phone" id="phone">
+    <div class="ambient"></div>
+
+    <!-- ============ CHAT SCREEN ============ -->
+    <main class="screen chat-screen" id="chatScreen">
+      <header class="topbar" id="topbar">
+        <div class="statusbar">
+          <img src="assets/status-time.svg" alt="9:41" width="54" height="21">
+          <img src="assets/status-right.svg" alt="" width="67" height="12">
+        </div>
+        <div class="progress-block">
+          <p class="progress-label" id="progressLabel">Let’s get started</p>
+          <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+        </div>
+      </header>
+
+      <div class="chat-scroll" id="chatScroll">
+        <div class="chat-stream" id="chatStream"></div>
+      </div>
+
+      <footer class="bottombar" id="bottomBar">
+        <button class="pill pill-mute" id="muteBtn">
+          <img src="assets/mic-mute.svg" alt=""> Mute
+        </button>
+        <button class="pill pill-skip" id="skipBtn">
+          Skip <img src="assets/chevron-dbl.svg" alt="">
+        </button>
+      </footer>
+
+      <div class="convmic-area gone" id="micArea">
+        <div class="mic-tip" id="micTip">Tap to speak</div>
+        <div class="convmic idle" id="convMic">
+          <div class="cm-mic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><line x1="12" y1="18" x2="12" y2="22"/></svg>
+          </div>
+          <button class="cm-cancel" id="cmCancel" aria-label="Cancel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
+          <div class="cm-wave" id="cmWave"></div>
+          <button class="cm-confirm" id="cmConfirm" aria-label="Done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12 10 17 19 7"/></svg></button>
+        </div>
+      </div>
+
+      <div class="home-indicator"></div>
+
+      <!-- story-style testimonial player (variant B) -->
+      <div class="story-player" id="storyPlayer" hidden>
+        <div class="sp-progress" id="spProgress"></div>
+        <div class="sp-top">
+          <button class="sp-mute" id="spMute" aria-label="Mute">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6.75 8.25l4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.7-.5-1.94-1.35A9 9 0 0 1 2.25 12c0-.83.11-1.63.32-2.4.23-.84 1.06-1.35 1.94-1.35h2.24Z"/><path class="sp-waves" d="M19.11 5.64a9 9 0 0 1 0 12.72M16.46 8.29a5.25 5.25 0 0 1 0 7.42"/><line class="sp-slash" x1="16" y1="8" x2="21" y2="16" opacity="0"/></svg>
+          </button>
+          <button class="sp-close" id="spClose" aria-label="Close"><img src="assets/paywall/close.svg" alt=""></button>
+        </div>
+        <div class="sp-media" id="spMedia"></div>
+        <div class="sp-scrim">
+          <img class="sp-stars" src="assets/paywall/stars.svg" alt="★★★★★">
+          <p class="sp-quote" id="spQuote"></p>
+          <b class="sp-name" id="spName"></b>
+          <span class="sp-role" id="spRole"></span>
+        </div>
+        <div class="sp-nav sp-prev" id="spPrev"></div>
+        <div class="sp-nav sp-next" id="spNext"></div>
+      </div>
+    </main>
+
+    <!-- ============ HINT FLOW: level meter → fix pronunciation → practice ============ -->
+    <section class="screen takeover is-hidden" id="hintScreen" hidden>
+      <div class="statusbar">
+        <img src="assets/status-time.svg" alt="9:41" width="54" height="21">
+        <img src="assets/status-right.svg" alt="" width="67" height="12">
+      </div>
+      <div class="hs-wrap">
+
+        <!-- 1 · level meter -->
+        <div class="hs-view" id="hsMeterView">
+          <div class="hs-coach">
+            <div class="dp"><img src="assets/sarah-avatar.png" alt="Sarah"></div>
+            <p class="hs-say" id="hsSay">I listened to how you read. Here is where you stand.</p>
+          </div>
+          <div class="hs-stage">
+            <h2 class="hs-title" id="hsHead">Your<br>speech<br>level</h2>
+            <div class="hs-meterrow">
+              <div class="hs-bub" id="hsBub"><span id="hsPct">0%</span></div>
+              <div class="hs-track" id="hsTrack"></div>
+              <div class="hs-labels" id="hsLabels"></div>
+            </div>
+          </div>
+          <button class="hs-cta" id="hsNext" style="visibility:hidden">Continue</button>
+        </div>
+
+        <!-- 2 · errors -->
+        <div class="hs-view" id="hsErrorsView" hidden>
+          <h2 class="hs-fq">First, let’s fix your<br><em>pronunciation</em>.</h2>
+          <p class="hs-sub">Two words from your reading need work.</p>
+          <div class="hs-passage" id="hsPassage"></div>
+          <button class="hs-cta" id="hsFix">Let’s correct them</button>
+        </div>
+
+        <!-- 3 · practice -->
+        <div class="hs-view" id="hsPracticeView" hidden>
+          <p class="hs-state" id="hsState">Let’s practice this word</p>
+          <div class="scaf-progress"><i id="hsFill"></i></div>
+          <div class="hs-passage" id="hsPracPassage"></div>
+          <p class="hs-teach">Read the word <b>out loud</b></p>
+          <div class="pron-card" id="pronCard">
+            <i class="pc-burst" aria-hidden="true"></i>
+            <span class="pc-check" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <div class="pc-top">
+              <div>
+                <div class="pc-word" id="pcWord"></div>
+                <div class="pc-ph" id="pcPh"></div>
+              </div>
+              <div class="pc-play">
+                <img src="assets/sarah-avatar.png" alt="">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M8 9v6M4 10.5v3M16 7v10M20 9.5v5"/></svg>
+              </div>
+            </div>
+            <div class="pc-bottom">
+              <div class="pc-score"><b id="pcScore">52%</b><span>Current score</span></div>
+              <div class="pc-right">
+                <div class="pc-tip" id="pcTip"></div>
+                <button class="pc-btn" id="pcBtn">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><rect x="9" y="2.5" width="6" height="12" rx="3"/><path d="M5 11.5v.5a7 7 0 0 0 14 0v-.5M12 19.5V22M8 22h8" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
+                  <span id="pcBtnT">Tap to speak</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <button class="skip-link pc-skip" id="pcSkip">Skip the word</button>
+        </div>
+
+      </div>
+      <div class="home-indicator"></div>
+    </section>
+
+    <!-- ============ GRAPH → PAYWALL (golden) ============ -->
+    <section class="screen takeover is-hidden" id="paywallScreen" hidden>
+      <div class="pw-scroll" id="pwScroll">
+        <header class="pw-hero" id="pwHero">
+          <div class="statusbar">
+            <img src="assets/status-time.svg" alt="9:41" width="54" height="21">
+            <img src="assets/status-right.svg" alt="" width="67" height="12">
+          </div>
+          <div class="pw-topbar" id="pwTopbar">
+            <img class="pw-close" src="assets/paywall/close.svg" alt="Close">
+            <span class="pw-pro-pill">Stimuler <b>PRO</b></span>
+            <span class="pw-topbar-spacer"></span>
+          </div>
+          <h1 class="pw-title" id="pwTitle"></h1>
+          <div class="pw-graph" id="pwGraph">
+            <img class="pwg-back" src="assets/paywall/trail-back.svg" alt="">
+            <div class="pwg-reveal" id="pwgReveal">
+              <img class="pwg-area" src="assets/paywall/area-fill.svg" alt="">
+              <img class="pwg-top" src="assets/paywall/trail-top.svg" alt="">
+            </div>
+            <div class="pwg-drop" id="pwgDrop"></div>
+            <div class="pwg-dot" id="pwgDot"></div>
+            <div class="pw-tag" id="pwgTag1"><small>YOU TOOK THE</small><b>First Step</b></div>
+            <div class="pw-tag pw-tag2" id="pwgTag2"><small>IN A YEAR</small><b>Master Fluency</b></div>
+          </div>
+        </header>
+
+        <div class="pw-body" id="pwBody">
+          <h2 class="pw-h2">What 8Mn+ learners say!</h2>
+
+          <div class="pw-stats">
+            <div class="pw-stat">
+              <img src="assets/paywall/laurel-1.svg" alt="">
+              <div class="ps-mid"><small>LOVED BY</small><b>8Mn+</b><span>users</span></div>
+              <img class="flip" src="assets/paywall/laurel-2.svg" alt="">
+            </div>
+            <div class="pw-stat">
+              <img src="assets/paywall/laurel-3.svg" alt="">
+              <div class="ps-mid"><b>4.9</b><span>Learner’s rating</span><img class="stars" src="assets/paywall/stars.svg" alt="★★★★★"></div>
+              <img class="flip" src="assets/paywall/laurel-4.svg" alt="">
+            </div>
+          </div>
+
+          <div class="pw-award">
+            <img src="assets/paywall/trophy.png" alt="Trophy">
+            <div class="pw-award-txt">
+              <small>Awarded</small>
+              <b>Google play<br>Best AI App<br>Worldwide..</b>
+            </div>
+          </div>
+
+          <div class="pw-testi-wrap">
+            <div class="pw-testi-rail">
+              <article class="pw-testi">
+                <img src="assets/paywall/photo-aarav.png" alt="">
+                <p>“At last I found an app that really helps you to grow. Direct to the point instructions for every lesson”</p>
+                <b>Aarav Gupta</b><span>Engineer IT, Pune</span>
+              </article>
+              <article class="pw-testi">
+                <img src="assets/paywall/photo-siddharth.png" alt="">
+                <p>“I am an introvert. The app is really helpful for me personally. I am practicing English consistently now“</p>
+                <b>Siddharth Mehta</b><span>Accountant, Mumbai</span>
+              </article>
+              <article class="pw-testi">
+                <img src="assets/paywall/photo-aarohi.png" alt="">
+                <p>“This app really helped me with my pronunciation. The features improved my English”</p>
+                <b>Aarohi Patwa</b><span>Student, Patna</span>
+              </article>
+              <article class="pw-testi">
+                <img src="assets/paywall/photo-swathi.png" alt="">
+                <p>“Excellent app for speaking and chatting! It’s improved my English with effective practice”</p>
+                <b>Swathi Natarajan</b><span>Engineer IT, Chennai</span>
+              </article>
+              <article class="pw-testi">
+                <img src="assets/paywall/photo-hanvika.png" alt="">
+                <p>“Its worthy guys! Its not expensive among quality they provide! Smarty professional &amp; effective app”</p>
+                <b>Hanvika Manoj</b><span>Beautician, Telangana</span>
+              </article>
+            </div>
+          </div>
+
+          <h2 class="pw-h2">Progress faster in your English learning with <em>PRO</em> plan</h2>
+          <div class="pw-table">
+            <div class="pwt-row pwt-head">
+              <span></span><span>FREE</span><span class="pro"><i>PRO</i></span>
+            </div>
+            <div class="pwt-row"><span>Roadmap Days</span><span>1</span><span class="pro">Unlimited</span></div>
+            <div class="pwt-row"><span>Chat with Sarah</span><span>4</span><span class="pro">Unlimited</span></div>
+            <div class="pwt-row"><span>Access to calling with Sarah AI tutor</span><span>1</span><span class="pro">Upto 40min/day</span></div>
+            <div class="pwt-row"><span>Priority support from English Experts</span><span>No</span><span class="pro">Yes</span></div>
+            <div class="pwt-row"><span>Learn New Vocabulary Everyday challenge</span><span>No</span><span class="pro">Yes</span></div>
+          </div>
+
+          <div class="pw-92">
+            <div class="pw-92-head"><b>92%</b><p>Stimuler users speak fluently in <em>12 weeks</em></p></div>
+            <div class="pw-92-photo">
+              <img src="assets/paywall/photo-92.png" alt="">
+              <span class="lbl-stim">Stimuler<br>users
+                <svg viewBox="0 0 40 44" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M32 4 C 34 18, 26 30, 12 36"/><path d="M12 36 l8.5 -1.5M12 36 l3.4 -8"/></svg>
+              </span>
+              <span class="lbl-other">Other<br>app users
+                <svg viewBox="0 0 44 30" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6 C 14 22, 26 26, 38 22"/><path d="M38 22 l-8 -2.5M38 22 l-5.5 6"/></svg>
+              </span>
+            </div>
+          </div>
+
+          <div class="pw-faq">
+            <div class="pw-faq-divider"><span>Frequently <b>asked questions</b></span></div>
+            <h3>Still in <em>doubt</em> ? <em>I hope</em><br>these clears <em>them!</em></h3>
+            <div class="pw-faq-card">
+              <div class="pwf-row"><span>Why should I get Stimuler Pro?</span><img src="assets/paywall/chevron.svg" alt=""></div>
+              <div class="pwf-row"><span>Will the price increase in future ?</span><img src="assets/paywall/chevron.svg" alt=""></div>
+              <div class="pwf-row"><span>Is my payment secure &amp; can I cancel my plan anytime</span><img src="assets/paywall/chevron.svg" alt=""></div>
+              <div class="pwf-row"><span>What to do if I am facing any problems in purchase ?</span><img src="assets/paywall/chevron.svg" alt=""></div>
+            </div>
+          </div>
+          <div class="pw-bottom-pad"></div>
+        </div>
+      </div>
+
+      <div class="pw-pricebar" id="pwPricebar" data-keep>
+        <div class="pw-plans">
+          <div class="pw-plan selected">
+            <small>PRO YEARLY <i class="off">50% OFF</i></small>
+            <b>Rp 299.000</b>
+          </div>
+          <div class="pw-plan">
+            <small>PRO MONTHLY</small>
+            <b>Rp 59.000</b>
+          </div>
+        </div>
+        <div class="pw-cta">Get Stimuler PRO</div>
+      </div>
+      <div class="home-indicator"></div>
+    </section>
+
+    <!-- ============ GIFT TRANSITION (golden) ============ -->
+    <section class="screen takeover is-hidden" id="giftScreen" hidden>
+      <div class="statusbar gift-status">
+        <img src="assets/status-time.svg" alt="9:41" width="54" height="21">
+        <img src="assets/status-right.svg" alt="" width="67" height="12">
+      </div>
+      <div class="gift-stage" id="giftStage">
+        <img class="g-ray gr-big" src="assets/paywall/gift/ray-big.svg" alt="">
+        <img class="g-ray gr-1" src="assets/paywall/gift/ray-1.svg" alt="">
+        <img class="g-ray gr-2" src="assets/paywall/gift/ray-2.svg" alt="">
+        <img class="g-ray gr-3" src="assets/paywall/gift/ray-3.svg" alt="">
+        <img class="g-ray gr-4" src="assets/paywall/gift/ray-4.svg" alt="">
+        <h1 class="gift-title">YOU’VE<br>UNLOCKED AN<br>OFFER</h1>
+        <img class="gift-closed" id="giftClosed" src="assets/paywall/gift/box-closed.svg" alt="Gift box">
+        <div class="gift-open" id="giftOpen">
+          <img class="go-beam" src="assets/paywall/gift/beam.svg" alt="">
+          <img class="go-glow" src="assets/paywall/gift/box-glow.svg" alt="">
+          <img class="go-base" src="assets/paywall/gift/base.svg" alt="">
+          <div class="go-box"><i class="go-lip"></i><i class="go-ribbon go-r1"></i><i class="go-ribbon go-r2"></i></div>
+          <img class="go-lidshadow" src="assets/paywall/gift/lid-shadow.svg" alt="">
+          <div class="gift-coupon" id="giftCoupon">
+            <img class="gc-a" src="assets/paywall/gift/coupon-a.svg" alt="">
+            <img class="gc-b" src="assets/paywall/gift/coupon-b.svg" alt="">
+            <div class="gc-txt">
+              <img src="assets/paywall/gift/star.svg" alt="">
+              <small>WELCOME OFFER</small>
+              <b>50% OFF</b>
+            </div>
+          </div>
+          <img class="go-lid" id="giftLid" src="assets/paywall/gift/lid.svg" alt="">
+        </div>
+        <p class="gift-tap" id="giftTap">Tap to open the box</p>
+      </div>
+    </section>
+
+    <!-- ============ OFFER (discounted) PAYWALL ============ -->
+    <section class="screen takeover is-hidden" id="offerScreen" hidden>
+      <div class="pw-scroll offer-scroll" id="offerScroll">
+        <header class="offer-hero">
+          <div class="statusbar">
+            <img src="assets/status-time.svg" alt="9:41" width="54" height="21">
+            <img src="assets/status-right.svg" alt="" width="67" height="12">
+          </div>
+          <div class="pw-topbar offer-topbar">
+            <img class="pw-close" src="assets/paywall/close.svg" alt="Close">
+            <span class="pw-pro-pill">Stimuler <b>PRO</b></span>
+            <span class="pw-topbar-spacer"></span>
+          </div>
+          <div class="gift-coupon offer-coupon">
+            <img class="gc-a" src="assets/paywall/gift/coupon-a.svg" alt="">
+            <img class="gc-b" src="assets/paywall/gift/coupon-b.svg" alt="">
+            <div class="gc-txt">
+              <img src="assets/paywall/gift/star.svg" alt="">
+              <small>WELCOME OFFER</small>
+              <b>50% OFF</b>
+            </div>
+          </div>
+          <div class="offer-count" id="offerCount"><b>23</b><i>:</i><b>12</b><i>:</i><b>05</b></div>
+          <h2 class="offer-h">Limited Time<br><em>50%</em> Offer Today</h2>
+        </header>
+        <div class="pw-body offer-body" id="offerBody"></div>
+      </div>
+      <div class="pw-pricebar offer-bar" id="offerBar">
+        <div class="offer-plan">
+          <span class="op-pill">ONE TIME WELCOME 50% OFFER</span>
+          <div class="op-price"><s>Rp 299.000</s><b>Rp 149.000</b></div>
+          <small>Just Rp 12.400 per month paid for a whole year</small>
+        </div>
+        <div class="pw-cta">Try Stimuler PRO for an year</div>
+        <div class="offer-seeall" id="offerSeeAll">See all plans</div>
+      </div>
+      <div class="sheet-backdrop" id="sheetBackdrop"></div>
+      <div class="plans-sheet" id="plansSheet">
+        <i class="ps-handle"></i>
+        <h4>Choose your plan</h4>
+        <div class="ps-plan selected" data-plan="yearly">
+          <div class="psp-l"><b>PRO Yearly</b><small>Billed once a year</small></div>
+          <div class="psp-r"><i class="off">50% OFF</i><s>Rp 299.000</s><b>Rp 149.000</b></div>
+        </div>
+        <div class="ps-plan" data-plan="monthly">
+          <div class="psp-l"><b>PRO Monthly</b><small>Billed every month</small></div>
+          <div class="psp-r"><i class="off">50% OFF</i><s>Rp 59.000</s><b>Rp 29.000</b></div>
+        </div>
+        <div class="pw-cta" id="sheetCta">Try Stimuler PRO for an year</div>
+      </div>
+      <div class="home-indicator"></div>
+    </section>
+
+  </div>
+  </div>
+  <aside class="devpanel" id="devPanel">
+    <h3>Flow review</h3>
+    <p class="dp-cap">Cohort</p>
+    <div class="dp-chips dp-cohorts" id="dpCohorts"></div>
+    <p class="dp-cap">Step</p>
+    <div class="dp-chips" id="dpSteps"></div>
+    <p class="dp-cap">Language</p>
+    <div class="dp-chips" id="dpLangs"></div>
+    <p class="dp-cap">Level (meter)</p>
+    <div class="dp-chips" id="dpLvls"></div>
+  </aside>
+  <button class="restart" id="restartBtn">↺ Restart</button>
+</div>
+<script src="content.js"></script>
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="438.065" height="227.276" viewBox="0 0 438.065 227.276" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Trail top" clip-path="url(#clip0_9690_61445)">
+<path id="Trail top_2" d="M0 222.238C3.51272 222.706 18.1256 219.147 48.4755 201.161C62.058 192.263 91.3307 161.819 131.376 168.843C171.421 175.868 192.461 119.904 197.415 111.235C208.655 91.5623 231.839 59.2468 272.587 64.8671C330.195 72.8131 329.071 43.9299 355.487 16.3902C371.646 -8.98881 426.303 3.60395 436.982 0.23174" stroke="url(#paint0_linear_9690_61445)" stroke-width="5"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_9690_61445" x1="432.703" y1="-4.77356" x2="-28.2524" y2="162.373" gradientUnits="userSpaceOnUse">
+<stop stop-color="#E7B455"/>
+<stop offset="1" stop-color="#D9A24A"/>
+</linearGradient>
+<clipPath id="clip0_9690_61445">
+<rect width="352" height="222" fill="white"/>
+</clipPath>
+</defs>
+</svg>
