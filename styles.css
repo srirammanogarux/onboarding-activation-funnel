@@ -2764,3 +2764,32 @@ body{
   text-align:center;
 }
 .dp-cohorts button.active i{background:rgba(0,0,0,.25);}
+
+/* ---------- review panel: branch chips ----------
+   One chip per distinct scenario list, with its item count. Clicking
+   jumps straight to that list, so every branch is one tap from any
+   other. Derived from SCENARIOS, so a new mode shows up here on its own. */
+.dp-branches{gap:5px;}
+.dp-branches button{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  width:100%;
+  text-align:left;
+}
+.dp-branches button i{
+  flex-shrink:0;
+  min-width:18px;
+  padding:0 5px;
+  border-radius:5px;
+  background:rgba(255,255,255,.09);
+  font-style:normal;
+  font-size:10px;
+  font-weight:700;
+  line-height:16px;
+  text-align:center;
+}
+.dp-branches button.active i{background:rgba(0,0,0,.28);}
+.dp-branches button.skipped{opacity:.5;}
+.dp-cap .dp-sub{font-weight:400;opacity:.6;}

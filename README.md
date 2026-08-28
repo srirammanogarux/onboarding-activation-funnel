@@ -81,8 +81,12 @@ scenario set.
 
 ## Review panel
 
-On desktop, a side panel deep-links into any point of any cohort. All state is
-in the URL:
+On desktop, a side panel deep-links into any point of any cohort. The top row
+is **Branch** — one chip per distinct scenario list with its item count, so
+every one of the 12 is a single tap from any other. It's derived from
+`SCENARIOS`, so adding a work mode makes a chip appear on its own.
+
+All state is in the URL:
 
 ```
 ?cohort=A&step=band

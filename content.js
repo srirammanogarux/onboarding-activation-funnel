@@ -368,8 +368,43 @@ const COHORTS = [
   { id:'G', label:'Travel',        goal:'travel' },
 ];
 
+/* Short names for the work modes, used by the review panel. */
+const MODE_LABEL = {
+  office:'at work', ownboss:'own boss', jobhunt:'job hunt',
+  student:'student', athome:'at home', careerbreak:'career break',
+  _default:'everyday',
+};
+
+/* Every distinct scenario list, derived from SCENARIOS rather than
+   listed by hand — a branch cannot go missing from the review panel
+   when someone adds a mode. Each carries a situation that reaches it. */
+function branches(){
+  const out = [];
+  const SHORT = { exam:'Exam', career:'Career', personal:'Personal',
+                  school:'School', travel:'Travel' };
+  for (const g of GOALS){
+    const set = SCENARIOS[g.value];
+    const short = SHORT[g.value] || g.label;
+    if (!set){ out.push({ goal:g.value, label:`${short} · no screen`,
+                          sit:SITUATIONS[0], mode:'—', count:0, skipped:true }); continue; }
+    if (!set.byMode){
+      out.push({ goal:g.value, label:short, sit:SITUATIONS[0], mode:'—', count:set.items.length });
+      continue;
+    }
+    const declared = Object.keys(set.byMode);
+    for (const [mode, list] of Object.entries(set.byMode)){
+      const sit = mode === '_default'
+        ? SITUATIONS.find(x => !declared.includes(WORKMODE[x]))
+        : SITUATIONS.find(x => WORKMODE[x] === mode);
+      out.push({ goal:g.value, label:`${short} · ${MODE_LABEL[mode] || mode}`,
+                 sit, mode, count:list.items.length });
+    }
+  }
+  return out;
+}
+
 /* goal is the primary key; situation refines it only where a set
-   declares bySituation. Returns null when the goal has no set. */
+   declares byMode. Returns null when the goal has no set. */
 function scenarioSet(goal, situation){
   const g = SCENARIOS[goal];
   if (!g) return null;
@@ -380,6 +415,7 @@ function scenarioSet(goal, situation){
 
 window.CONTENT = {
   LANGUAGES, APPLANG_DESC, GOALS, EXAMS, IELTS_TYPES, examDateOptions,
-  bandNote, SCENARIOS, scenarioSet, WORKMODE, SITUATIONS, ACTIVATION, PW_TITLE,
+  bandNote, SCENARIOS, scenarioSet, WORKMODE, MODE_LABEL, branches,
+  SITUATIONS, ACTIVATION, PW_TITLE,
   PRICING, COHORTS,
 };

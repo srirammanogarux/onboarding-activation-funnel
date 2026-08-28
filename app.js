@@ -81,6 +81,25 @@ function buildDevPanel(){
       box.appendChild(b);
     });
   };
+  /* branch chips — one per distinct scenario list, straight to it */
+  const bBox = $('dpBranches');
+  if (bBox) C.branches().forEach(br => {
+    const b = document.createElement('button');
+    b.innerHTML = `${br.label}${br.skipped ? '' : `<i>${br.count}</i>`}`;
+    if (br.skipped) b.classList.add('skipped');
+    if (DBG.goal === br.goal && (br.mode === '—' || C.WORKMODE[DBG.sit] === br.mode
+        || (br.mode === '_default' && !Object.keys((C.SCENARIOS[br.goal]||{}).byMode || {}).includes(C.WORKMODE[DBG.sit]))))
+      b.classList.add('active');
+    b.addEventListener('click', () => {
+      const p = new URLSearchParams(location.search);
+      p.set('goal', br.goal); p.set('sit', br.sit);
+      p.set('step', br.skipped ? 'situation' : 'scenarios');
+      p.delete('cohort');
+      location.search = p.toString();
+    });
+    bBox.appendChild(b);
+  });
+
   /* cohort chips clear goal+exam so the cohort wins */
   const cBox = $('dpCohorts');
   if (cBox) C.COHORTS.forEach(c => {
