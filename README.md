@@ -46,7 +46,17 @@ are the same conversation — you answer to clients either way):
 
 Only **career** and **personal growth** refine by mode — the same two
 usa-onboarding refines. Travel, school and exam don't: a waiter is a waiter
-whether you're a student or a CEO. That's 14 scenario lists, not 35.
+whether you're a student or a CEO.
+
+Career refines all six ways. Personal only refines three — `student`, `athome`
+and `careerbreak`; working, freelancing, running a business and job-hunting
+share `_default`, because an adult's social life doesn't change because you
+invoice instead of drawing a salary. **12 scenario lists**, not 35.
+
+usa-onboarding puts "Handle doctors and offices solo" in every social list.
+That's an immigrant-in-the-US need — you can't take a translator to every
+appointment. Our learners are in their own countries and see the doctor in
+their own language, so it's dropped.
 
 ## Cohorts
 

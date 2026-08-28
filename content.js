@@ -150,7 +150,7 @@ const SCENARIOS = {
         prompt: 'In your search, which of these do you want to handle with ease?',
         items: [
           { label: 'Job interviews',                who: 'the interviewer' },
-          { label: 'Answering “tell me about yourself”', who: 'the interviewer' },
+          { label: 'A recruiter’s first phone screen', who: 'the recruiter' },
           { label: 'Explaining a gap in my CV',     who: 'the interviewer' },
           { label: 'Negotiating the offer',         who: 'the recruiter' },
           { label: 'Networking to find openings',   who: 'a contact' },
@@ -161,7 +161,7 @@ const SCENARIOS = {
         prompt: 'Starting out, which of these do you want to handle with ease?',
         items: [
           { label: 'Internship interviews',         who: 'the interviewer' },
-          { label: 'Answering “tell me about yourself”', who: 'the interviewer' },
+          { label: 'Talking about my final-year project', who: 'the interviewer' },
           { label: 'Networking on campus',          who: 'a recruiter' },
           { label: 'Asking a professor about openings', who: 'your professor' },
           { label: 'Group assessments',             who: 'the panel' },
@@ -195,59 +195,41 @@ const SCENARIOS = {
 
   personal: {
     byMode: {
-      office: {
-        prompt: 'Outside work, which of these do you want to handle with ease?',
-        items: [
-          { label: 'Chatting with colleagues outside work', who: 'a colleague' },
-          { label: 'Meeting someone new',           who: 'someone you just met' },
-          { label: 'At the doctor or a government office', who: 'the receptionist' },
-          { label: 'Winning over my partner’s family', who: 'your partner’s mother' },
-          { label: 'Catching up with a friend',     who: 'your friend' },
-          { label: 'Turning down an invitation',    who: 'your friend' },
-        ],
-      },
-      ownboss: {
+      /* Working a job, freelancing, running a business and looking for
+         work all share one list. An adult's social life is an adult's
+         social life — it does not change because you invoice instead of
+         being paid a salary. Only the three modes below genuinely differ. */
+      _default: {
         prompt: 'In daily life, which of these do you want to handle with ease?',
         items: [
-          { label: 'Meeting new people at events',  who: 'another guest' },
-          { label: 'Meeting someone new',           who: 'someone you just met' },
-          { label: 'At the doctor or a government office', who: 'the receptionist' },
+          { label: 'Meeting someone new',            who: 'someone you just met' },
+          { label: 'Catching up with an old friend',  who: 'your friend' },
+          { label: 'Making conversation at a party',  who: 'another guest' },
+          { label: 'Talking to my neighbours',        who: 'your neighbour' },
           { label: 'Winning over my partner’s family', who: 'your partner’s mother' },
-          { label: 'Catching up with a friend',     who: 'your friend' },
-          { label: 'Talking to my neighbours',      who: 'your neighbour' },
+          { label: 'Turning down an invitation',      who: 'your friend' },
         ],
       },
       student: {
         prompt: 'Day to day, which of these do you want to handle with ease?',
         items: [
-          { label: 'Making friends on campus',      who: 'a classmate' },
+          { label: 'Making friends on campus',       who: 'a classmate' },
           { label: 'Joining a conversation already going', who: 'a group of classmates' },
-          { label: 'Talking to my flatmates',       who: 'your flatmate' },
-          { label: 'At the doctor or a government office', who: 'the receptionist' },
-          { label: 'Meeting someone new',           who: 'someone you just met' },
-          { label: 'Turning down an invitation',    who: 'your friend' },
+          { label: 'Talking to my flatmates',        who: 'your flatmate' },
+          { label: 'Meeting someone new at a party', who: 'another student' },
+          { label: 'Asking a friend for a favour',   who: 'your friend' },
+          { label: 'Turning down an invitation',     who: 'your friend' },
         ],
       },
       athome: {
         prompt: 'Day to day, which of these do you want to handle with ease?',
         items: [
-          { label: 'Talking to my child’s teacher', who: 'the teacher' },
+          { label: 'Talking to my child’s teacher',  who: 'the teacher' },
           { label: 'Making friends at the school gate', who: 'another parent' },
-          { label: 'At the doctor with my child',   who: 'the doctor' },
+          { label: 'Chatting at a children’s party', who: 'another parent' },
+          { label: 'Talking to my neighbours',       who: 'your neighbour' },
           { label: 'Winning over my partner’s family', who: 'your partner’s mother' },
-          { label: 'Talking to my neighbours',      who: 'your neighbour' },
-          { label: 'Sorting things out at the bank', who: 'the bank clerk' },
-        ],
-      },
-      jobhunt: {
-        prompt: 'In daily life, which of these do you want to handle with ease?',
-        items: [
-          { label: 'Meeting someone new',           who: 'someone you just met' },
-          { label: 'Catching up with a friend',     who: 'your friend' },
-          { label: 'At the doctor or a government office', who: 'the receptionist' },
-          { label: 'Winning over my partner’s family', who: 'your partner’s mother' },
-          { label: 'Talking to my neighbours',      who: 'your neighbour' },
-          { label: 'Turning down an invitation',    who: 'your friend' },
+          { label: 'Catching up with an old friend', who: 'your friend' },
         ],
       },
       careerbreak: {
@@ -255,10 +237,10 @@ const SCENARIOS = {
         items: [
           { label: 'Getting back into everyday chat', who: 'a friend you haven’t seen' },
           { label: 'Reconnecting with an old friend', who: 'an old friend' },
-          { label: 'Meeting someone new',           who: 'someone you just met' },
-          { label: 'At the doctor or a government office', who: 'the receptionist' },
-          { label: 'Talking to my child’s teacher', who: 'the teacher' },
-          { label: 'Talking to my neighbours',      who: 'your neighbour' },
+          { label: 'Rebuilding my circle at events',  who: 'a former colleague' },
+          { label: 'Explaining what I’ve been up to', who: 'an old friend' },
+          { label: 'Meeting someone new',             who: 'someone you just met' },
+          { label: 'Talking to my neighbours',        who: 'your neighbour' },
         ],
       },
     },
@@ -394,7 +376,7 @@ function scenarioSet(goal, situation){
   if (!g) return null;
   if (!g.byMode) return g;                       /* goal-only */
   const mode = WORKMODE[situation] || 'office';  /* situation -> work mode */
-  return g.byMode[mode] || g.byMode.office;
+  return g.byMode[mode] || g.byMode._default || g.byMode.office;
 }
 
 window.CONTENT = {
