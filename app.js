@@ -1387,7 +1387,8 @@ async function flow(){
     reach('scenarios');
     await sarah(sc.prompt);
     setProgress(76, '76% completed');
-    await multiSelect(sc.items, { forced: [sc.items[0], sc.items[1]] });
+    const labels = sc.items.map(i => i.label);
+    await multiSelect(labels, { forced: [labels[0], labels[1]] });
     await sarah(T('scenarios_ack'), { typingMs: 900 });
   }
 

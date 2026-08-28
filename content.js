@@ -8,8 +8,9 @@
    - Goal framing comes from Activation v3. "Prepare for an
      English exam" is a parent; only IELTS branches further.
    - Scenarios are keyed to GOAL, not situation. Multi-select,
-     minimum 1, no upper cap, no ordering. The exam cohort has no
-     set — see SCENARIOS below for why.
+     minimum 1, no upper cap, no ordering. Every scenario is a
+     roleplay with a named counterpart. The exam cohort has no set —
+     see SCENARIOS below for why.
    - Activation (reading passage + the two pronunciation words)
      is keyed to GOAL.
    ============================================================ */
@@ -88,7 +89,12 @@ function bandNote(band){
   return 'Near-native. A very high bar.';
 }
 
-/* ---------- 4 · scenarios, keyed to GOAL ---------- */
+/* ---------- 4 · scenarios, keyed to GOAL ----------
+   Rule: every scenario must be a ROLEPLAY — a specific exchange with
+   a specific counterpart. `who` is that counterpart, and it is not
+   decoration: if you cannot name one, the item is a skill ("sounding
+   natural") or a place ("at the airport"), not a scenario, and it
+   cannot be played. Anything added here needs a `who`.            */
 const SCENARIOS = {
   /* No scenario set for the exam cohort — deliberately.
      The format is already fixed, and by this point they have told us
@@ -101,45 +107,45 @@ const SCENARIOS = {
   career: {
     prompt: 'Which of these do you want to handle with ease?',
     items: [
-      'Talking to my manager',
-      'Speaking up in meetings',
-      'Presenting my work',
-      'Handling client calls',
-      'Small talk with colleagues',
-      'Interviews and appraisals',
+      { label: 'Talking to my manager',      who: 'your manager' },
+      { label: 'Speaking up in meetings',    who: 'the team' },
+      { label: 'Presenting my work',         who: 'the room' },
+      { label: 'Handling client calls',      who: 'a client' },
+      { label: 'Small talk with colleagues', who: 'a colleague' },
+      { label: 'Interviews and appraisals',  who: 'the interviewer' },
     ],
   },
   personal: {
-    prompt: 'Where do you most want to feel comfortable?',
+    prompt: 'In daily life, which of these do you want to handle with ease?',
     items: [
-      'Everyday conversation',
-      'Making new friends',
-      'Saying what I think',
-      'Telling stories about myself',
-      'Speaking without translating first',
-      'Sounding natural, not textbook',
+      { label: 'Meeting someone new',            who: 'someone you just met' },
+      { label: 'Catching up with a friend',      who: 'your friend' },
+      { label: 'Talking to my neighbours',       who: 'your neighbour' },
+      { label: 'Sorting things out at the bank', who: 'the bank clerk' },
+      { label: 'Video calls with family abroad', who: 'your cousin' },
+      { label: 'Turning down an invitation',     who: 'your friend' },
     ],
   },
   school: {
     prompt: 'On campus, which of these do you want to handle with ease?',
     items: [
-      'Answering in class',
-      'Presenting a project',
-      'Group discussions',
-      'Talking to teachers',
-      'Debates and viva',
-      'Making friends at school',
+      { label: 'Answering in class',       who: 'your teacher' },
+      { label: 'Presenting a project',     who: 'the class' },
+      { label: 'Group discussions',        who: 'your classmates' },
+      { label: 'Talking to teachers',      who: 'your teacher' },
+      { label: 'Debates and viva',         who: 'the examiner' },
+      { label: 'Making friends at school', who: 'a classmate' },
     ],
   },
   travel: {
     prompt: 'On the road, which of these do you want to handle with ease?',
     items: [
-      'At the airport',
-      'Hotel check-in',
-      'Ordering food',
-      'Asking for directions',
-      'Shopping and bargaining',
-      'Getting help in an emergency',
+      { label: 'Checking in at the airport',    who: 'the check-in agent' },
+      { label: 'Checking into a hotel',         who: 'the receptionist' },
+      { label: 'Ordering at a restaurant',      who: 'the waiter' },
+      { label: 'Asking someone for directions', who: 'a stranger' },
+      { label: 'Bargaining at a market',        who: 'the seller' },
+      { label: 'Fixing a booking gone wrong',   who: 'the desk agent' },
     ],
   },
 };

@@ -23,6 +23,10 @@ lives in stage 5**.
 | 5 | **Goal** | The only real fork. Exam is a parent; **only IELTS branches further** |
 | 6 | Situation | Profile data — does not fork the flow |
 | 7 | **Scenarios** | Multi-select, keyed to goal. Min 1, no cap, no ordering. **Exam cohorts skip it** |
+
+Every scenario is a **roleplay with a named counterpart** (`who` in `content.js`).
+If you can't name who's on the other side, it's a skill or a place, not a
+scenario — it can't be played, and it doesn't belong in the list.
 | 7b | Testimonials | Text carousel + notification ask |
 | 8 | Level | Sets the speech-meter start and target |
 | 9 | Activation | Reading test → award → meter → fix two words → practice → graph → paywall → gift → offer |
