@@ -8,7 +8,8 @@
    - Goal framing comes from Activation v3. "Prepare for an
      English exam" is a parent; only IELTS branches further.
    - Scenarios are keyed to GOAL, not situation. Multi-select,
-     minimum 1, no upper cap, no ordering.
+     minimum 1, no upper cap, no ordering. The exam cohort has no
+     set — see SCENARIOS below for why.
    - Activation (reading passage + the two pronunciation words)
      is keyed to GOAL.
    ============================================================ */
@@ -89,17 +90,14 @@ function bandNote(band){
 
 /* ---------- 4 · scenarios, keyed to GOAL ---------- */
 const SCENARIOS = {
-  exam: {
-    prompt: 'In the speaking test, which of these do you want to handle with ease?',
-    items: [
-      'Introductions and small talk',
-      'The long turn',
-      'Discussion questions',
-      'Describing charts and data',
-      'Giving opinions with reasons',
-      'Staying fluent under time pressure',
-    ],
-  },
+  /* No scenario set for the exam cohort — deliberately.
+     The format is already fixed, and by this point they have told us
+     the exam, the type, the date and the target band. Asking which
+     part of the test they are weakest at is self-diagnosis, which the
+     activation at stage 9 does properly a minute later. Restore a set
+     here and stage 7 turns itself back on. */
+  exam: null,
+
   career: {
     prompt: 'Which of these do you want to handle with ease?',
     items: [

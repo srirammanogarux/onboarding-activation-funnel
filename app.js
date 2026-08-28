@@ -229,15 +229,17 @@ function options(items, { head = null, link = null, linkValue = null, wide = fal
     };
 
     items.forEach(item => {
-      const chev = item.chev ? '<span class="opt-chev">›</span>' : '';
+      /* No affordance for rows that open a sub-tree. In a conversation
+         every answer leads somewhere; signposting which ones have a
+         follow-up is a menu idiom and reads as a mis-set expectation. */
       const note = item.note ? `<span class="opt-note">${item.note}</span>` : '';
       const btn = el(item.desc
-        ? `<button class="opt stacked${item.chev ? ' branches' : ''}">
-             <span class="opt-top">${item.icon ? `<span class="ico">${item.icon}</span>` : ''}<span class="opt-label">${item.label}</span>${chev}</span>
+        ? `<button class="opt stacked">
+             <span class="opt-top">${item.icon ? `<span class="ico">${item.icon}</span>` : ''}<span class="opt-label">${item.label}</span></span>
              <span class="opt-desc">${item.desc}</span>
            </button>`
-        : `<button class="opt${item.chev ? ' branches' : ''}">
-             ${item.icon ? `<span class="ico">${item.icon}</span>` : ''}<span class="opt-label">${item.label}</span>${note}${chev}
+        : `<button class="opt">
+             ${item.icon ? `<span class="ico">${item.icon}</span>` : ''}<span class="opt-label">${item.label}</span>${note}
            </button>`);
       btn.addEventListener('click', () => {
         if (item.inert){
@@ -1317,7 +1319,6 @@ async function flow(){
     C.GOALS.map(g => ({
       value: g.value, label: g.label,
       defaultOnSkip: g.value === 'career',
-      chev: !!g.branches,
     })),
     { forced: DBG.goal });
   setActivation(goal);
@@ -1330,7 +1331,7 @@ async function flow(){
     await sarah(T('exam_q'));
     setProgress(50, '50% completed');
     exam = await options(
-      C.EXAMS.map(e => ({ value: e.value, label: e.label, chev: !!e.branches,
+      C.EXAMS.map(e => ({ value: e.value, label: e.label,
                           defaultOnSkip: e.value === 'ielts' })),
       { forced: DBG.exam });
 
@@ -1375,13 +1376,20 @@ async function flow(){
   setProgress(69, '69% completed');
   await options(C.SITUATIONS.map((s, i) => ({ value: s, label: s, defaultOnSkip: i === 0 })));
 
-  /* ---------- 7 · scenarios — multi-select, keyed to goal ---------- */
-  reach('scenarios');
-  const sc = C.SCENARIOS[goal] || C.SCENARIOS.career;
-  await sarah(sc.prompt);
-  setProgress(76, '76% completed');
-  const picked = await multiSelect(sc.items, { forced: [sc.items[0], sc.items[1]] });
-  await sarah(T('scenarios_ack'), { typingMs: 900 });
+  /* ---------- 7 · scenarios — multi-select, keyed to goal ----------
+     Exam cohorts skip this. Their scenario is already fixed — the test
+     format is the format — and they have just answered three or four
+     exam questions. Asking them to name which part of the test they
+     are weakest at is asking them to do the assessment that stage 9
+     does properly, objectively, a minute later.                      */
+  const sc = C.SCENARIOS[goal];
+  if (sc){
+    reach('scenarios');
+    await sarah(sc.prompt);
+    setProgress(76, '76% completed');
+    await multiSelect(sc.items, { forced: [sc.items[0], sc.items[1]] });
+    await sarah(T('scenarios_ack'), { typingMs: 900 });
+  }
 
   /* ---------- 7b · social proof (text carousel) + notifications ---------- */
   reach('testimonials');

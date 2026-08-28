@@ -22,7 +22,7 @@ lives in stage 5**.
 | 4 | Age · Gender | Buckets, both skippable. Data capture only |
 | 5 | **Goal** | The only real fork. Exam is a parent; **only IELTS branches further** |
 | 6 | Situation | Profile data — does not fork the flow |
-| 7 | **Scenarios** | Multi-select, keyed to goal. Min 1, no cap, no ordering |
+| 7 | **Scenarios** | Multi-select, keyed to goal. Min 1, no cap, no ordering. **Exam cohorts skip it** |
 | 7b | Testimonials | Text carousel + notification ask |
 | 8 | Level | Sets the speech-meter start and target |
 | 9 | Activation | Reading test → award → meter → fix two words → practice → graph → paywall → gift → offer |
@@ -34,9 +34,9 @@ pronunciation words and the paywall headline.
 
 | | Cohort | Extra stage-5 screens | Total |
 |---|---|---|---|
-| A | Exam · IELTS | +4 — exam → Academic/General → when → band slider | 23 |
-| B | Exam · TOEFL / TOEIC / PTE | +1 — recorded, then straight on | 20 |
-| C | Exam · Others | +2 — plus a free-text field | 21 |
+| A | Exam · IELTS | +4 — exam → Academic/General → when → band slider | 22 |
+| B | Exam · TOEFL / TOEIC / PTE | +1 — recorded, then straight on | 19 |
+| C | Exam · Others | +2 — plus a free-text field | 20 |
 | D | Grow in my career | — | 19 |
 | E | Personal growth | — | 19 |
 | F | Excel at my school | — | 19 |
@@ -66,7 +66,6 @@ in the URL:
   selection order carries no meaning. Needs its own confirm button.
 - **Band slider** (`.band-card`) — the full IELTS 0–9 scale in 0.5 steps, with
   a caption naming what that band unlocks. IELTS only.
-- **Branch affordance** — a chevron on option rows that open a sub-tree.
 - **Goal-keyed activation** — `content.js` holds one passage and one pair of
   pronunciation words per goal, replacing India's single paint sentence.
 - **IDR pricing** — Rp 299.000 yearly / Rp 59.000 monthly, offer Rp 149.000.

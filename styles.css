@@ -2614,23 +2614,13 @@ body{
    Interaction stays indigo; gold is never used here.
    ============================================================ */
 
-/* ---------- branch affordance on an option row ---------- */
-.opt-chev{
-  margin-left:auto;
-  font-size:22px;
-  line-height:1;
-  color:var(--accent);
-  transform:translateY(-1px);
-}
-.opt.stacked .opt-chev{margin-left:auto;}
-.opt.branches{border-color:color-mix(in srgb, var(--accent) 45%, transparent);}
+/* ---------- trailing note on an option row (e.g. exam month) ---------- */
 .opt-note{
   margin-left:auto;
   font-family:var(--font-body);
   font-size:14px;
   color:var(--text-low);
 }
-.opt-note + .opt-chev{margin-left:10px;}
 
 /* ---------- multi-select ---------- */
 .options.multi .opt-list{width:308px;}
