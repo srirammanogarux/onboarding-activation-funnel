@@ -90,7 +90,7 @@ function bandNote(band){
 /* ---------- 4 · scenarios, keyed to GOAL ---------- */
 const SCENARIOS = {
   exam: {
-    prompt: 'Which part of the speaking test worries you most?',
+    prompt: 'In the speaking test, which of these do you want to handle with ease?',
     items: [
       'Introductions and small talk',
       'The long turn',
