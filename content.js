@@ -89,98 +89,191 @@ function bandNote(band){
   return 'Near-native. A very high bar.';
 }
 
-/* ---------- 4 · scenarios, keyed to GOAL ----------
-   Rule: every scenario must be a ROLEPLAY — a specific exchange with
-   a specific counterpart. `who` is that counterpart, and it is not
-   decoration: if you cannot name one, the item is a skill ("sounding
-   natural") or a place ("at the airport"), not a scenario, and it
-   cannot be played. Anything added here needs a `who`.            */
+/* ---------- 4 · work modes + scenarios ----------
+   Model taken from usa-onboarding (`GOALS.jtbd` + `JTBD_MODE`), which is
+   where this taxonomy actually lives — India has no JTBD concept and
+   Activation v3 only renamed the scenario to `jtbdLabel`.
+
+   Two keys, not one. GOAL is primary. SITUATION collapses to a WORK MODE
+   and refines the list, but only for the two goals where who you talk to
+   actually changes: career and personal. usa-onboarding refines exactly
+   these two and leaves travel, school and exam alone — a waiter is a
+   waiter whether you are a student or a CEO, but a stay-at-home parent's
+   everyday English is the school gate, not the office kitchen.
+
+   Our own rule still applies on top: every scenario is a roleplay with a
+   named counterpart (`who`). usa-onboarding has JTBDs like "Understand
+   fast coworkers" that name no one; those are rewritten as the exchange
+   they actually are — asking a colleague to confirm what they said.  */
+
+const WORKMODE = {
+  'Working a job':           'office',
+  'Studying':                'student',
+  'Freelancing':             'ownboss',
+  'Running my own business': 'ownboss',
+  'Looking for work':        'jobhunt',
+  'At home with family':     'athome',
+  'On a career break':       'careerbreak',
+};
+
 const SCENARIOS = {
-  /* No scenario set for the exam cohort — deliberately.
-     The format is already fixed, and by this point they have told us
-     the exam, the type, the date and the target band. Asking which
-     part of the test they are weakest at is self-diagnosis, which the
-     activation at stage 9 does properly a minute later. Restore a set
-     here and stage 7 turns itself back on. */
+  /* No set for exam — deliberately. The format is fixed and by this point
+     they have given us the exam, the type, the date and the target band.
+     usa-onboarding does carry three IELTS JTBDs if you want them back. */
   exam: null,
 
-  /* Career is the one goal where the SITUATION changes who you talk to.
-     An employee answers to a manager, a freelancer to clients, an owner
-     to suppliers and investors, a job-seeker to interviewers. Left as a
-     single list, a freelancer sees four rows out of six that do not
-     apply to them. No other goal has this problem — a waiter is a
-     waiter whether you are a student or a CEO — so only career is
-     keyed twice. Situations without their own set fall to `_default`. */
   career: {
-    bySituation: {
-      'Working a job': {
+    byMode: {
+      office: {
         prompt: 'At work, which of these do you want to handle with ease?',
         items: [
-          { label: 'Talking to my manager',      who: 'your manager' },
-          { label: 'Speaking up in meetings',    who: 'the team' },
-          { label: 'Presenting my work',         who: 'the room' },
-          { label: 'Handling client calls',      who: 'a client' },
-          { label: 'Small talk with colleagues', who: 'a colleague' },
-          { label: 'Appraisals and reviews',     who: 'your manager' },
+          { label: 'Talking to my manager',            who: 'your manager' },
+          { label: 'Speaking up in meetings',          who: 'the team' },
+          { label: 'Handling customer calls',          who: 'a customer' },
+          { label: 'Catching what a fast colleague said', who: 'a colleague' },
+          { label: 'Small talk with colleagues',       who: 'a colleague' },
+          { label: 'Appraisals and reviews',           who: 'your manager' },
         ],
       },
-      'Freelancing': {
+      ownboss: {
         prompt: 'With clients, which of these do you want to handle with ease?',
         items: [
-          { label: 'Pitching to a new client',  who: 'a prospective client' },
-          { label: 'Discussing my rate',        who: 'the client' },
-          { label: 'A first discovery call',    who: 'a prospective client' },
-          { label: 'Explaining a delay',        who: 'the client' },
-          { label: 'Pushing back on scope',     who: 'the client' },
-          { label: 'Asking for a testimonial',  who: 'a happy client' },
+          { label: 'Winning a new client',          who: 'a prospective client' },
+          { label: 'Explaining and defending my price', who: 'the client' },
+          { label: 'A first discovery call',        who: 'a prospective client' },
+          { label: 'Chasing a late payment',        who: 'the client' },
+          { label: 'Understanding a fast client',   who: 'the client' },
+          { label: 'Handling an unhappy customer',  who: 'the customer' },
         ],
       },
-      'Running my own business': {
-        prompt: 'Running things, which of these do you want to handle with ease?',
-        items: [
-          { label: 'Pitching to investors',        who: 'an investor' },
-          { label: 'Negotiating with a supplier',  who: 'the supplier' },
-          { label: 'Briefing my team',             who: 'your team' },
-          { label: 'Handling an unhappy customer', who: 'the customer' },
-          { label: 'Talking at networking events', who: 'another founder' },
-          { label: 'Closing a new customer',       who: 'the buyer' },
-        ],
-      },
-      /* Looking for work · Studying · At home with family · On a career
-         break — all heading into the same room, an interview. */
-      _default: {
+      jobhunt: {
         prompt: 'In your search, which of these do you want to handle with ease?',
         items: [
-          { label: 'Job interviews',            who: 'the interviewer' },
-          { label: '"Tell me about yourself"',  who: 'the interviewer' },
-          { label: 'Explaining a gap in my CV', who: 'the interviewer' },
-          { label: 'Salary conversations',      who: 'the recruiter' },
-          { label: 'Asking for a referral',     who: 'a contact' },
-          { label: 'Following up after applying', who: 'the recruiter' },
+          { label: 'Job interviews',                who: 'the interviewer' },
+          { label: 'Answering “tell me about yourself”', who: 'the interviewer' },
+          { label: 'Explaining a gap in my CV',     who: 'the interviewer' },
+          { label: 'Negotiating the offer',         who: 'the recruiter' },
+          { label: 'Networking to find openings',   who: 'a contact' },
+          { label: 'Following up after applying',   who: 'the recruiter' },
+        ],
+      },
+      student: {
+        prompt: 'Starting out, which of these do you want to handle with ease?',
+        items: [
+          { label: 'Internship interviews',         who: 'the interviewer' },
+          { label: 'Answering “tell me about yourself”', who: 'the interviewer' },
+          { label: 'Networking on campus',          who: 'a recruiter' },
+          { label: 'Asking a professor about openings', who: 'your professor' },
+          { label: 'Group assessments',             who: 'the panel' },
+          { label: 'My first day at work',          who: 'a new colleague' },
+        ],
+      },
+      athome: {
+        prompt: 'Going back to work, which of these do you want to handle with ease?',
+        items: [
+          { label: 'Interviews after time away',    who: 'the interviewer' },
+          { label: 'Talking about skills I built at home', who: 'the interviewer' },
+          { label: 'Explaining why I stopped working', who: 'the interviewer' },
+          { label: 'Speaking up in meetings again', who: 'the team' },
+          { label: 'Making friends at a new workplace', who: 'a new colleague' },
+          { label: 'Asking about flexible hours',   who: 'your manager' },
+        ],
+      },
+      careerbreak: {
+        prompt: 'Getting back into it, which of these do you want to handle with ease?',
+        items: [
+          { label: 'Explaining a gap in my CV',     who: 'the interviewer' },
+          { label: 'Job interviews',                who: 'the interviewer' },
+          { label: 'Speaking up in meetings again', who: 'the team' },
+          { label: 'Work small talk again',         who: 'a colleague' },
+          { label: 'Reconnecting with an old contact', who: 'a former colleague' },
+          { label: 'Negotiating the offer',         who: 'the recruiter' },
         ],
       },
     },
   },
+
   personal: {
-    prompt: 'In daily life, which of these do you want to handle with ease?',
-    items: [
-      { label: 'Meeting someone new',            who: 'someone you just met' },
-      { label: 'Catching up with a friend',      who: 'your friend' },
-      { label: 'Talking to my neighbours',       who: 'your neighbour' },
-      { label: 'Sorting things out at the bank', who: 'the bank clerk' },
-      { label: 'Video calls with family abroad', who: 'your cousin' },
-      { label: 'Turning down an invitation',     who: 'your friend' },
-    ],
+    byMode: {
+      office: {
+        prompt: 'Outside work, which of these do you want to handle with ease?',
+        items: [
+          { label: 'Chatting with colleagues outside work', who: 'a colleague' },
+          { label: 'Meeting someone new',           who: 'someone you just met' },
+          { label: 'At the doctor or a government office', who: 'the receptionist' },
+          { label: 'Winning over my partner’s family', who: 'your partner’s mother' },
+          { label: 'Catching up with a friend',     who: 'your friend' },
+          { label: 'Turning down an invitation',    who: 'your friend' },
+        ],
+      },
+      ownboss: {
+        prompt: 'In daily life, which of these do you want to handle with ease?',
+        items: [
+          { label: 'Meeting new people at events',  who: 'another guest' },
+          { label: 'Meeting someone new',           who: 'someone you just met' },
+          { label: 'At the doctor or a government office', who: 'the receptionist' },
+          { label: 'Winning over my partner’s family', who: 'your partner’s mother' },
+          { label: 'Catching up with a friend',     who: 'your friend' },
+          { label: 'Talking to my neighbours',      who: 'your neighbour' },
+        ],
+      },
+      student: {
+        prompt: 'Day to day, which of these do you want to handle with ease?',
+        items: [
+          { label: 'Making friends on campus',      who: 'a classmate' },
+          { label: 'Joining a conversation already going', who: 'a group of classmates' },
+          { label: 'Talking to my flatmates',       who: 'your flatmate' },
+          { label: 'At the doctor or a government office', who: 'the receptionist' },
+          { label: 'Meeting someone new',           who: 'someone you just met' },
+          { label: 'Turning down an invitation',    who: 'your friend' },
+        ],
+      },
+      athome: {
+        prompt: 'Day to day, which of these do you want to handle with ease?',
+        items: [
+          { label: 'Talking to my child’s teacher', who: 'the teacher' },
+          { label: 'Making friends at the school gate', who: 'another parent' },
+          { label: 'At the doctor with my child',   who: 'the doctor' },
+          { label: 'Winning over my partner’s family', who: 'your partner’s mother' },
+          { label: 'Talking to my neighbours',      who: 'your neighbour' },
+          { label: 'Sorting things out at the bank', who: 'the bank clerk' },
+        ],
+      },
+      jobhunt: {
+        prompt: 'In daily life, which of these do you want to handle with ease?',
+        items: [
+          { label: 'Meeting someone new',           who: 'someone you just met' },
+          { label: 'Catching up with a friend',     who: 'your friend' },
+          { label: 'At the doctor or a government office', who: 'the receptionist' },
+          { label: 'Winning over my partner’s family', who: 'your partner’s mother' },
+          { label: 'Talking to my neighbours',      who: 'your neighbour' },
+          { label: 'Turning down an invitation',    who: 'your friend' },
+        ],
+      },
+      careerbreak: {
+        prompt: 'Getting back into it, which of these do you want to handle with ease?',
+        items: [
+          { label: 'Getting back into everyday chat', who: 'a friend you haven’t seen' },
+          { label: 'Reconnecting with an old friend', who: 'an old friend' },
+          { label: 'Meeting someone new',           who: 'someone you just met' },
+          { label: 'At the doctor or a government office', who: 'the receptionist' },
+          { label: 'Talking to my child’s teacher', who: 'the teacher' },
+          { label: 'Talking to my neighbours',      who: 'your neighbour' },
+        ],
+      },
+    },
   },
+
+  /* No mode refinement below — the counterpart does not change with your job. */
   school: {
     prompt: 'On campus, which of these do you want to handle with ease?',
     items: [
-      { label: 'Answering in class',       who: 'your teacher' },
-      { label: 'Presenting a project',     who: 'the class' },
-      { label: 'Group discussions',        who: 'your classmates' },
-      { label: 'Talking to teachers',      who: 'your teacher' },
-      { label: 'Debates and viva',         who: 'the examiner' },
-      { label: 'Making friends at school', who: 'a classmate' },
+      { label: 'Answering in class',        who: 'your teacher' },
+      { label: 'Presenting a project',      who: 'the class' },
+      { label: 'Group discussions',         who: 'your classmates' },
+      { label: 'Asking after a fast lecture', who: 'your professor' },
+      { label: 'Debates and viva',          who: 'the examiner' },
+      { label: 'Making friends on campus',  who: 'a classmate' },
     ],
   },
   travel: {
@@ -191,7 +284,7 @@ const SCENARIOS = {
       { label: 'Ordering at a restaurant',      who: 'the waiter' },
       { label: 'Asking someone for directions', who: 'a stranger' },
       { label: 'Bargaining at a market',        who: 'the seller' },
-      { label: 'Fixing a booking gone wrong',   who: 'the desk agent' },
+      { label: 'Sorting out a mix-up abroad',   who: 'the desk agent' },
     ],
   },
 };
@@ -285,16 +378,13 @@ const PRICING = {
 
 /* ---------- 9 · cohorts, for the review panel ---------- */
 const COHORTS = [
-  { id:'A',  label:'Exam · IELTS',   goal:'exam',     exam:'ielts' },
-  { id:'B',  label:'Exam · TOEFL',   goal:'exam',     exam:'toefl' },
-  { id:'C',  label:'Exam · Others',  goal:'exam',     exam:'other' },
-  { id:'D1', label:'Career · job',       goal:'career', sit:'Working a job' },
-  { id:'D2', label:'Career · freelance', goal:'career', sit:'Freelancing' },
-  { id:'D3', label:'Career · business',  goal:'career', sit:'Running my own business' },
-  { id:'D4', label:'Career · seeking',   goal:'career', sit:'Looking for work' },
-  { id:'E',  label:'Personal',       goal:'personal' },
-  { id:'F',  label:'School',         goal:'school' },
-  { id:'G',  label:'Travel',         goal:'travel' },
+  { id:'A', label:'Exam · IELTS',  goal:'exam',     exam:'ielts' },
+  { id:'B', label:'Exam · TOEFL',  goal:'exam',     exam:'toefl' },
+  { id:'C', label:'Exam · Others', goal:'exam',     exam:'other' },
+  { id:'D', label:'Career',        goal:'career' },
+  { id:'E', label:'Personal',      goal:'personal' },
+  { id:'F', label:'School',        goal:'school' },
+  { id:'G', label:'Travel',        goal:'travel' },
 ];
 
 /* goal is the primary key; situation refines it only where a set
@@ -302,12 +392,13 @@ const COHORTS = [
 function scenarioSet(goal, situation){
   const g = SCENARIOS[goal];
   if (!g) return null;
-  if (!g.bySituation) return g;
-  return g.bySituation[situation] || g.bySituation._default;
+  if (!g.byMode) return g;                       /* goal-only */
+  const mode = WORKMODE[situation] || 'office';  /* situation -> work mode */
+  return g.byMode[mode] || g.byMode.office;
 }
 
 window.CONTENT = {
   LANGUAGES, APPLANG_DESC, GOALS, EXAMS, IELTS_TYPES, examDateOptions,
-  bandNote, SCENARIOS, scenarioSet, SITUATIONS, ACTIVATION, PW_TITLE,
+  bandNote, SCENARIOS, scenarioSet, WORKMODE, SITUATIONS, ACTIVATION, PW_TITLE,
   PRICING, COHORTS,
 };

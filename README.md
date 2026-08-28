@@ -28,14 +28,25 @@ Every scenario is a **roleplay with a named counterpart** (`who` in `content.js`
 If you can't name who's on the other side, it's a skill or a place, not a
 scenario — it can't be played, and it doesn't belong in the list.
 
-**Goal is the primary key. Situation refines it only for career**, where it
-changes who you talk to: an employee answers to a manager, a freelancer to
-clients, an owner to suppliers, a job-seeker to interviewers. No other goal
-needs it — a waiter is a waiter whether you're a student or a CEO. Add
-`bySituation` to any goal in `content.js` to key it twice.
-| 7b | Testimonials | Text carousel + notification ask |
-| 8 | Level | Sets the speech-meter start and target |
-| 9 | Activation | Reading test → award → meter → fix two words → practice → graph → paywall → gift → offer |
+**Goal is the primary key; situation refines it via a work mode.** The model
+comes from `usa-onboarding` (`GOALS.jtbd` + `JTBD_MODE`) — India has no JTBD
+concept and Activation v3 only renamed the scenario to `jtbdLabel`.
+
+Seven situations collapse to six work modes (freelancing and running a business
+are the same conversation — you answer to clients either way):
+
+| Situation | Work mode |
+|---|---|
+| Working a job | `office` |
+| Studying | `student` |
+| Freelancing · Running my own business | `ownboss` |
+| Looking for work | `jobhunt` |
+| At home with family | `athome` |
+| On a career break | `careerbreak` |
+
+Only **career** and **personal growth** refine by mode — the same two
+usa-onboarding refines. Travel, school and exam don't: a waiter is a waiter
+whether you're a student or a CEO. That's 14 scenario lists, not 35.
 
 ## Cohorts
 
@@ -48,10 +59,7 @@ scenario set.
 | A | Exam · IELTS | +4 — exam → Academic/General → when → band slider | 22 |
 | B | Exam · TOEFL / TOEIC / PTE | +1 — recorded, then straight on | 19 |
 | C | Exam · Others | +2 — plus a free-text field | 20 |
-| D1 | Career · working a job | — | 19 |
-| D2 | Career · freelancing | — | 19 |
-| D3 | Career · own business | — | 19 |
-| D4 | Career · looking for work | — | 19 |
+| D | Grow in my career | — | 19 |
 | E | Personal growth | — | 19 |
 | F | Excel at my school | — | 19 |
 | G | Travel confidently | — | 19 |
@@ -67,11 +75,11 @@ in the URL:
 ?goal=travel&step=reading&lang=id
 ```
 
-- `cohort` — `A B C D1 D2 D3 D4 E F G`, sets goal + exam + situation together
+- `cohort` — `A … G`, sets goal + exam together
 - `step` — jump to any stage; everything before it fast-forwards
 - `goal` — `exam · career · personal · school · travel`
 - `exam` — `ielts · toefl · toeic · pte · other`
-- `sit` — situation, only meaningful on the career path
+- `sit` — situation; refines career and personal growth via work mode
 - `lang` — `en` plus `id · es · pt · hi · vi · ar · fr`
 - `lvl` — `beginner · intermediate · advanced`
 

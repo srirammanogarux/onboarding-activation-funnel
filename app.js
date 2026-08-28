@@ -89,11 +89,12 @@ function buildDevPanel(){
     if (DBG.cohort === c.id) b.classList.add('active');
     b.addEventListener('click', () => {
       const p = new URLSearchParams(location.search);
-      p.set('cohort', c.id); p.delete('goal'); p.delete('exam'); p.delete('sit');
+      p.set('cohort', c.id); p.delete('goal'); p.delete('exam');
       location.search = p.toString();
     });
     cBox.appendChild(b);
   });
+  fill('dpSits', C.SITUATIONS.map(s => [s, s]), 'sit');
   fill('dpSteps', DP_STEPS, 'step');
   fill('dpLangs', DP_LANGS, 'lang');
   fill('dpLvls',  DP_LVLS,  'lvl');
