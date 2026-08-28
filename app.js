@@ -45,6 +45,7 @@ const DBG = {
   lvl:    QP.get('lvl')  || 'beginner',
   goal:   QP.get('goal') || (COHORT ? COHORT.goal : 'career'),
   exam:   QP.get('exam') || (COHORT ? COHORT.exam : 'ielts'),
+  sit:    QP.get('sit')  || (COHORT && COHORT.sit ? COHORT.sit : 'Working a job'),
   cohort: COHORT ? COHORT.id : '',
 };
 let FF = DBG.step !== 'intro';   // fast-forward until the target step
@@ -88,7 +89,7 @@ function buildDevPanel(){
     if (DBG.cohort === c.id) b.classList.add('active');
     b.addEventListener('click', () => {
       const p = new URLSearchParams(location.search);
-      p.set('cohort', c.id); p.delete('goal'); p.delete('exam');
+      p.set('cohort', c.id); p.delete('goal'); p.delete('exam'); p.delete('sit');
       location.search = p.toString();
     });
     cBox.appendChild(b);
@@ -1374,7 +1375,9 @@ async function flow(){
   reach('situation');
   await sarah(T('situation_q'));
   setProgress(69, '69% completed');
-  await options(C.SITUATIONS.map((s, i) => ({ value: s, label: s, defaultOnSkip: i === 0 })));
+  const situation = await options(
+    C.SITUATIONS.map(s => ({ value: s, label: s, defaultOnSkip: s === DBG.sit })),
+    { forced: DBG.sit });
 
   /* ---------- 7 · scenarios — multi-select, keyed to goal ----------
      Exam cohorts skip this. Their scenario is already fixed — the test
@@ -1382,7 +1385,7 @@ async function flow(){
      exam questions. Asking them to name which part of the test they
      are weakest at is asking them to do the assessment that stage 9
      does properly, objectively, a minute later.                      */
-  const sc = C.SCENARIOS[goal];
+  const sc = C.scenarioSet(goal, situation);
   if (sc){
     reach('scenarios');
     await sarah(sc.prompt);

@@ -104,16 +104,62 @@ const SCENARIOS = {
      here and stage 7 turns itself back on. */
   exam: null,
 
+  /* Career is the one goal where the SITUATION changes who you talk to.
+     An employee answers to a manager, a freelancer to clients, an owner
+     to suppliers and investors, a job-seeker to interviewers. Left as a
+     single list, a freelancer sees four rows out of six that do not
+     apply to them. No other goal has this problem — a waiter is a
+     waiter whether you are a student or a CEO — so only career is
+     keyed twice. Situations without their own set fall to `_default`. */
   career: {
-    prompt: 'Which of these do you want to handle with ease?',
-    items: [
-      { label: 'Talking to my manager',      who: 'your manager' },
-      { label: 'Speaking up in meetings',    who: 'the team' },
-      { label: 'Presenting my work',         who: 'the room' },
-      { label: 'Handling client calls',      who: 'a client' },
-      { label: 'Small talk with colleagues', who: 'a colleague' },
-      { label: 'Interviews and appraisals',  who: 'the interviewer' },
-    ],
+    bySituation: {
+      'Working a job': {
+        prompt: 'At work, which of these do you want to handle with ease?',
+        items: [
+          { label: 'Talking to my manager',      who: 'your manager' },
+          { label: 'Speaking up in meetings',    who: 'the team' },
+          { label: 'Presenting my work',         who: 'the room' },
+          { label: 'Handling client calls',      who: 'a client' },
+          { label: 'Small talk with colleagues', who: 'a colleague' },
+          { label: 'Appraisals and reviews',     who: 'your manager' },
+        ],
+      },
+      'Freelancing': {
+        prompt: 'With clients, which of these do you want to handle with ease?',
+        items: [
+          { label: 'Pitching to a new client',  who: 'a prospective client' },
+          { label: 'Discussing my rate',        who: 'the client' },
+          { label: 'A first discovery call',    who: 'a prospective client' },
+          { label: 'Explaining a delay',        who: 'the client' },
+          { label: 'Pushing back on scope',     who: 'the client' },
+          { label: 'Asking for a testimonial',  who: 'a happy client' },
+        ],
+      },
+      'Running my own business': {
+        prompt: 'Running things, which of these do you want to handle with ease?',
+        items: [
+          { label: 'Pitching to investors',        who: 'an investor' },
+          { label: 'Negotiating with a supplier',  who: 'the supplier' },
+          { label: 'Briefing my team',             who: 'your team' },
+          { label: 'Handling an unhappy customer', who: 'the customer' },
+          { label: 'Talking at networking events', who: 'another founder' },
+          { label: 'Closing a new customer',       who: 'the buyer' },
+        ],
+      },
+      /* Looking for work · Studying · At home with family · On a career
+         break — all heading into the same room, an interview. */
+      _default: {
+        prompt: 'In your search, which of these do you want to handle with ease?',
+        items: [
+          { label: 'Job interviews',            who: 'the interviewer' },
+          { label: '"Tell me about yourself"',  who: 'the interviewer' },
+          { label: 'Explaining a gap in my CV', who: 'the interviewer' },
+          { label: 'Salary conversations',      who: 'the recruiter' },
+          { label: 'Asking for a referral',     who: 'a contact' },
+          { label: 'Following up after applying', who: 'the recruiter' },
+        ],
+      },
+    },
   },
   personal: {
     prompt: 'In daily life, which of these do you want to handle with ease?',
@@ -239,16 +285,29 @@ const PRICING = {
 
 /* ---------- 9 · cohorts, for the review panel ---------- */
 const COHORTS = [
-  { id:'A', label:'Exam · IELTS',  goal:'exam',     exam:'ielts' },
-  { id:'B', label:'Exam · TOEFL',  goal:'exam',     exam:'toefl' },
-  { id:'C', label:'Exam · Others', goal:'exam',     exam:'other' },
-  { id:'D', label:'Career',        goal:'career' },
-  { id:'E', label:'Personal',      goal:'personal' },
-  { id:'F', label:'School',        goal:'school' },
-  { id:'G', label:'Travel',        goal:'travel' },
+  { id:'A',  label:'Exam · IELTS',   goal:'exam',     exam:'ielts' },
+  { id:'B',  label:'Exam · TOEFL',   goal:'exam',     exam:'toefl' },
+  { id:'C',  label:'Exam · Others',  goal:'exam',     exam:'other' },
+  { id:'D1', label:'Career · job',       goal:'career', sit:'Working a job' },
+  { id:'D2', label:'Career · freelance', goal:'career', sit:'Freelancing' },
+  { id:'D3', label:'Career · business',  goal:'career', sit:'Running my own business' },
+  { id:'D4', label:'Career · seeking',   goal:'career', sit:'Looking for work' },
+  { id:'E',  label:'Personal',       goal:'personal' },
+  { id:'F',  label:'School',         goal:'school' },
+  { id:'G',  label:'Travel',         goal:'travel' },
 ];
+
+/* goal is the primary key; situation refines it only where a set
+   declares bySituation. Returns null when the goal has no set. */
+function scenarioSet(goal, situation){
+  const g = SCENARIOS[goal];
+  if (!g) return null;
+  if (!g.bySituation) return g;
+  return g.bySituation[situation] || g.bySituation._default;
+}
 
 window.CONTENT = {
   LANGUAGES, APPLANG_DESC, GOALS, EXAMS, IELTS_TYPES, examDateOptions,
-  bandNote, SCENARIOS, SITUATIONS, ACTIVATION, PW_TITLE, PRICING, COHORTS,
+  bandNote, SCENARIOS, scenarioSet, SITUATIONS, ACTIVATION, PW_TITLE,
+  PRICING, COHORTS,
 };
