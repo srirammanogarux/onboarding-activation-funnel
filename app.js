@@ -277,13 +277,11 @@ function options(items, { head = null, link = null, linkValue = null, wide = fal
           return;
         }
         btn.classList.add('selected');
-        /* juice: the answer pays back — pop at the tap, token into the bar,
-           and a themed rain when the item carries one (the big picks) */
-        const em = item.e || null;
-        if (em) JUICE.burst(btn, [em, '✨']);
-        JUICE.feedProgress(btn, em || '✓');
-        if (item.fx) JUICE.dropRain(item.fx);
-        setTimeout(() => finish(item), 180);
+        /* juice v2: the row punches, the icon does its own little move.
+           Stars are awarded at milestones by the flow, not here. */
+        const ico = btn.querySelector('.ico');
+        if (ico && item.anim) ico.classList.add(item.anim);
+        setTimeout(() => finish(item), item.anim ? 420 : 180);
       });
       list.appendChild(btn);
     });
@@ -352,7 +350,6 @@ function multiSelect(items, { head = 'Select all that apply', cta = 'Continue', 
       btn.addEventListener('click', () => {
         if (chosen.has(label)) chosen.delete(label); else chosen.add(label);
         btn.classList.toggle('on', chosen.has(label));
-        if (chosen.has(label)) JUICE.burst(btn, ['✅','✨']);
         sync();
       });
       list.appendChild(btn);
@@ -360,8 +357,6 @@ function multiSelect(items, { head = 'Select all that apply', cta = 'Continue', 
 
     cta_.addEventListener('click', () => {
       if (!chosen.size) return;                 /* minimum one */
-      JUICE.feedProgress(cta_, '✅');
-      if (fx) JUICE.dropRain(fx);
       disarmSkip();
       wrap.remove();
       const picked = items.filter(i => chosen.has(i));   /* source order, not tap order */
@@ -408,11 +403,7 @@ function bandSlider({ start = 7 } = {}){
     };
     input.addEventListener('input', paint);
     const finish = (v) => { disarmSkip(); wrap.remove(); if (v !== null) userChip(`Band ${v.toFixed(1)}`); resolve(v); };
-    wrap.querySelector('.btn-continue').addEventListener('click', () => {
-      JUICE.feedProgress(wrap.querySelector('.btn-continue'), '🎯');
-      JUICE.dropRain(['🎯','🏅','✨'], 10);
-      finish(parseFloat(input.value));
-    });
+    wrap.querySelector('.btn-continue').addEventListener('click', () => finish(parseFloat(input.value)));
     wrap.querySelector('.skip-link').addEventListener('click', () => finish(null));
     paint();
     chatStream.appendChild(wrap);
@@ -964,6 +955,26 @@ async function recapBubble(chips){
   await wait(FF ? 0 : 1700);
 }
 
+/* notification ask as a Remy-style permission moment: a card with a
+   bell and a toggle that grants itself — satisfying, not a dialog */
+function permissionCard(){
+  const BELL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>';
+  const card = el(`
+    <div class="perm-card">
+      <span class="bell">${BELL}</span>
+      <p>Daily reminders from Sarah</p>
+      <span class="perm-toggle"></span>
+    </div>`);
+  chatStream.appendChild(card);
+  scrollToEnd();
+  return new Promise(resolve => {
+    const grant = () => { card.classList.add('granted'); setTimeout(resolve, FF ? 0 : 800); };
+    if (FF){ grant(); return; }
+    const t = setTimeout(grant, 1600);                       /* grants itself */
+    card.addEventListener('click', () => { clearTimeout(t); grant(); }, { once: true });
+  });
+}
+
 /* Sarah flies between surfaces — the Remy continuity anchor */
 function sarahFly(toEl){
   if (FF || !toEl) return;
@@ -1004,7 +1015,8 @@ async function planBuildSequence(answers){
   sarahFly($('pbAvatar').querySelector('img'));
   showScreen('planBuildScreen');
   setTimeout(() => $('chatScreen').classList.add('is-hidden'), FF ? 0 : 500);
-  JUICE.setAmbient('reward');
+  if (!FF) JUICE.sweep();                      /* THE one ambient pass */
+  if (!FF) setTimeout(() => JUICE.trayToPlan(stack), 350);   /* stars come down */
 
   /* answers slide into the stack, then the checklist ticks */
   const cards = [...stack.children];
@@ -1089,6 +1101,7 @@ function stageTurn(){
       if (!mic.classList.contains('idle')) return;
       clearTimeout(stgHintT);
       JUICE.setAmbient('listening');
+      $('stgMicRow').classList.add('stg-listen-glow');   /* Gemini input glow */
       $('stgTip').classList.add('hidden');
       mic.className = 'convmic expanded';
       stgStartWave();
@@ -1113,6 +1126,7 @@ function stageTurn(){
         skip.removeEventListener('click', onSkip);
         stgWords().forEach(w => w.classList.add('said'));
         mic.className = 'convmic submitting';
+        $('stgMicRow').classList.remove('stg-listen-glow');
         await wait(600);
         mic.classList.add('gone');
         setTimeout(() => { $('stgMicRow').classList.add('gone'); mic.classList.remove('gone'); }, 300);
@@ -1175,7 +1189,16 @@ async function stageLadder(goal, level){
     if (rung.gaps.length){
       $('stgSpeaker').hidden = false;
       $('stgMicRow').classList.add('gone');
+      /* Sarah "says it": live waveform instead of static bars */
+      const bars = $('stgSpeaker').querySelector('.stg-bars');
+      let wv = null;
+      if (bars && !FF){
+        bars.innerHTML = '';
+        bars.classList.add('stg-wavebox');
+        wv = JUICE.wave(bars, { width: 120, height: 24, energy: .9 });
+      }
       await wait(FF ? 0 : 2400);
+      if (wv) wv.stop();
       $('stgSpeaker').hidden = true;
       /* stall hint — if they don't start in ~4s, the gaps peek */
       clearTimeout(stgHintT);
@@ -1206,15 +1229,15 @@ async function stageLadder(goal, level){
     /* pass beat */
     rungs[i].classList.remove('on');
     rungs[i].classList.add('done');
-    JUICE.setAmbient('reward');
+    JUICE.setAmbient('idle');
     if (i === 0){
+      if (!FF) JUICE.confetti(36, 'burst');
       $('stgSay').textContent = T('stg_pass1');
     } else if (i === 1){
-      JUICE.bokeh(10);
+      if (!FF) JUICE.confetti(50, 'burst');
       $('stgSay').textContent = T('stg_pass2');
     } else {
-      JUICE.bokeh(22);
-      JUICE.dropRain(['⭐','✨','🌟'], 10);
+      if (!FF){ JUICE.confetti(90, 'burst'); JUICE.bokeh(18); }
       $('stgSay').textContent = T('stg_strong');
     }
     await wait(FF ? 0 : (i === 2 ? 2100 : 1400));
@@ -1357,6 +1380,7 @@ function hsPracticeWord(idx){
         st.classList.add('ok');
         st.textContent = T('prac_nice');
         $('hsFill').parentElement.classList.add('win');
+        JUICE.confetti(26, 'burst');
         let sc = PRON_WORDS[idx].start;
         scoreT = setInterval(() => {
           sc += 2;
@@ -1565,6 +1589,7 @@ async function giftSequence(){
     await new Promise(r => $('giftScreen').addEventListener('click', r, { once: true }));
   }
   $('giftScreen').classList.add('open');
+  if (!FF) JUICE.fireworks();
   await wait(2600);
 }
 
@@ -1605,6 +1630,7 @@ async function offerSequence(){
   }));
 
   showScreen('offerScreen');
+  if (!FF) JUICE.confetti(70, 'rain');
   setTimeout(() => $('giftScreen').classList.add('is-hidden'), 600);
 }
 
@@ -1628,7 +1654,7 @@ async function flow(){
   const lang = await options([
     ...C.LANGUAGES.map(l => ({
       value: l.value, label: l.label, icon: flag(l.flag),
-      defaultOnSkip: l.value === 'id', e: '🌐',
+      defaultOnSkip: l.value === 'id', e: '🌐', anim: 'oa-wave',
     })),
     { value: 'more', label: T('other_langs'), icon: '🌎', inert: true },
   ], { chipIcons: true, forced: DBG.lang === 'en' ? 'id' : DBG.lang });
@@ -1647,6 +1673,7 @@ async function flow(){
   ], { wide: true, link: T('other_lang_link'), forced: DBG.lang === 'en' ? 'english' : 'native' });
   if (applang === 'native' && STR[lang]) L10N = lang;
   setProgress(7, '7% completed');
+  JUICE.star({ emoji: '🌐', instant: FF });                 /* ★ 1 — language chosen */
   await wait(300);
 
   /* ---------- 2 · name ---------- */
@@ -1703,6 +1730,7 @@ async function flow(){
     { value: 'nonbin', label: 'Non-binary' },
   ], { link: T('rather_not_say'), linkValue: 'na' });
   setProgress(46, T('lbl_plan'));
+  JUICE.star({ emoji: '🙋', instant: FF });                 /* ★ 2 — about you complete */
   await wait(300);
 
   /* ---------- 5 · goal — the only real fork ---------- */
@@ -1712,13 +1740,16 @@ async function flow(){
   const goal = await options(
     C.GOALS.map(g => ({
       value: g.value, label: g.label,
+      icon: (C.GOAL_FX[g.value] || {}).e,
       defaultOnSkip: g.value === 'career',
       e: (C.GOAL_FX[g.value] || {}).e,
-      fx: (C.GOAL_FX[g.value] || {}).rain,     /* themed drop on the big pick */
+      anim: { exam:'oa-pulse', career:'oa-bounce', personal:'oa-wave',
+              school:'oa-tilt', travel:'oa-tilt' }[g.value],
     })),
     { forced: DBG.goal });
   setActivation(goal);
   const goalLabel = (C.GOALS.find(g => g.value === goal) || {}).label;
+  JUICE.star({ emoji: (C.GOAL_FX[goal] || {}).e || '🎯', big: true, instant: FF });  /* ★ 3 — the goal */
 
   /* ---------- 5.2 – 5.5 · exam sub-tree (IELTS branches; the rest are noted) ---------- */
   let exam = null, examType = null, examDate = null, band = null;
@@ -1735,6 +1766,7 @@ async function flow(){
       await sarah(T('exam_other_q'));
       await textInput(T('exam_other_ph'), { skip: T('skip_for_now') });
       setProgress(61, '61% completed');
+      JUICE.star({ emoji: '🎯', instant: FF });             /* ★ 4 — target set (own exam) */
     } else if (exam === 'ielts'){
       /* the only exam that branches further */
       reach('examtype');
@@ -1756,10 +1788,12 @@ async function flow(){
       await sarah(T('band_q'));
       setProgress(61, '61% completed');
       band = await bandSlider({ start: 7 });
+      JUICE.star({ emoji: '🎯', instant: FF });             /* ★ 4 — target set (band) */
     } else {
       /* TOEFL / TOEIC / PTE — recorded, then straight on */
       await sarah(T('exam_noted', (C.EXAMS.find(e => e.value === exam) || {}).label), { typingMs: 700 });
       setProgress(61, '61% completed');
+      JUICE.star({ emoji: '🎯', instant: FF });             /* ★ 4 — target set (exam noted) */
     }
   } else {
     await sarah(T(`ack_goal_${goal}`), { typingMs: 1200 });
@@ -1789,8 +1823,8 @@ async function flow(){
     await sarah(sc.prompt);
     setProgress(76, '76% completed');
     const labels = sc.items.map(i => i.label);
-    picked = await multiSelect(labels, { forced: [labels[0], labels[1]],
-                                fx: (C.GOAL_FX[goal] || {}).rain });
+    picked = await multiSelect(labels, { forced: [labels[0], labels[1]] });
+    JUICE.star({ emoji: '✅', instant: FF });               /* ★ 4 — focus set (scenarios) */
     await sarah(T('scenarios_ack'), { typingMs: 900, quick: true });
     /* their own words, replayed — personalization proof for free */
     await recapBubble([
@@ -1807,6 +1841,7 @@ async function flow(){
   await testimonialCarousel();
   await sarah(T('testi_follow'), { quick: true });
   await sarah(T('notif_ask'));
+  await permissionCard();
   await sarah(T('notif_ok'), { typingMs: 800, quick: true });
   setProgress(84, '84% completed');
 
@@ -1815,12 +1850,13 @@ async function flow(){
   await sarah(T('level_q'));
   const level = await options([
     { value: 'beginner',     label: 'Beginner',     icon: ICONS.seedling,
-      desc: T('lvl_beg_d'), defaultOnSkip: true, e: '🌱', fx: ['🌱','⭐','✨'] },
+      desc: T('lvl_beg_d'), defaultOnSkip: true, e: '🌱', anim: 'oa-bounce' },
     { value: 'intermediate', label: 'Intermediate', icon: ICONS.herb,
-      desc: T('lvl_int_d'), e: '🌿', fx: ['🌿','⭐','✨'] },
+      desc: T('lvl_int_d'), e: '🌿', anim: 'oa-bounce' },
     { value: 'advanced',     label: 'Advanced',     icon: ICONS.brain,
-      desc: T('lvl_adv_d'), e: '🧠', fx: ['🧠','⭐','✨'] },
+      desc: T('lvl_adv_d'), e: '🧠', anim: 'oa-pulse' },
   ], { wide: true, chipIcons: true, forced: DBG.lvl });
+  JUICE.star({ emoji: { beginner:'🌱', intermediate:'🌿', advanced:'🧠' }[level], instant: FF });  /* ★ 5 */
   await sarah(T(`ack_${level}`), { typingMs: 1100 });
   setProgress(88, T('lbl_last_step'));
 
@@ -1841,6 +1877,8 @@ async function flow(){
   chatStream.appendChild(cta);
   scrollToEnd();
   if (!FF) await new Promise(r => cta.addEventListener('click', r, { once: true }));
+  JUICE.star({ emoji: '🎙', instant: FF });                 /* ★ 6 — ready to speak */
+  if (!FF) await wait(700);                     /* let the last star land */
 
   /* ---------- 9.2 · plan build — the chat's exit ---------- */
   await planBuildSequence([

@@ -103,6 +103,27 @@ All state is in the URL:
 - `lvl` — `beginner · intermediate · advanced`
 - `perf` — ladder outcome override: `weak · mid · midhigh · strong` (defaults by level)
 
+## The interaction layer (juice v2)
+
+Seven primitives in `juice.js`, placed by one rule — everything that flies
+lands somewhere and stays:
+
+- **Star tray** — six slots in the header. Milestone answers pop off the
+  user's chip and land as gold stars (slotPunch · ringPulse · barGlow,
+  vocabulary from the conversation-lead prototype). Stars persist and fly
+  down into the plan-build stack.
+- **Punch + icon micro-anims** on every option tap (flag waves, briefcase
+  bounces) — no particles on menu taps.
+- **Canvas confetti engine** (ported from Activation v3): burst on ladder
+  passes and practice wins, rain on the offer, fireworks on the gift.
+- **The one sweep** — a single Gemini-style indigo→gold gradient pass at
+  plan-build. Gold appears only when earned.
+- **Live waveform** while Sarah "says it" on the echo rung; glow around the
+  mic while it listens.
+- **Permission card** — the notification ask as a self-granting toggle.
+- Everything is FF-aware (instant during deep-link fast-forward) and dies
+  under `prefers-reduced-motion`.
+
 ## What's new versus the India prototype
 
 - **Multi-select** (`.opt.ms-opt`) — plain ticks, no numbering, because
