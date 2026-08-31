@@ -75,6 +75,43 @@
       </div>
     </main>
 
+    <!-- ============ SPEAKING STAGE · the ladder (R1 read → R2 read → R3 echo) ============ -->
+    <section class="screen takeover is-hidden" id="stageScreen" hidden>
+      <div class="statusbar">
+        <img src="assets/status-time.svg" alt="9:41" width="54" height="21">
+        <img src="assets/status-right.svg" alt="" width="67" height="12">
+      </div>
+      <div class="stage-wrap">
+        <div class="hs-coach">
+          <div class="dp"><img src="assets/sarah-avatar.png" alt="Sarah"></div>
+          <p class="hs-say" id="stgSay"></p>
+        </div>
+        <div class="stg-rungs" id="stgRungs"><i></i><i></i><i></i></div>
+        <div class="read-card stg-card" id="stgCard">
+          <p class="rc-label" id="stgLabel">SAY IT OUT LOUD</p>
+          <p class="rc-text" id="stgText"></p>
+          <div class="stg-speaker" id="stgSpeaker" hidden>
+            <img src="assets/sarah-avatar.png" alt="">
+            <span class="stg-bars"><i></i><i></i><i></i><i></i><i></i></span>
+            <em>Sarah is saying it…</em>
+          </div>
+        </div>
+        <div class="stg-microw" id="stgMicRow">
+          <div class="mic-tip" id="stgTip">Tap to speak</div>
+          <div class="convmic idle" id="stgMic">
+            <div class="cm-mic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><line x1="12" y1="18" x2="12" y2="22"/></svg>
+            </div>
+            <button class="cm-cancel" id="stgCancel" aria-label="Cancel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
+            <div class="cm-wave" id="stgWave"></div>
+            <button class="cm-confirm" id="stgConfirm" aria-label="Done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12 10 17 19 7"/></svg></button>
+          </div>
+          <button class="skip-link stg-skip" id="stgSkip">I can’t speak right now</button>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </section>
+
     <!-- ============ HINT FLOW: level meter → fix pronunciation → practice ============ -->
     <section class="screen takeover is-hidden" id="hintScreen" hidden>
       <div class="statusbar">
@@ -379,6 +416,8 @@
     <div class="dp-chips dp-cohorts" id="dpCohorts"></div>
     <p class="dp-cap">Situation → work mode</p>
     <div class="dp-chips" id="dpSits"></div>
+    <p class="dp-cap">Ladder performance</p>
+    <div class="dp-chips" id="dpPerf"></div>
     <p class="dp-cap">Step</p>
     <div class="dp-chips" id="dpSteps"></div>
     <p class="dp-cap">Language</p>

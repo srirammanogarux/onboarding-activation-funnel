@@ -2851,3 +2851,86 @@ body{
   .amb-blob{animation:none;opacity:0 !important;}
   .fx-layer{display:none;}
 }
+
+/* ============================================================
+   SPEAKING STAGE — the ladder screen (chat ends before this)
+   Reuses the read-card + convmic anatomy on a full screen with
+   Sarah as the coach header, like the hint screen.
+   ============================================================ */
+.stage-wrap{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  padding:6px 24px 0;
+}
+/* rung progress — three dots, gold fills as rungs pass */
+.stg-rungs{display:flex;gap:8px;margin:18px 2px 14px;}
+.stg-rungs i{
+  flex:1;
+  height:5px;
+  border-radius:999px;
+  background:var(--track);
+  transition:background .5s var(--ease-out);
+}
+.stg-rungs i.on{background:var(--accent);}
+.stg-rungs i.done{background:var(--progress);}
+
+.stg-card{margin-top:4px;}
+.stg-card .rc-text{min-height:96px;}
+.stg-card .rc-text .gap{
+  display:inline-block;
+  min-width:74px;
+  border-bottom:2px dashed color-mix(in srgb, var(--blue-300) 55%, transparent);
+  color:transparent;
+  transition:color .4s var(--ease-out), border-color .4s var(--ease-out);
+}
+.stg-card .rc-text .gap.hinted{animation:gap-shimmer 1.1s ease-in-out;}
+.stg-card .rc-text .gap.said{color:var(--read-said);border-color:transparent;}
+@keyframes gap-shimmer{
+  0%,100%{border-color:color-mix(in srgb, var(--blue-300) 55%, transparent);}
+  50%{border-color:var(--blue-200);}
+}
+
+/* Sarah "audio" playing state inside the card */
+.stg-speaker{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:14px;
+}
+.stg-speaker img{width:26px;height:26px;border-radius:50%;}
+.stg-speaker em{font-family:var(--font-body);font-style:normal;font-size:13px;color:var(--text-low);}
+.stg-bars{display:flex;align-items:center;gap:2.5px;height:16px;}
+.stg-bars i{
+  width:3px;
+  border-radius:999px;
+  background:var(--blue-300);
+  animation:stg-bar .7s ease-in-out infinite alternate;
+}
+.stg-bars i:nth-child(1){height:6px;animation-delay:0s;}
+.stg-bars i:nth-child(2){height:12px;animation-delay:.12s;}
+.stg-bars i:nth-child(3){height:16px;animation-delay:.24s;}
+.stg-bars i:nth-child(4){height:10px;animation-delay:.36s;}
+.stg-bars i:nth-child(5){height:7px;animation-delay:.48s;}
+@keyframes stg-bar{from{transform:scaleY(.45);}to{transform:scaleY(1);}}
+
+/* mic row pinned low, matching the chat's convmic sizing */
+.stg-microw{
+  margin-top:auto;
+  padding-bottom:46px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:14px;
+}
+.stg-microw .convmic{position:relative;}
+.stg-skip{margin-top:2px;}
+.stg-microw.gone{opacity:0;pointer-events:none;transition:opacity .4s var(--ease-out);}
+
+/* stage phrase word states */
+.stg-card .rc-text .w{color:var(--read-rest);transition:color .25s var(--ease-out);}
+.stg-card .rc-text .w.said{color:var(--read-said);}
+.stg-card .rc-text .w.miss{color:var(--warn-300);}
+.stg-card .rc-text .gap{color:transparent;}
+.stg-card .rc-text .gap.peek{color:var(--text-low);}
+.stg-card .rc-text .gap.said{color:var(--read-said);border-color:transparent;}

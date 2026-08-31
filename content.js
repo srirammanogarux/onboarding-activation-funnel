@@ -292,54 +292,91 @@ const SITUATIONS = [
   'On a career break',
 ];
 
-/* ---------- 6 · activation, keyed to GOAL ----------
-   `lead` is the first sentence — it fills in periwinkle as the
-   user reads. `rest` completes the passage. The two pron words
-   must both appear inside lead + rest.                        */
+/* ---------- 6 · activation ladder, keyed to GOAL ----------
+   Three rungs of AFFIRMATION phrases (user direction 2026-08-28):
+   the first things a learner says out loud are self-affirming.
+
+   R1 — simple phrase.  R2 — same spirit, more complex words.
+   R3 — ECHO of R2: Sarah "says it" first (mock audio), then the user
+   repeats it with the two complex words hidden (cloze).
+
+   Honesty rule: the pron-practice pair always comes from the rung the
+   user actually stumbled on. A passed rung never shows errors.
+   Each word: pre<hot>post render for the pron card. */
 const ACTIVATION = {
   exam: {
-    intro: "Let's hear you. Read this out loud — it's the kind of answer the examiner is listening for.",
-    lead:  'In my opinion, the main advantage is that people can work from anywhere. ',
-    rest:  'However, it also means the working day never really ends.',
-    words: [
-      { w:'opinion',   pre:'o',   hot:'pin', post:'ion', ph:'uh.pin.yun', tip:"Stress the middle sound ‘pin’", start:51 },
-      { w:'advantage', pre:'ad',  hot:'van', post:'tage', ph:'ad.van.tij', tip:"The ‘tage’ says ‘tij’",       start:48 },
+    intro: "Time to hear you. Say this like you mean it — the examiner listens for exactly this energy.",
+    ladder: [
+      { text: 'I am ready to do well in this exam.',
+        words: [
+          { w:'ready', pre:'rea', hot:'dy', post:'', ph:'reh.dee', tip:"Two quick beats: ‘reh’ then ‘dee’", start:55 },
+          { w:'exam',  pre:'e',   hot:'xam', post:'', ph:'ig.zam', tip:"Stress the second beat: ‘zam’",    start:50 },
+        ] },
+      { text: 'I express my opinions with clarity and confidence.',
+        words: [
+          { w:'opinions', pre:'o',   hot:'pin', post:'ions', ph:'uh.pin.yunz', tip:"Stress the middle sound ‘pin’", start:51 },
+          { w:'clarity',  pre:'cla', hot:'ri',  post:'ty',   ph:'kla.ri.tee',  tip:"Three even beats, start on ‘kla’", start:49 },
+        ] },
     ],
   },
   career: {
-    intro: "Let's hear you. Read this out loud — it's the kind of thing you'd say at work.",
-    lead:  "I'd like to take next Friday off. ",
-    rest:  "It's my cousin's wedding, and my work for the week is already done.",
-    words: [
-      { w:'Friday',  pre:'Fri', hot:'da',  post:'y',  ph:'fry.day',  tip:"Two beats: ‘fry’ then ‘day’", start:54 },
-      { w:'wedding', pre:'we',  hot:'ddi', post:'ng', ph:'weh.ding', tip:"The ‘dd’ stays soft",         start:51 },
+    intro: "Time to hear you. Say this like you'd say it at work — clear and unhurried.",
+    ladder: [
+      { text: 'My voice matters at work.',
+        words: [
+          { w:'voice',   pre:'v',  hot:'oi', post:'ce',  ph:'voys',    tip:"One beat — ‘oy’ glides into ‘s’", start:56 },
+          { w:'matters', pre:'ma', hot:'tt', post:'ers', ph:'ma.turz', tip:"The ‘tt’ stays soft, like ‘madders’", start:52 },
+        ] },
+      { text: 'I speak with confidence in every conversation.',
+        words: [
+          { w:'confidence',   pre:'con',    hot:'fi', post:'dence', ph:'kon.fi.dens',      tip:"Stress the first beat: ‘kon’", start:50 },
+          { w:'conversation', pre:'conver', hot:'sa', post:'tion',  ph:'kon.vur.say.shun', tip:"Four beats, stress on ‘say’",  start:47 },
+        ] },
     ],
   },
   personal: {
-    intro: "Let's hear you. Read this out loud — it's the kind of thing you'd say to a new friend.",
-    lead:  'I usually spend my weekends with my family. ',
-    rest:  'We cook together, and sometimes we watch a movie at home.',
-    words: [
-      { w:'usually',  pre:'u',   hot:'su',  post:'ally', ph:'yoo.zhoo.lee', tip:"Three beats, not four",  start:50 },
-      { w:'together', pre:'to',  hot:'ge',  post:'ther', ph:'tuh.geh.thur', tip:"Starts on ‘tuh’, not ‘to’", start:53 },
+    intro: "Time to hear you. Say this like you'd say it to a friend — relaxed, no rush.",
+    ladder: [
+      { text: 'I enjoy speaking English every day.',
+        words: [
+          { w:'enjoy', pre:'en', hot:'joy', post:'', ph:'in.joy', tip:"Starts on ‘in’, not ‘en’", start:55 },
+          { w:'every', pre:'e',  hot:'ve',  post:'ry', ph:'ev.ree', tip:"Two beats, not three: ‘ev.ree’", start:53 },
+        ] },
+      { text: 'I express myself naturally, without hesitation.',
+        words: [
+          { w:'naturally',  pre:'na',   hot:'tu', post:'rally', ph:'na.chruh.lee',   tip:"The ‘tu’ says ‘chruh’", start:48 },
+          { w:'hesitation', pre:'hesi', hot:'ta', post:'tion',  ph:'heh.zi.tay.shun', tip:"The ‘s’ is a soft ‘z’", start:49 },
+        ] },
     ],
   },
   school: {
-    intro: "Let's hear you. Read this out loud — it's the kind of thing you'd say in class.",
-    lead:  'For my project, I studied how plants grow in different kinds of soil. ',
-    rest:  'The results surprised everyone.',
-    words: [
-      { w:'project', pre:'',   hot:'proj', post:'ect', ph:'proj.ekt',  tip:"It's a noun, so stress ‘proj’", start:53 },
-      { w:'results', pre:'re', hot:'sul',  post:'ts',  ph:'ri.zults',  tip:"The ‘s’ is a soft ‘z’",         start:49 },
+    intro: "Time to hear you. Say this like you'd say it in class — steady and proud.",
+    ladder: [
+      { text: 'I am proud to share my ideas in class.',
+        words: [
+          { w:'proud', pre:'pr', hot:'ou', post:'d',  ph:'prowd',       tip:"The ‘ou’ says ‘ow’",          start:55 },
+          { w:'ideas', pre:'i',  hot:'de', post:'as', ph:'eye.dee.uhz', tip:"Three beats, starts on ‘eye’", start:51 },
+        ] },
+      { text: 'I answer difficult questions with confidence.',
+        words: [
+          { w:'difficult', pre:'di',   hot:'ffi', post:'cult', ph:'di.fi.kult',  tip:"Stress the first beat: ‘di’", start:50 },
+          { w:'questions', pre:'ques', hot:'tio', post:'ns',   ph:'kwes.chunz', tip:"The ‘tio’ says ‘chun’",       start:49 },
+        ] },
     ],
   },
   travel: {
-    intro: "Let's hear you. Read this out loud — it's the kind of thing you'd say at an airport.",
-    lead:  'Excuse me, could you tell me where the departure gate is? ',
-    rest:  'My flight leaves in about an hour.',
-    words: [
-      { w:'departure', pre:'de', hot:'par', post:'ture', ph:'di.par.chur', tip:"The ‘ture’ says ‘chur’", start:52 },
-      { w:'hour',      pre:'',   hot:'h',   post:'our',  ph:'ow.er',       tip:"The ‘h’ is silent",      start:47 },
+    intro: "Time to hear you. Say this like you're already on the trip — easy and sure.",
+    ladder: [
+      { text: 'I am comfortable asking for help.',
+        words: [
+          { w:'comfortable', pre:'com', hot:'for', post:'table', ph:'kumf.tur.bul', tip:"Three beats, not four: ‘kumf.tur.bul’", start:46 },
+          { w:'asking',      pre:'a',   hot:'ski', post:'ng',    ph:'ah.sking',     tip:"Open with a long ‘ah’",                 start:54 },
+        ] },
+      { text: 'I handle unexpected situations with ease.',
+        words: [
+          { w:'unexpected', pre:'unex', hot:'pec', post:'ted',   ph:'un.ik.spek.tid',  tip:"Stress lands on ‘spek’", start:48 },
+          { w:'situations', pre:'situ', hot:'a',   post:'tions', ph:'si.chu.ay.shunz', tip:"The ‘tu’ says ‘chu’",    start:47 },
+        ] },
     ],
   },
 };

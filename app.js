@@ -47,6 +47,7 @@ const DBG = {
   exam:   QP.get('exam') || (COHORT ? COHORT.exam : 'ielts'),
   sit:    QP.get('sit')  || (COHORT && COHORT.sit ? COHORT.sit : 'Working a job'),
   cohort: COHORT ? COHORT.id : '',
+  perf:   QP.get('perf') || '',
 };
 let FF = DBG.step !== 'intro';   // fast-forward until the target step
 function reach(key){ if (DBG.step === key) FF = false; }
@@ -57,8 +58,9 @@ const DP_STEPS = [
   ['age', 'Age'], ['gender', 'Gender'], ['goal', 'Goal'],
   ['exam', 'Which exam'], ['examtype', 'Academic/General'], ['examdate', 'Exam date'], ['band', 'Target band'],
   ['situation', 'Situation'], ['scenarios', 'Scenarios'],
-  ['testimonials', 'Testimonials'], ['level', 'Level'], ['reading', 'Reading test'],
-  ['award', 'Award'], ['meter', 'Speech meter'], ['fix', 'Fix pronunciation'],
+  ['testimonials', 'Testimonials'], ['level', 'Level'], ['award', 'Award'],
+  ['stage', 'R1 · Read'], ['read2', 'R2 · Harder'], ['echo', 'R3 · Echo'],
+  ['meter', 'Speech meter'], ['fix', 'Fix pronunciation'],
   ['practice', 'Practice'], ['paywall', 'Graph → Paywall'], ['gift', 'Gift'], ['offer', 'Offer paywall'],
 ];
 const DP_LANGS = [['en','English'], ...C.LANGUAGES.map(l => [l.value, l.label])];
@@ -114,6 +116,8 @@ function buildDevPanel(){
     cBox.appendChild(b);
   });
   fill('dpSits', C.SITUATIONS.map(s => [s, s]), 'sit');
+  fill('dpPerf', [['weak','Weak · fails R1'],['mid','Mid · fails R2'],
+                  ['midhigh','Mid-high · fails R3'],['strong','Strong · clean']], 'perf');
   fill('dpSteps', DP_STEPS, 'step');
   fill('dpLangs', DP_LANGS, 'lang');
   fill('dpLvls',  DP_LVLS,  'lvl');
@@ -745,21 +749,31 @@ function closeStory(){
 
 
 /* ---------- speaking test ---------- */
-/* Passage, the two flagged words and the whole hint flow are keyed
-   to the GOAL chosen at stage 5. setActivation() is called there. */
-let PASSAGE     = ['', ''];
+/* The ladder, the flagged words and the hint flow are keyed to the
+   GOAL chosen at stage 5. PRON_WORDS / HS_PASSAGE are re-pointed by
+   the ladder to the rung the user actually stumbled on (honesty
+   rule); the R1 defaults below only serve deep links straight into
+   fix/practice. */
+let PASSAGE     = ['', ''];   /* legacy, unused */
 let PRON_WORDS  = [];
 let HS_PASSAGE  = '';
 let ACT_INTRO   = '';
+let ACT         = null;
 
 function setActivation(goal){
-  const a = C.ACTIVATION[goal] || C.ACTIVATION.career;
-  PASSAGE    = [a.lead, a.rest];
-  PRON_WORDS = a.words;
-  HS_PASSAGE = a.lead + a.rest;
-  ACT_INTRO  = a.intro;
+  ACT = C.ACTIVATION[goal] || C.ACTIVATION.career;
+  PRON_WORDS = ACT.ladder[0].words;
+  HS_PASSAGE = ACT.ladder[0].text;
+  ACT_INTRO  = ACT.intro;
 }
 setActivation(DBG.goal);   /* so deep links land on the right content */
+
+/* outcome: how far up the ladder this user gets. Deterministic by
+   level so demos are stable; ?perf= overrides; hint/skip forces weak. */
+function ladderOutcome(level){
+  if (['weak','mid','midhigh','strong'].includes(DBG.perf)) return DBG.perf;
+  return { beginner:'weak', intermediate:'mid', advanced:'strong' }[level] || 'mid';
+}
 
 const ICON_TRANSLATE = '<svg viewBox="0 0 20 20" fill="currentColor" aria-label="Translate"><path d="M7.75 2.75a.75.75 0 0 0-1.5 0v1.258a32.987 32.987 0 0 0-3.599.278.75.75 0 1 0 .198 1.487A31.545 31.545 0 0 1 8.7 5.545 19.381 19.381 0 0 1 7 9.56a19.418 19.418 0 0 1-1.002-2.05.75.75 0 0 0-1.384.577 20.935 20.935 0 0 0 1.492 2.91 19.613 19.613 0 0 1-3.828 4.154.75.75 0 1 0 .945 1.164A21.116 21.116 0 0 0 7 12.331c.095.132.192.262.29.391a.75.75 0 0 0 1.194-.91c-.204-.266-.4-.538-.59-.815a20.888 20.888 0 0 0 2.333-5.332c.31.031.618.068.924.108a.75.75 0 0 0 .198-1.487 32.832 32.832 0 0 0-3.599-.278V2.75Z"/><path d="M13 8a.75.75 0 0 1 .671.415l4.25 8.5a.75.75 0 1 1-1.342.67L15.787 16h-5.573l-.793 1.585a.75.75 0 1 1-1.342-.67l4.25-8.5A.75.75 0 0 1 13 8Zm2.037 6.5L13 10.427 10.964 14.5h4.073Z"/></svg>';
 const ICON_SPEAKER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-label="Listen"><path d="M19.114 5.636a9 9 0 0 1 0 12.728M16.463 8.288a5.25 5.25 0 0 1 0 7.424M6.75 8.25l4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z"/></svg>';
@@ -888,6 +902,203 @@ async function showToast(title, sub, holdMs = 2200){
 }
 
 /* ============================================================
+   SPEAKING STAGE — the ladder. The chat ends before this screen.
+   R1 read a simple affirmation → R2 read one with harder words →
+   R3 echo: Sarah "says it" first, the user repeats it with the two
+   complex words hidden. Slip anywhere → pron practice with the
+   words from that exact rung. Clean run → no practice at all.
+   ============================================================ */
+const STG_BARS = 26;
+let stgWaveT = null, stgHintT = null;
+
+function stgBuildWave(){
+  const wave = $('stgWave');
+  if (!wave.children.length){
+    for (let i = 0; i < STG_BARS; i++) wave.appendChild(document.createElement('i'));
+  }
+}
+function stgStartWave(){
+  const bars = [...$('stgWave').children];
+  const mid = (STG_BARS - 1) / 2;
+  stgWaveT = setInterval(() => {
+    bars.forEach((b, i) => {
+      const env = Math.exp(-Math.pow((i - mid) / (STG_BARS * 0.4), 2));
+      b.style.height = `${4 + Math.random() * 28 * env}px`;
+    });
+  }, 90);
+}
+function stgStopWave(){
+  clearInterval(stgWaveT);
+  [...$('stgWave').children].forEach(b => b.style.height = '4px');
+}
+
+/* render a phrase as word spans; gap words start invisible (cloze) */
+function stgRenderPhrase(text, gaps = []){
+  const g = gaps.map(w => w.toLowerCase());
+  $('stgText').innerHTML = text.split(' ').map(w => {
+    const clean = w.replace(/[.,!?]/g, '').toLowerCase();
+    return `<span class="w${g.includes(clean) ? ' gap' : ''}">${w}</span>`;
+  }).join(' ');
+}
+function stgWords(){ return [...$('stgText').querySelectorAll('.w')]; }
+
+async function stgFillWords(signal){
+  for (const sp of stgWords()){
+    if (signal.cancelled) return;
+    sp.classList.add('said');
+    await wait(240);
+  }
+}
+function stgResetSaid(){ stgWords().forEach(w => w.classList.remove('said')); }
+
+/* one mic turn on the stage: orb → waveform + words fill → ✓ */
+function stageTurn(){
+  return new Promise(resolve => {
+    const mic = $('stgMic');
+    $('stgMicRow').classList.remove('gone');
+    mic.className = 'convmic idle';
+    $('stgTip').classList.remove('hidden');
+
+    const onOrbTap = () => {
+      if (!mic.classList.contains('idle')) return;
+      clearTimeout(stgHintT);
+      JUICE.setAmbient('listening');
+      $('stgTip').classList.add('hidden');
+      mic.className = 'convmic expanded';
+      stgStartWave();
+      const signal = { cancelled: false };
+      stgFillWords(signal);
+
+      const cancel = $('stgCancel'), confirm = $('stgConfirm');
+      const onCancel = () => {
+        signal.cancelled = true;
+        stgStopWave();
+        confirm.removeEventListener('click', onConfirm);
+        stgResetSaid();
+        $('stgTip').classList.remove('hidden');
+        mic.className = 'convmic idle';
+        JUICE.setAmbient('idle');
+      };
+      const onConfirm = async () => {
+        signal.cancelled = true;
+        stgStopWave();
+        cancel.removeEventListener('click', onCancel);
+        mic.removeEventListener('click', onOrbTap);
+        skip.removeEventListener('click', onSkip);
+        stgWords().forEach(w => w.classList.add('said'));
+        mic.className = 'convmic submitting';
+        await wait(600);
+        mic.classList.add('gone');
+        setTimeout(() => { $('stgMicRow').classList.add('gone'); mic.classList.remove('gone'); }, 300);
+        resolve('spoke');
+      };
+      cancel.addEventListener('click', onCancel, { once: true });
+      confirm.addEventListener('click', onConfirm, { once: true });
+    };
+
+    const skip = $('stgSkip');
+    const onSkip = () => {
+      clearTimeout(stgHintT);
+      mic.removeEventListener('click', onOrbTap);
+      $('stgMicRow').classList.add('gone');
+      resolve('skipped');            /* forces the weak path */
+    };
+    mic.addEventListener('click', onOrbTap);
+    skip.addEventListener('click', onSkip, { once: true });
+  });
+}
+
+/* mark the rung's two words amber on a stumble */
+function stgFlagWords(words){
+  const flag = words.map(w => w.w.toLowerCase());
+  stgWords().forEach(sp => {
+    const clean = sp.textContent.replace(/[.,!?]/g, '').toLowerCase();
+    if (flag.includes(clean)) sp.classList.add('miss');
+  });
+}
+
+async function stageLadder(goal, level){
+  const outcome = ladderOutcome(level);
+  let failAt = { weak: 1, mid: 2, midhigh: 3, strong: 0 }[outcome];
+
+  showScreen('stageScreen');
+  setTimeout(() => $('chatScreen').classList.add('is-hidden'), FF ? 0 : 500);
+  stgBuildWave();
+  const rungs = [...$('stgRungs').children];
+  const R = ACT.ladder;
+  /* R3 echoes R2's phrase with its complex words hidden */
+  const plan = [
+    { key:'stage', phrase: R[0].text, words: R[0].words, gaps: [],
+      coach: ACT_INTRO },
+    { key:'read2', phrase: R[1].text, words: R[1].words, gaps: [],
+      coach: T('stg_r2') },
+    { key:'echo',  phrase: R[1].text, words: R[1].words,
+      gaps: R[1].words.map(w => w.w), coach: T('stg_r3') },
+  ];
+
+  for (let i = 0; i < plan.length; i++){
+    const rung = plan[i];
+    reach(rung.key);
+    rungs.forEach((d, k) => { d.classList.toggle('on', k === i); });
+    $('stgSay').textContent = rung.coach;
+    stgRenderPhrase(rung.phrase, rung.gaps);
+    $('stgLabel').textContent = rung.gaps.length ? T('stg_label_echo') : T('stg_label_read');
+
+    /* echo rung: Sarah "says it" before the mic unlocks */
+    if (rung.gaps.length){
+      $('stgSpeaker').hidden = false;
+      $('stgMicRow').classList.add('gone');
+      await wait(FF ? 0 : 2400);
+      $('stgSpeaker').hidden = true;
+      /* stall hint — if they don't start in ~4s, the gaps peek */
+      clearTimeout(stgHintT);
+      stgHintT = setTimeout(() => {
+        $('stgText').querySelectorAll('.gap').forEach(g => g.classList.add('hinted', 'peek'));
+      }, 4000);
+    }
+
+    let turn = 'spoke';
+    if (FF){
+      stgWords().forEach(w => w.classList.add('said'));
+    } else {
+      turn = await stageTurn();
+    }
+    if (turn === 'skipped'){ failAt = i + 1; }   /* hint rule: bail = weak here */
+
+    if (failAt === i + 1){
+      /* honesty rule: the practice pair comes from THIS rung */
+      PRON_WORDS = rung.words;
+      HS_PASSAGE = rung.phrase;
+      stgFlagWords(rung.words);
+      $('stgSay').textContent = T('stg_fail');
+      JUICE.setAmbient('idle');
+      await wait(FF ? 0 : 1900);
+      break;
+    }
+
+    /* pass beat */
+    rungs[i].classList.remove('on');
+    rungs[i].classList.add('done');
+    JUICE.setAmbient('reward');
+    if (i === 0){
+      $('stgSay').textContent = T('stg_pass1');
+    } else if (i === 1){
+      JUICE.bokeh(10);
+      $('stgSay').textContent = T('stg_pass2');
+    } else {
+      JUICE.bokeh(22);
+      JUICE.dropRain(['⭐','✨','🌟'], 10);
+      $('stgSay').textContent = T('stg_strong');
+    }
+    await wait(FF ? 0 : (i === 2 ? 2100 : 1400));
+  }
+
+  hideScreen('stageScreen');
+  await wait(FF ? 0 : 550);
+  return failAt === 0 ? 'strong' : { 1:'weak', 2:'mid', 3:'midhigh' }[failAt];
+}
+
+/* ============================================================
    TAKEOVER SEQUENCES
    ============================================================ */
 function showScreen(id){
@@ -910,6 +1121,12 @@ const LEVEL_METER = {
   beginner:     { name:'A2', score:32, tgt:'Upper intermediate', tgtScore:68 },
   intermediate: { name:'B1', score:45, tgt:'Advanced',           tgtScore:82 },
   advanced:     { name:'B2', score:58, tgt:'Proficient',         tgtScore:93 },
+};
+/* a clean ladder run starts a band higher — the placement is earned */
+const STRONG_METER = {
+  beginner:     { name:'B1', score:50, tgt:'Advanced',   tgtScore:82 },
+  intermediate: { name:'B2', score:60, tgt:'Proficient', tgtScore:90 },
+  advanced:     { name:'C1', score:70, tgt:'Proficient', tgtScore:95 },
 };
 
 function buildMeter(){
@@ -1030,13 +1247,17 @@ function hsPracticeWord(idx){
   });
 }
 
-async function hintSequence(level){
-  const cfg = LEVEL_METER[level] || LEVEL_METER.beginner;
+async function hintSequence(level, outcome = 'weak'){
+  /* meter position reflects how far up the ladder they got */
+  const base = LEVEL_METER[level] || LEVEL_METER.beginner;
+  const cfg = outcome === 'strong'
+    ? (STRONG_METER[level] || STRONG_METER.beginner)
+    : { ...base, score: base.score + ({ mid: 8, midhigh: 12 }[outcome] || 0) };
   buildMeter();
   $('hsPct').textContent = '0%';
   $('hsBub').style.top = '95.5%';
   /* localize the static hint-screen strings */
-  $('hsSay').textContent = T('hs_say1');
+  $('hsSay').textContent = outcome === 'strong' ? T('hs_say_strong') : T('hs_say1');
   $('hsHead').innerHTML = T('hs_title');
   $('hsNext').textContent = T('continue');
   document.querySelector('#hsErrorsView .hs-fq').innerHTML = T('fix_title');
@@ -1065,6 +1286,13 @@ async function hintSequence(level){
   const next = $('hsNext');
   next.style.visibility = 'visible';
   if (!FF) await new Promise(r => next.addEventListener('click', r, { once: true }));
+
+  /* a clean ladder run has nothing to fix — honesty rule */
+  if (outcome === 'strong'){
+    hideScreen('hintScreen');
+    await wait(550);
+    return;
+  }
 
   /* errors view */
   reach('fix');
@@ -1460,40 +1688,29 @@ async function flow(){
   await sarah(T(`ack_${level}`), { typingMs: 1100 });
   setProgress(88, T('lbl_last_step'));
 
-  /* ---------- 9.1 · reading test, passage from the goal ---------- */
-  reach('reading');
-  await sarah(ACT_INTRO);
-  await sticker('question');
-  const card = readAloudCard();
-  $('micTip').textContent = T('tap_speak');
-  bottomBar.classList.add('gone');
-  if (FF){
-    card.querySelector('.said').textContent = PASSAGE[0] + PASSAGE[1];
-    card.querySelector('.rest').textContent = '';
-  } else {
-    await readingInteraction(card);
-  }
-  card.classList.add('done');
-  await showToast(T('toast_title'), T('toast_sub'), FF ? 0 : 2200);
-  setProgress(94, '94% completed');
-
-  /* ---------- 9.2 · award + report ---------- */
+  /* ---------- 9.1 · award, then the chat ENDS ---------- */
   reach('award');
   await sarah(T('award_msg'), { typingMs: 1100 });
   const award = el(`<div class="award"><img src="assets/award-trophy.png" alt="Google Play’s Best AI App 2023"></div>`);
   chatStream.appendChild(award);
   scrollToEnd();
   await wait(900);
-  setProgress(98, '98% completed');
-  await sarah(T('report_q'));
+  setProgress(96, '96% completed');
+
+  /* the handoff — the last thing the chat ever does */
+  await sarah(T('stage_handoff'));
   setProgress(100, '100% completed');
-  const cta = el(`<button class="btn-report">${T('report_cta')}</button>`);
+  bottomBar.classList.add('gone');
+  const cta = el(`<button class="btn-report">${T('stage_cta')}</button>`);
   chatStream.appendChild(cta);
   scrollToEnd();
   if (!FF) await new Promise(r => cta.addEventListener('click', r, { once: true }));
 
+  /* ---------- 9.2 · the speaking stage (the ladder) ---------- */
+  const outcome = await stageLadder(goal, level);
+
   /* ---------- 9.3 – 9.7 · takeovers ---------- */
-  await hintSequence(level);
+  await hintSequence(level, outcome);
   await paywallSequence(goal === 'exam' && exam === 'ielts' ? 'ielts' : goal);
   await giftSequence();
   await offerSequence();
