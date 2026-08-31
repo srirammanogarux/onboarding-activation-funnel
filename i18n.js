@@ -63,7 +63,14 @@ const STR = {
     ack_goal_school: "Perfect. Let’s get you speaking up with confidence at school.",
     ack_goal_travel: "Nice! Let’s get you comfortable anywhere you land.",
     /* ---- speaking stage (the ladder) ---- */
-    stage_handoff: "One last thing before your plan — I want to hear you. Ready to say something out loud?",
+    /* ---- conviction widgets + plan-build ---- */
+    proof_lead: "You're in good company, by the way.",
+    goal_proof_lead: "Good choice —",
+    recap_lead: "Here's what I've got so far:",
+    pb_coach: "Give me a second — I'm putting yours together.",
+    pb_title: "Building<br>your plan",
+    pb_cta: "Let's calibrate it",
+    stage_handoff:  "One last thing before your plan — I want to hear you. Ready to say something out loud?",
     stage_cta: "I'm ready",
     stg_label_read: "SAY IT OUT LOUD",
     stg_label_echo: "LISTEN, THEN SAY IT BACK",
@@ -74,7 +81,7 @@ const STR = {
     stg_strong: "Honestly? Nothing to fix. Let's see where that puts you.",
     stg_fail: "Almost. Two words tripped you — let's fix them together.",
     hs_say_strong: "You cleared every rung without a wobble. Here is where that puts you.",
-    intro1: "Hey! I’m Sarah. I’m here to help you practice and improve your English through friendly conversations.",
+    intro1: "Hey! I’m Sarah. I’m here to help you speak English with confidence — in a friendly, relaxed way.",
     intro2: "Together, we’ll work on your speaking skills in a comfortable, relaxed way.",
     lang_q: "So, what’s your native language? This helps me support you better.",
     other_langs: "Other languages",
@@ -157,7 +164,7 @@ const STR = {
      Machine-drafted: needs native-speaker review before any test.
      Anything missing falls back to English via T().                 */
   id: {
-    intro1: "Hai! Aku Sarah. Aku di sini untuk membantumu berlatih dan memperbaiki bahasa Inggrismu lewat obrolan santai.",
+    intro1: "Hai! Aku Sarah. Aku di sini untuk membantumu bicara bahasa Inggris dengan percaya diri — santai saja.",
     intro2: "Bersama-sama, kita akan melatih kemampuan bicaramu dengan cara yang nyaman dan tanpa tekanan.",
     lang_q: "Jadi, apa bahasa ibumu? Ini membantuku mendukungmu lebih baik.",
     other_langs: "Bahasa lainnya",

@@ -2934,3 +2934,164 @@ body{
 .stg-card .rc-text .gap{color:transparent;}
 .stg-card .rc-text .gap.peek{color:var(--text-low);}
 .stg-card .rc-text .gap.said{color:var(--read-said);border-color:transparent;}
+
+/* ============================================================
+   CONVICTION — inline proof cards, recap chips, plan-build
+   ============================================================ */
+
+/* proof card: count-up stat + stars, Sarah-sent */
+.proof-card{
+  align-self:flex-start;
+  width:280px;
+  margin-left:42px;
+  padding:18px 20px;
+  border-radius:var(--r-card);
+  background:var(--bubble-fill);
+  border:1px solid color-mix(in srgb, var(--blue-400) 30%, transparent);
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  animation:msg-in .45s var(--ease-out) both;
+}
+.proof-card b{
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:30px;
+  letter-spacing:-.02em;
+  line-height:34px;
+  color:var(--text-hi);
+  font-variant-numeric:tabular-nums;
+}
+.proof-card span{
+  font-family:var(--font-body);
+  font-size:13.5px;
+  line-height:19px;
+  color:var(--text-low);
+}
+.proof-card .stars{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  margin-top:4px;
+  font-family:var(--font-body);
+  font-size:12.5px;
+  color:var(--progress);
+}
+
+/* recap chips inside a Sarah bubble */
+.recap-chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:10px;
+}
+.recap-chips i{
+  font-style:normal;
+  font-family:var(--font-body);
+  font-size:12.5px;
+  line-height:18px;
+  padding:5px 10px;
+  border-radius:999px;
+  background:color-mix(in srgb, var(--accent) 18%, transparent);
+  border:1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  color:var(--text-mid);
+}
+
+/* ---------- plan-build takeover ---------- */
+.pb-wrap{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  padding:6px 24px 40px;
+}
+.pb-title{
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:44px;
+  line-height:46px;
+  letter-spacing:-.03em;
+  color:var(--text-hi);
+  margin:22px 0 20px;
+}
+.pb-stack{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  min-height:120px;
+}
+.pb-card{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px 16px;
+  border-radius:14px;
+  background:var(--opt-bg);
+  border:1px solid rgba(255,255,255,.07);
+  opacity:0;
+  transform:translateY(18px);
+  transition:opacity .45s var(--ease-out), transform .45s var(--ease-out);
+}
+.pb-card.in{opacity:1;transform:none;}
+.pb-card small{
+  font-family:var(--font-body);
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:.08em;
+  color:var(--text-faint);
+  width:82px;
+  flex-shrink:0;
+}
+.pb-card b{
+  font-family:var(--font-display);
+  font-weight:500;
+  font-size:15.5px;
+  color:var(--text-hi);
+}
+.pb-checks{
+  list-style:none;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  margin-top:26px;
+  padding:0;
+}
+.pb-checks li{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-family:var(--font-body);
+  font-size:14.5px;
+  color:var(--text-low);
+  opacity:0;
+  transform:translateY(10px);
+  transition:opacity .4s var(--ease-out), transform .4s var(--ease-out), color .4s var(--ease-out);
+}
+.pb-checks li.in{opacity:1;transform:none;}
+.pb-checks li.done{color:var(--text-mid);}
+.pb-checks li .tick{
+  width:20px;
+  height:20px;
+  border-radius:999px;
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--track);
+  transition:background .35s var(--ease-out);
+}
+.pb-checks li.done .tick{background:var(--succ-300);}
+.pb-checks li .tick svg{width:11px;height:11px;color:#06301B;opacity:0;transform:scale(.5);transition:opacity .25s, transform .25s var(--ease-out);}
+.pb-checks li.done .tick svg{opacity:1;transform:scale(1);}
+.pb-cta{margin-top:auto;}
+
+/* Sarah flying between surfaces */
+.sarah-fly{
+  position:absolute;
+  z-index:80;
+  border-radius:50%;
+  overflow:hidden;
+  border:1px solid rgba(155,161,231,.5);
+  will-change:transform,width,height;
+  pointer-events:none;
+}
+.sarah-fly img{width:100%;height:100%;object-fit:cover;display:block;}

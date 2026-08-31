@@ -59,7 +59,7 @@ const DP_STEPS = [
   ['exam', 'Which exam'], ['examtype', 'Academic/General'], ['examdate', 'Exam date'], ['band', 'Target band'],
   ['situation', 'Situation'], ['scenarios', 'Scenarios'],
   ['testimonials', 'Testimonials'], ['level', 'Level'], ['award', 'Award'],
-  ['stage', 'R1 · Read'], ['read2', 'R2 · Harder'], ['echo', 'R3 · Echo'],
+  ['planbuild', 'Plan build'], ['stage', 'R1 · Read'], ['read2', 'R2 · Harder'], ['echo', 'R3 · Echo'],
   ['meter', 'Speech meter'], ['fix', 'Fix pronunciation'],
   ['practice', 'Practice'], ['paywall', 'Graph → Paywall'], ['gift', 'Gift'], ['offer', 'Offer paywall'],
 ];
@@ -162,7 +162,8 @@ function el(html){
 /* ---------- chat primitives ---------- */
 /* voice state: typing dots → full text appears → gradient sheen
    sweeps the fill + bubble pulses for the duration of the "voice" */
-async function sarah(text, { typingMs = 650, holdMs = 350, perWord = 130 } = {}){
+async function sarah(text, { typingMs = 650, holdMs = 350, perWord = 130, quick = false } = {}){
+  if (quick){ perWord = 85; typingMs = Math.min(typingMs, 450); holdMs = 220; }
   dimPreviousSarah();
   if (FF || rushing){
     const fast = el(`
@@ -902,6 +903,131 @@ async function showToast(title, sub, holdMs = 2200){
 }
 
 /* ============================================================
+   CONVICTION — Sarah-sent proof cards, the recap bubble, and the
+   plan-build takeover that ends the chat. (Remy: rich cards inline;
+   CRED/Freeletics: answers stack + checklist ticks.)
+   ============================================================ */
+function countUp(elm, to, dur = 1200){
+  const t0 = performance.now();
+  const fmt = (n) => n >= 1000000 ? (n / 1000000).toFixed(1).replace('.0','') + 'Mn+'
+              : n >= 1000 ? Math.round(n / 1000) + 'k+' : String(n);
+  const step = (now) => {
+    const k = Math.min(1, (now - t0) / dur);
+    elm.textContent = fmt(Math.round(to * (1 - Math.pow(1 - k, 3))));
+    if (k < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+/* global stat card — after attribution */
+async function proofCard(){
+  await sarah(T('proof_lead'), { typingMs: 600, quick: true });
+  const card = el(`
+    <div class="proof-card">
+      <b>0</b>
+      <span>${C.PROOF.global.label}</span>
+      <span class="stars">★★★★★ &nbsp;${C.PROOF.global.stars} learner rating</span>
+    </div>`);
+  chatStream.appendChild(card);
+  scrollToEnd();
+  countUp(card.querySelector('b'), C.PROOF.global.n);
+  await wait(1600);
+}
+
+/* one-liner keyed to the goal — right after they pick it */
+async function goalProofCard(goal){
+  const p = C.PROOF.byGoal[goal];
+  if (!p) return;
+  const card = el(`
+    <div class="proof-card">
+      <b>0</b>
+      <span>${p.line}</span>
+    </div>`);
+  chatStream.appendChild(card);
+  scrollToEnd();
+  countUp(card.querySelector('b'), p.n);
+  await wait(1500);
+}
+
+/* Sarah replays their own answers as chips — personalization proof */
+async function recapBubble(chips){
+  dimPreviousSarah();
+  const row = el(`
+    <div class="msg">
+      <div class="dp"><img src="${SARAH}" alt="Sarah"></div>
+      <div class="bubble"><p>${T('recap_lead')}</p>
+        <span class="recap-chips">${chips.filter(Boolean).map(c => `<i>${c}</i>`).join('')}</span>
+      </div>
+    </div>`);
+  chatStream.appendChild(row);
+  scrollToEnd();
+  await wait(FF ? 0 : 1700);
+}
+
+/* Sarah flies between surfaces — the Remy continuity anchor */
+function sarahFly(toEl){
+  if (FF || !toEl) return;
+  const from = [...chatStream.querySelectorAll('.msg .dp img')].pop();
+  if (!from) return;
+  const pr = $('phone').getBoundingClientRect();
+  const fr = from.getBoundingClientRect();
+  const tr = toEl.getBoundingClientRect();
+  const fly = el(`<div class="sarah-fly"><img src="${SARAH}" alt=""></div>`);
+  fly.style.left = (fr.left - pr.left) + 'px';
+  fly.style.top = (fr.top - pr.top) + 'px';
+  fly.style.width = fr.width + 'px';
+  fly.style.height = fr.height + 'px';
+  $('phone').appendChild(fly);
+  toEl.style.opacity = '0';
+  fly.animate([
+    { transform: 'translate(0,0) scale(1)' },
+    { transform: `translate(${tr.left - fr.left}px, ${tr.top - fr.top}px) scale(${tr.width / fr.width})` },
+  ], { duration: 620, easing: 'cubic-bezier(.3,.7,.3,1)', fill: 'forwards' })
+    .onfinish = () => { toEl.style.opacity = ''; fly.remove(); };
+}
+
+/* the chat's exit: their answers assemble into a plan */
+async function planBuildSequence(answers){
+  reach('planbuild');
+  $('pbSay').textContent = T('pb_coach');
+  $('pbTitle').innerHTML = T('pb_title');
+  $('pbCta').textContent = T('pb_cta');
+  const stack = $('pbStack');
+  stack.innerHTML = '';
+  answers.filter(a => a && a[1]).forEach(([k, v]) => {
+    stack.appendChild(el(`<div class="pb-card"><small>${k}</small><b>${v}</b></div>`));
+  });
+  const TICK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+  $('pbChecks').innerHTML = C.PLAN_BUILD.map(t =>
+    `<li><span class="tick">${TICK_SVG}</span>${t}</li>`).join('');
+
+  sarahFly($('pbAvatar').querySelector('img'));
+  showScreen('planBuildScreen');
+  setTimeout(() => $('chatScreen').classList.add('is-hidden'), FF ? 0 : 500);
+  JUICE.setAmbient('reward');
+
+  /* answers slide into the stack, then the checklist ticks */
+  const cards = [...stack.children];
+  for (let i = 0; i < cards.length; i++){
+    await wait(FF ? 0 : 240);
+    cards[i].classList.add('in');
+  }
+  const checks = [...$('pbChecks').children];
+  for (const li of checks){
+    await wait(FF ? 0 : 420);
+    li.classList.add('in');
+    await wait(FF ? 0 : 520);
+    li.classList.add('done');
+  }
+  JUICE.bokeh(10);
+  const cta = $('pbCta');
+  cta.style.visibility = 'visible';
+  if (!FF) await new Promise(r => cta.addEventListener('click', r, { once: true }));
+  hideScreen('planBuildScreen');
+  await wait(FF ? 0 : 500);
+}
+
+/* ============================================================
    SPEAKING STAGE — the ladder. The chat ends before this screen.
    R1 read a simple affirmation → R2 read one with harder words →
    R3 echo: Sarah "says it" first, the user repeats it with the two
@@ -1024,6 +1150,7 @@ async function stageLadder(goal, level){
   showScreen('stageScreen');
   setTimeout(() => $('chatScreen').classList.add('is-hidden'), FF ? 0 : 500);
   stgBuildWave();
+  JUICE.setAmbient('idle');
   const rungs = [...$('stgRungs').children];
   const R = ACT.ladder;
   /* R3 echoes R2's phrase with its complex words hidden */
@@ -1491,7 +1618,6 @@ async function flow(){
 
   /* ---------- intro ---------- */
   await sarah(T('intro1'), { typingMs: 1100 });
-  await sarah(T('intro2'), { typingMs: 1200 });
   await sticker('scooter');
   await wait(400);
 
@@ -1553,6 +1679,7 @@ async function flow(){
     { value: 'youtube',   label: 'Youtube',               icon: ICONS.youtube },
   ], { wide: true, chipIcons: true });
   await sarah(T('glad'), { typingMs: 700 });
+  await proofCard();                      /* conviction: you're in good company */
   await wait(200);
 
   /* ---------- 4 · age + gender (data capture only) ---------- */
@@ -1639,6 +1766,8 @@ async function flow(){
     setProgress(61, '61% completed');
   }
 
+  await goalProofCard(goal);             /* conviction: keyed to their goal */
+
   /* ---------- 6 · situation (profile only, no fork) ---------- */
   reach('situation');
   await sarah(T('situation_q'));
@@ -1654,24 +1783,31 @@ async function flow(){
      are weakest at is asking them to do the assessment that stage 9
      does properly, objectively, a minute later.                      */
   const sc = C.scenarioSet(goal, situation);
+  let picked = [];
   if (sc){
     reach('scenarios');
     await sarah(sc.prompt);
     setProgress(76, '76% completed');
     const labels = sc.items.map(i => i.label);
-    await multiSelect(labels, { forced: [labels[0], labels[1]],
+    picked = await multiSelect(labels, { forced: [labels[0], labels[1]],
                                 fx: (C.GOAL_FX[goal] || {}).rain });
-    await sarah(T('scenarios_ack'), { typingMs: 900 });
+    await sarah(T('scenarios_ack'), { typingMs: 900, quick: true });
+    /* their own words, replayed — personalization proof for free */
+    await recapBubble([
+      goalLabel,
+      exam === 'ielts' && band ? `IELTS · Band ${band.toFixed(1)}` : (exam ? exam.toUpperCase() : null),
+      picked[0], picked.length > 1 ? `+${picked.length - 1} more` : null,
+    ]);
   }
 
   /* ---------- 7b · social proof (text carousel) + notifications ---------- */
   reach('testimonials');
   setProgress(80, T('lbl_know_you'));
-  await sarah(T('testi_lead'));
+  await sarah(T('testi_lead'), { quick: true });
   await testimonialCarousel();
-  await sarah(T('testi_follow'));
+  await sarah(T('testi_follow'), { quick: true });
   await sarah(T('notif_ask'));
-  await sarah(T('notif_ok'), { typingMs: 800 });
+  await sarah(T('notif_ok'), { typingMs: 800, quick: true });
   setProgress(84, '84% completed');
 
   /* ---------- 8 · level ---------- */
@@ -1706,7 +1842,16 @@ async function flow(){
   scrollToEnd();
   if (!FF) await new Promise(r => cta.addEventListener('click', r, { once: true }));
 
-  /* ---------- 9.2 · the speaking stage (the ladder) ---------- */
+  /* ---------- 9.2 · plan build — the chat's exit ---------- */
+  await planBuildSequence([
+    ['GOAL',     goalLabel],
+    ['TARGET',   exam === 'ielts' && band ? `Band ${band.toFixed(1)}` : (exam ? exam.toUpperCase() : null)],
+    ['FOCUS',    picked[0] || null],
+    ['LEVEL',    level.charAt(0).toUpperCase() + level.slice(1)],
+    ['LANGUAGE', L.label],
+  ]);
+
+  /* ---------- 9.3 · the speaking stage (the ladder) ---------- */
   const outcome = await stageLadder(goal, level);
 
   /* ---------- 9.3 – 9.7 · takeovers ---------- */

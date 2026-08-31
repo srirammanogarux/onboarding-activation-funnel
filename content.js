@@ -381,6 +381,27 @@ const ACTIVATION = {
   },
 };
 
+/* ---------- conviction: proof stats ----------
+   One global stat card (after attribution) + a one-liner keyed to
+   the goal (right after they pick it). Numbers are illustrative. */
+const PROOF = {
+  global: { n: 8000000, label: 'learners practice with Sarah', stars: '4.9' },
+  byGoal: {
+    exam:     { n: 214000, line: 'passed their English exam with us last year' },
+    career:   { n: 380000, line: 'use Stimuler to get ahead at work' },
+    personal: { n: 520000, line: 'found their everyday confidence here' },
+    school:   { n: 260000, line: 'students speak up in class thanks to Sarah' },
+    travel:   { n: 190000, line: 'travellers ordered, bargained and got home fine' },
+  },
+};
+
+/* plan-build takeover: the checklist that assembles their plan */
+const PLAN_BUILD = [
+  'Scenario library matched',
+  'Difficulty calibrated to your level',
+  'Daily pace set',
+];
+
 /* ---------- 7 · paywall headline, keyed to GOAL ---------- */
 const PW_TITLE = {
   exam:     '<em>Ace your exam</em><br>with English practice',
@@ -463,7 +484,7 @@ function scenarioSet(goal, situation){
 
 window.CONTENT = {
   LANGUAGES, APPLANG_DESC, GOALS, EXAMS, IELTS_TYPES, examDateOptions,
-  bandNote, GOAL_FX, SCENARIOS, scenarioSet, WORKMODE, MODE_LABEL, branches,
+  bandNote, GOAL_FX, PROOF, PLAN_BUILD, SCENARIOS, scenarioSet, WORKMODE, MODE_LABEL, branches,
   SITUATIONS, ACTIVATION, PW_TITLE,
   PRICING, COHORTS,
 };

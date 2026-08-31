@@ -101,6 +101,7 @@ All state is in the URL:
 - `sit` — situation; refines career and personal growth via work mode
 - `lang` — `en` plus `id · es · pt · hi · vi · ar · fr`
 - `lvl` — `beginner · intermediate · advanced`
+- `perf` — ladder outcome override: `weak · mid · midhigh · strong` (defaults by level)
 
 ## What's new versus the India prototype
 
