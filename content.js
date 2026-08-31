@@ -39,6 +39,17 @@ const APPLANG_DESC = {
   fr: 'Vous apprendrez dans votre langue.',
 };
 
+/* ---------- juice: emoji per goal ----------
+   `e` pops from the tapped option; `rain` is the themed drop that
+   fires on the big selections for that goal. */
+const GOAL_FX = {
+  exam:     { e: '📝', rain: ['📝','🎯','🏅','✨'] },
+  career:   { e: '💼', rain: ['💼','📈','🤝','✨'] },
+  personal: { e: '🌱', rain: ['🌱','💬','☕','✨'] },
+  school:   { e: '🎓', rain: ['🎓','📚','✏️','✨'] },
+  travel:   { e: '✈️', rain: ['✈️','🌍','🧳','✨'] },
+};
+
 /* ---------- 2 · goals (Activation v3 framing) ---------- */
 const GOALS = [
   { value: 'exam',     label: 'Prepare for an English exam', branches: true },
@@ -415,7 +426,7 @@ function scenarioSet(goal, situation){
 
 window.CONTENT = {
   LANGUAGES, APPLANG_DESC, GOALS, EXAMS, IELTS_TYPES, examDateOptions,
-  bandNote, SCENARIOS, scenarioSet, WORKMODE, MODE_LABEL, branches,
+  bandNote, GOAL_FX, SCENARIOS, scenarioSet, WORKMODE, MODE_LABEL, branches,
   SITUATIONS, ACTIVATION, PW_TITLE,
   PRICING, COHORTS,
 };

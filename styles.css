@@ -2793,3 +2793,61 @@ body{
 .dp-branches button.active i{background:rgba(0,0,0,.28);}
 .dp-branches button.skipped{opacity:.5;}
 .dp-cap .dp-sub{font-weight:400;opacity:.6;}
+
+/* ============================================================
+   JUICE LAYER — particles, progress tokens, ambient states
+   ============================================================ */
+
+/* particle layer above screens, below the review panel */
+.fx-layer{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:60;
+  overflow:hidden;
+}
+.fx-token{position:absolute;font-size:20px;line-height:1;will-change:transform;}
+.fx-p{position:absolute;line-height:1;will-change:transform;opacity:0;}
+.fx-bokeh{
+  position:absolute;
+  border-radius:50%;
+  background:radial-gradient(circle at 35% 35%, #F4D9A6, #D9A24A 60%, transparent 75%);
+  filter:blur(1px);
+  opacity:0;
+  will-change:transform;
+}
+
+/* ---------- ambient state machine ----------
+   Two blurred blobs breathe under every screen. State drives palette
+   and energy; gold appears on reward only, honoring the color rule. */
+.ambient{overflow:hidden;}
+.amb-blob{
+  position:absolute;
+  width:340px;
+  height:300px;
+  border-radius:50%;
+  filter:blur(70px);
+  opacity:0;
+  transition:opacity 1s var(--ease-out), background 1s var(--ease-out);
+  will-change:transform,opacity;
+}
+.amb-a{top:-120px;left:-60px;background:rgba(108,99,255,.20);animation:amb-drift-a 9s ease-in-out infinite alternate;}
+.amb-b{top:-80px;right:-80px;background:rgba(59,54,140,.18);animation:amb-drift-b 11s ease-in-out infinite alternate;}
+@keyframes amb-drift-a{
+  from{transform:translate(0,0) scale(1);}
+  to{transform:translate(60px,40px) scale(1.15);}
+}
+@keyframes amb-drift-b{
+  from{transform:translate(0,0) scale(1.1);}
+  to{transform:translate(-50px,30px) scale(.95);}
+}
+.ambient[data-state="thinking"] .amb-blob{opacity:.9;}
+.ambient[data-state="listening"] .amb-a{opacity:.8;animation-duration:3.5s;}
+.ambient[data-state="listening"] .amb-b{opacity:.6;animation-duration:4.5s;}
+.ambient[data-state="reward"] .amb-a{opacity:1;background:rgba(217,162,74,.26);}
+.ambient[data-state="reward"] .amb-b{opacity:.9;background:rgba(231,180,85,.18);}
+
+@media (prefers-reduced-motion: reduce){
+  .amb-blob{animation:none;opacity:0 !important;}
+  .fx-layer{display:none;}
+}

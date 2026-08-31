@@ -177,7 +177,9 @@ async function sarah(text, { typingMs = 650, holdMs = 350, perWord = 130 } = {})
     </div>`);
   chatStream.appendChild(row);
   scrollToEnd();
+  JUICE.setAmbient('thinking');
   await wait(typingMs);
+  JUICE.setAmbient('idle');
   const bubble = row.querySelector('.bubble');
   bubble.classList.remove('typing');
   bubble.innerHTML = `<p>${text}</p>`;
@@ -270,6 +272,12 @@ function options(items, { head = null, link = null, linkValue = null, wide = fal
           return;
         }
         btn.classList.add('selected');
+        /* juice: the answer pays back — pop at the tap, token into the bar,
+           and a themed rain when the item carries one (the big picks) */
+        const em = item.e || null;
+        if (em) JUICE.burst(btn, [em, '✨']);
+        JUICE.feedProgress(btn, em || '✓');
+        if (item.fx) JUICE.dropRain(item.fx);
         setTimeout(() => finish(item), 180);
       });
       list.appendChild(btn);
@@ -304,7 +312,7 @@ const flag = (name) => `<img src="assets/flag-${name}.svg" alt="">`;
 */
 const TICK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
 
-function multiSelect(items, { head = 'Select all that apply', cta = 'Continue', forced = null } = {}){
+function multiSelect(items, { head = 'Select all that apply', cta = 'Continue', forced = null, fx = null } = {}){
   if (FF){
     const picked = forced && forced.length ? forced : [items[0]];
     userChip(picked.length > 1 ? `${picked[0]} +${picked.length - 1}` : picked[0]);
@@ -339,6 +347,7 @@ function multiSelect(items, { head = 'Select all that apply', cta = 'Continue', 
       btn.addEventListener('click', () => {
         if (chosen.has(label)) chosen.delete(label); else chosen.add(label);
         btn.classList.toggle('on', chosen.has(label));
+        if (chosen.has(label)) JUICE.burst(btn, ['✅','✨']);
         sync();
       });
       list.appendChild(btn);
@@ -346,6 +355,8 @@ function multiSelect(items, { head = 'Select all that apply', cta = 'Continue', 
 
     cta_.addEventListener('click', () => {
       if (!chosen.size) return;                 /* minimum one */
+      JUICE.feedProgress(cta_, '✅');
+      if (fx) JUICE.dropRain(fx);
       disarmSkip();
       wrap.remove();
       const picked = items.filter(i => chosen.has(i));   /* source order, not tap order */
@@ -392,7 +403,11 @@ function bandSlider({ start = 7 } = {}){
     };
     input.addEventListener('input', paint);
     const finish = (v) => { disarmSkip(); wrap.remove(); if (v !== null) userChip(`Band ${v.toFixed(1)}`); resolve(v); };
-    wrap.querySelector('.btn-continue').addEventListener('click', () => finish(parseFloat(input.value)));
+    wrap.querySelector('.btn-continue').addEventListener('click', () => {
+      JUICE.feedProgress(wrap.querySelector('.btn-continue'), '🎯');
+      JUICE.dropRain(['🎯','🏅','✨'], 10);
+      finish(parseFloat(input.value));
+    });
     wrap.querySelector('.skip-link').addEventListener('click', () => finish(null));
     paint();
     chatStream.appendChild(wrap);
@@ -816,6 +831,7 @@ function readingInteraction(card){
 
     const onOrbTap = () => {
       if (!convMic.classList.contains('idle')) return;
+      JUICE.setAmbient('listening');
       setProgress(84, '84% completed');
       $('micTip').classList.add('hidden');
       convMic.className = 'convmic expanded';
@@ -841,6 +857,7 @@ function readingInteraction(card){
         card.querySelector('.said').textContent = PASSAGE[0] + PASSAGE[1];
         card.querySelector('.rest').textContent = '';
         convMic.className = 'convmic submitting';
+        JUICE.setAmbient('reward');
         await wait(700);
         convMic.classList.add('gone');
         setTimeout(() => micArea.classList.add('gone'), 350);
@@ -863,6 +880,7 @@ async function showToast(title, sub, holdMs = 2200){
       </div>
     </div>`);
   $('chatScreen').appendChild(t);
+  JUICE.bokeh(18);
   await wait(holdMs);
   t.classList.add('leaving');
   await wait(400);
@@ -1256,7 +1274,7 @@ async function flow(){
   const lang = await options([
     ...C.LANGUAGES.map(l => ({
       value: l.value, label: l.label, icon: flag(l.flag),
-      defaultOnSkip: l.value === 'id',
+      defaultOnSkip: l.value === 'id', e: '🌐',
     })),
     { value: 'more', label: T('other_langs'), icon: '🌎', inert: true },
   ], { chipIcons: true, forced: DBG.lang === 'en' ? 'id' : DBG.lang });
@@ -1340,6 +1358,8 @@ async function flow(){
     C.GOALS.map(g => ({
       value: g.value, label: g.label,
       defaultOnSkip: g.value === 'career',
+      e: (C.GOAL_FX[g.value] || {}).e,
+      fx: (C.GOAL_FX[g.value] || {}).rain,     /* themed drop on the big pick */
     })),
     { forced: DBG.goal });
   setActivation(goal);
@@ -1411,7 +1431,8 @@ async function flow(){
     await sarah(sc.prompt);
     setProgress(76, '76% completed');
     const labels = sc.items.map(i => i.label);
-    await multiSelect(labels, { forced: [labels[0], labels[1]] });
+    await multiSelect(labels, { forced: [labels[0], labels[1]],
+                                fx: (C.GOAL_FX[goal] || {}).rain });
     await sarah(T('scenarios_ack'), { typingMs: 900 });
   }
 
@@ -1430,11 +1451,11 @@ async function flow(){
   await sarah(T('level_q'));
   const level = await options([
     { value: 'beginner',     label: 'Beginner',     icon: ICONS.seedling,
-      desc: T('lvl_beg_d'), defaultOnSkip: true },
+      desc: T('lvl_beg_d'), defaultOnSkip: true, e: '🌱', fx: ['🌱','⭐','✨'] },
     { value: 'intermediate', label: 'Intermediate', icon: ICONS.herb,
-      desc: T('lvl_int_d') },
+      desc: T('lvl_int_d'), e: '🌿', fx: ['🌿','⭐','✨'] },
     { value: 'advanced',     label: 'Advanced',     icon: ICONS.brain,
-      desc: T('lvl_adv_d') },
+      desc: T('lvl_adv_d'), e: '🧠', fx: ['🧠','⭐','✨'] },
   ], { wide: true, chipIcons: true, forced: DBG.lvl });
   await sarah(T(`ack_${level}`), { typingMs: 1100 });
   setProgress(88, T('lbl_last_step'));
