@@ -184,7 +184,8 @@ body{
   align-items:center;
   justify-content:space-between;
   padding:20px 24px 10px;
-  background:linear-gradient(98deg, var(--bg) 27%, var(--bg-raise) 101%);
+  /* transparent too: one continuous field from the notch to the chat */
+  background:none;
 }
 .statusbar img{display:block;}
 .progress-block{
@@ -192,7 +193,10 @@ body{
   flex-direction:column;
   gap:12px;
   padding:12px 24px 20px;
-  background:linear-gradient(94deg, var(--bg) 16%, var(--bg-raise) 106%);
+  /* the scrim lives on .topbar so it spans notch + bar as one field;
+     a band starting here is exactly what made the bar look cut off. */
+  position:relative; z-index:1;
+  background:none;
 }
 .progress-label{
   font-family:var(--font-body);
@@ -3377,9 +3381,9 @@ body{
 .award-card{
   position:relative;
   align-self:flex-start;
-  margin-left:42px;
-  width:322px;
-  padding:16px 18px;
+  margin-left:30px;
+  width:356px;
+  padding:18px 18px 18px 106px;
   border-radius:20px;
   overflow:hidden;
   background:linear-gradient(135deg,#3A2470,#1E1338);
@@ -3389,29 +3393,30 @@ body{
 }
 .award-card.in{opacity:1;transform:translateY(0);}
 .aw-trophy{
-  position:absolute;left:-15px;top:-10px;
-  width:95px;height:95px;object-fit:contain;
+  position:absolute;left:16px;top:50%;margin-top:-39px;
+  width:78px;height:78px;object-fit:contain;
   transform:scale(.86) rotate(-6deg);opacity:0;
   transition:transform .55s var(--ease-spring) .1s, opacity .35s var(--ease-out) .1s;
 }
 .award-card.in .aw-trophy{transform:scale(1) rotate(0);opacity:1;}
-.aw-text{position:relative;display:flex;flex-direction:column;gap:3px;padding-left:80px;}
+.aw-text{position:relative;display:flex;flex-direction:column;gap:3px;}
 .aw-kicker{font-family:var(--font-display);font-weight:700;font-size:10.5px;letter-spacing:.15em;color:#C4A9FF;}
 .aw-title{font-family:var(--font-display);font-weight:700;font-size:21px;line-height:25px;letter-spacing:-.015em;color:#fff;white-space:nowrap;}
-.aw-line{font-family:var(--font-body);font-size:12.5px;line-height:17px;color:var(--text-low);white-space:nowrap;}
+.aw-line{font-family:var(--font-body);font-size:11.5px;line-height:17px;letter-spacing:-.005em;color:var(--text-low);white-space:nowrap;}
 
 /* ============================================================
    INTERACTION v3 — the answer becomes progress
    ============================================================ */
-.fx-fly{
+.fx-pip{
   position:absolute;z-index:40;pointer-events:none;
-  width:28px;height:28px;
+  width:22px;height:22px;
   display:flex;align-items:center;justify-content:center;
-  font-size:22px;line-height:1;
-  filter:drop-shadow(0 4px 14px rgba(108,99,255,.55));
+  font-size:18px;line-height:1;
+  will-change:transform,opacity;
+  filter:drop-shadow(0 3px 10px rgba(108,99,255,.5));
 }
+.fx-pip img{width:20px;height:15px;border-radius:2px;display:block;}
 /* the chip keeps its shape but the icon has gone to the bar */
-.chip-ico.spent{opacity:0;transform:scale(.6);transition:opacity .2s var(--ease-out), transform .2s var(--ease-out);}
 
 /* the bar answers when something lands in it */
 .progress-track{position:relative;}
@@ -3426,13 +3431,13 @@ body{
 /* the header is the light source */
 .head-bloom{
   position:absolute;left:0;right:0;top:-40px;height:190px;
-  pointer-events:none;z-index:0;opacity:.55;
+  pointer-events:none;z-index:0;opacity:.3;
   background:radial-gradient(58% 70% at 24% 34%, rgba(108,99,255,.42), transparent 70%),
              radial-gradient(46% 62% at 78% 18%, rgba(217,162,74,.20), transparent 72%);
   transition:opacity .6s var(--ease-out);
 }
 .head-bloom.pulse{animation:headPulse .9s var(--ease-out);}
-@keyframes headPulse{0%{opacity:.55;}28%{opacity:1;}100%{opacity:.55;}}
+@keyframes headPulse{0%{opacity:.3;}28%{opacity:.85;}100%{opacity:.3;}}
 
 /* multi-select rows carry an icon now */
 .ms-opt{gap:14px;}
@@ -3463,13 +3468,13 @@ body{
 .amb-a{
   width:360px;height:360px;left:-90px;top:-40px;
   background:radial-gradient(circle, rgba(var(--aur-1)/.42), rgba(var(--aur-1)/0) 70%);
-  opacity:calc(.62 * var(--aur-boost));
+  opacity:calc(.34 * var(--aur-boost));
   animation:aurA 13s ease-in-out infinite;
 }
 .amb-b{
   width:320px;height:320px;right:-80px;top:120px;
   background:radial-gradient(circle, rgba(var(--aur-2)/.34), rgba(var(--aur-2)/0) 70%);
-  opacity:calc(.5 * var(--aur-boost));
+  opacity:calc(.26 * var(--aur-boost));
   animation:aurB 17s ease-in-out infinite;
 }
 @keyframes aurA{
@@ -3484,7 +3489,11 @@ body{
 }
 
 /* --- state machine: idle · thinking · listening · reward --- */
-#phone.amb-thinking{--aur-boost:1.45;}
+#phone.amb-thinking{--aur-boost:1.2;}
+#phone.amb-lit{--aur-boost:2.1;}
+#phone.amb-lit .head-bloom{opacity:.72;}
+#phone .amb-a,#phone .amb-b{transition:opacity .9s var(--ease-out), background 1.4s var(--ease-out);}
+#phone.amb-lit .amb-a,#phone.amb-lit .amb-b{transition:opacity .28s var(--ease-out);}
 #phone.amb-thinking .amb-a{animation-duration:7s;}
 #phone.amb-listening{--aur-1:120 150 255;--aur-2:217 162 74;--aur-boost:1.35;}
 #phone.amb-reward{--aur-1:217 162 74;--aur-2:231 180 85;--aur-boost:1.6;}
@@ -3503,3 +3512,36 @@ body{
   .amb-a,.amb-b{animation:none;}
   .progress-fill{transition:none;}
 }
+
+/* --- social proof, inside her bubble ------------------------ */
+.pf-hi{font-style:normal;font-weight:600;color:var(--blue-300);}
+.pf-stats{
+  display:flex;align-items:center;flex-wrap:wrap;gap:6px 7px;
+  margin-top:12px;padding-top:11px;
+  border-top:1px solid rgba(255,255,255,.10);
+  font-family:var(--font-body);font-size:12.5px;color:var(--text-low);
+}
+/* each stat is one indivisible unit, so a wrap can never orphan its label */
+.pf-item{display:inline-flex;align-items:baseline;gap:4px;white-space:nowrap;}
+.pf-n{
+  font-family:var(--font-display);font-weight:600;font-size:13.5px;
+  color:var(--text-mid);font-variant-numeric:tabular-nums;
+  transition:transform .3s var(--ease-spring);
+}
+.pf-n.gold{color:var(--progress);}
+.pf-n.done{animation:pfPop .38s var(--ease-spring);}
+@keyframes pfPop{0%{transform:scale(1);}45%{transform:scale(1.16);}100%{transform:scale(1);}}
+.pf-star{font-style:normal;color:var(--progress);font-size:12.5px;margin-left:-4px;}
+.pf-dot{width:3px;height:3px;border-radius:50%;background:var(--text-faint);flex:none;}
+.fx-pip svg{width:19px;height:19px;display:block;}
+
+
+/* the notch area gets its own soft veil so the clock stays readable
+   without drawing a line across the aurora */
+.topbar::before{
+  content:'';position:absolute;left:0;right:0;top:0;height:190px;
+  pointer-events:none;z-index:0;
+  background:linear-gradient(180deg,
+    rgba(8,6,14,.40) 0%, rgba(8,6,14,.30) 34%, rgba(8,6,14,.16) 62%, rgba(8,6,14,0) 100%);
+}
+.topbar > .statusbar{position:relative;z-index:1;}

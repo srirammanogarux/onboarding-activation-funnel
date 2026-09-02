@@ -9,7 +9,7 @@
    - All of it is non-blocking and dies under reduced motion.
 
    API:
-   JUICE.fly(el, {emoji})     answer's icon arcs into the progress bar
+   JUICE.pop(el, {emoji})     copies of the icon burst out and feed the bar
    JUICE.bloom()              the bar answers with a gold pulse
    JUICE.confetti(n, mode)    'burst' | 'rain'
    JUICE.fireworks()          three staggered shell bursts
@@ -43,10 +43,11 @@
      vocabulary lifted from conversation-lead-to-first-chat).
      ============================================================ */
   const STAR_PATH = 'M12 2.6l2.8 5.9 6.4.8-4.7 4.4 1.2 6.3L12 17l-5.7 3 1.2-6.3L2.8 9.3l6.4-.8z';
-  /* fly(fromEl, {emoji}) — the whole reward in one move.
-     The icon lifts out of the chip, arcs to the progress bar, and the bar
-     blooms as it lands. Nothing is left behind: the answer becomes progress. */
-  function fly(fromEl, { emoji = '', instant = false } = {}){
+  /* pop(fromEl, {emoji, n}) — the answer sprays copies of its own icon.
+     The original never leaves the button. The copies burst out, arc up,
+     shrink as they travel, and dissolve into the progress bar, which
+     blooms as the last one lands. */
+  function pop(fromEl, { emoji = '', html = '', n = 10, instant = false } = {}){
     const bar = document.querySelector('.progress-track');
     if (!bar || !fromEl || REDUCED || instant){ bloom(); return; }
     const host = document.getElementById('phone');
@@ -54,23 +55,48 @@
     const fr = fromEl.getBoundingClientRect();
     const br = bar.getBoundingClientRect();
 
-    const node = document.createElement('div');
-    node.className = 'fx-fly';
-    node.textContent = emoji;
-    node.style.left = (fr.left - hr.left + fr.width / 2 - 14) + 'px';
-    node.style.top  = (fr.top  - hr.top  + fr.height / 2 - 14) + 'px';
-    host.appendChild(node);
+    const ox = fr.left - hr.left + fr.width / 2;
+    const oy = fr.top  - hr.top  + fr.height / 2;
+    /* they converge on the filled end of the bar, not its middle */
+    const tx = br.left - hr.left + Math.max(28, br.width * 0.12);
+    const ty = br.top  - hr.top  + br.height / 2;
 
-    const dx = (br.left - hr.left + br.width * 0.18) - (fr.left - hr.left + fr.width / 2 - 14);
-    const dy = (br.top  - hr.top  + br.height / 2 - 14) - (fr.top - hr.top + fr.height / 2 - 14);
+    for (let i = 0; i < n; i++){
+      const node = document.createElement('div');
+      node.className = 'fx-pip';
+      if (html) node.innerHTML = html; else node.textContent = emoji;
+      node.style.left = (ox - 11) + 'px';
+      node.style.top  = (oy - 11) + 'px';
+      host.appendChild(node);
 
-    /* anticipation, then travel: lift a little before it commits */
-    node.animate([
-      { transform: 'translate(0,0) scale(1)',              opacity: 1, offset: 0 },
-      { transform: `translate(${dx*.12}px, ${-18}px) scale(1.22)`, opacity: 1, offset: .26 },
-      { transform: `translate(${dx}px, ${dy}px) scale(.42)`, opacity: .9, offset: 1 },
-    ], { duration: 620, easing: 'cubic-bezier(.32,.72,.28,1)', fill: 'forwards' })
-      .onfinish = () => { node.remove(); bloom(); };
+      /* burst outward first, then get pulled to the bar */
+      const ang  = (-Math.PI / 2) + (Math.random() - 0.5) * 2.5;
+      const dist = 34 + Math.random() * 46;
+      const bx = Math.cos(ang) * dist;
+      const by = Math.sin(ang) * dist;
+      const delay = i * 26;
+
+      const anim = node.animate([
+        { transform: 'translate(0,0) scale(.5)', opacity: 0, offset: 0 },
+        { transform: `translate(${bx}px, ${by}px) scale(1.15)`, opacity: 1, offset: .28 },
+        { transform: `translate(${bx * .6}px, ${by * .6 - 10}px) scale(1)`, opacity: 1, offset: .42 },
+        { transform: `translate(${tx - ox}px, ${ty - oy}px) scale(.18)`, opacity: 0, offset: 1 },
+      ], { duration: 900, delay, easing: 'cubic-bezier(.34,.62,.28,1)', fill: 'forwards' });
+
+      anim.onfinish = () => { node.remove(); if (i === n - 1) bloom(); };
+    }
+    /* the room brightens for the moment, then settles back */
+    flare();
+  }
+
+  /* the aurora swells on an answer and decays to idle */
+  let flareT = null;
+  function flare(){
+    const p = phone();
+    if (!p || REDUCED) return;
+    p.classList.add('amb-lit');
+    clearTimeout(flareT);
+    flareT = setTimeout(() => p.classList.remove('amb-lit'), 1500);
   }
 
   /* the bar answers: a gold pulse behind it, and the fill flashes */
@@ -79,6 +105,25 @@
     const glow  = document.querySelector('.head-bloom');
     if (track){ track.classList.remove('bloom'); void track.offsetWidth; track.classList.add('bloom'); }
     if (glow){ glow.classList.remove('pulse'); void glow.offsetWidth; glow.classList.add('pulse'); }
+  }
+
+  /* ============================================================
+     2 · CONFETTI ENGINE — one canvas, lazily built, resized to the
+     phone each time it wakes up. Burst, rain and fireworks share it.
+     ============================================================ */
+  let confC = null, confCtx = null, confParts = [], confRaf = null;
+  const COLS = ['#D9A24A', '#E7B455', '#6C63FF', '#9D96FF', '#F5F4FA', '#32E18D', '#B09CFF'];
+
+  function canvas(){
+    if (!confC){
+      confC = document.createElement('canvas');
+      confC.className = 'fx-canvas';
+      phone().appendChild(confC);
+      confCtx = confC.getContext('2d');
+    }
+    confC.width = phone().clientWidth;
+    confC.height = phone().clientHeight;
+    return confC;
   }
 
   function confetti(n = 60, mode = 'burst', origin = null){
@@ -269,5 +314,5 @@
     return { stop(){ cancelAnimationFrame(raf); svg.remove(); } };
   }
 
-  window.JUICE = { fly, bloom, tint, deepen, confetti, fireworks, bokeh, sweep, setAmbient, wave };
+  window.JUICE = { pop, flare, bloom, tint, deepen, confetti, fireworks, bokeh, sweep, setAmbient, wave };
 })();

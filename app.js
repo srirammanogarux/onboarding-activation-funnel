@@ -253,15 +253,7 @@ function options(items, { head = null, link = null, linkValue = null, wide = fal
     const finish = (item) => {
       disarmSkip();
       wrap.remove();
-      const row = userChip(item.label, item.icon || '');
-      /* the answer becomes progress: its icon leaves the chip for the bar */
-      const ico = row.querySelector('.chip-ico');
-      if (ico && item.e){
-        setTimeout(() => {
-          JUICE.fly(ico, { emoji: item.e, instant: FF });
-          ico.classList.add('spent');
-        }, 220);
-      }
+      userChip(item.label, item.icon || '');
       resolve(item.value);
     };
 
@@ -289,8 +281,15 @@ function options(items, { head = null, link = null, linkValue = null, wide = fal
         /* the icon animates where it stands, then the row collapses into
            the chip and the icon carries on to the bar. One continuous move. */
         const ico = btn.querySelector('.ico');
-        if (ico) ico.classList.add(item.anim || 'oa-bounce');
-        setTimeout(() => finish(item), ico ? 400 : 180);
+        if (ico){
+          ico.classList.add(item.anim || 'oa-bounce');
+          /* the icon stays where it is; copies of it feed the bar */
+          /* whatever the row actually shows is what sprays: flag, glyph, emoji */
+          JUICE.pop(ico, { html: ico.innerHTML, n: 9, instant: FF });
+        } else {
+          JUICE.pop(btn, { emoji: '\u2726', n: 6, instant: FF });
+        }
+        setTimeout(() => finish(item), ico ? 430 : 200);
       });
       list.appendChild(btn);
     });
@@ -374,9 +373,8 @@ function multiSelect(items, { head = 'Select all that apply', cta = 'Continue', 
       wrap.remove();
       const picked = items.filter(i => chosen.has(i));   /* source order, not tap order */
       const first = items.indexOf(picked[0]);
-      const row = userChip(picked.length > 1 ? `${picked[0]} +${picked.length - 1}` : picked[0], icons[first] || '');
-      const ico = row.querySelector('.chip-ico');
-      if (ico) setTimeout(() => { JUICE.fly(ico, { emoji: icons[first] || '🎯', instant: FF }); ico.classList.add('spent'); }, 220);
+      JUICE.pop(cta_, { emoji: icons[first] || '\u2726', n: 9, instant: FF });
+      userChip(picked.length > 1 ? `${picked[0]} +${picked.length - 1}` : picked[0], icons[first] || '');
       resolve(picked);
     });
 
@@ -914,44 +912,40 @@ function countUp(elm, to, dur = 1200){
   requestAnimationFrame(step);
 }
 
-/* the counter widget: one hero metric plus three supporting numbers.
-   Everything runs 0 -> target together, settles, then the hero pops. */
+/* one bubble does all of it: her sentence carries the claim, and the three
+   numbers underneath count up one after another without moving the layout. */
 async function proofCard(){
-  await sarah(T('proof_lead'), { typingMs: 600, quick: true });
   const P = C.PROOF, M = P.metric;
-  const card = el(`
-    <div class="stat-widget">
-      <div class="sw-hero">
-        <b class="sw-num">0${M.unit}</b>
-        <span class="sw-lab">${M.label}</span>
-      </div>
-      <div class="sw-track"><i></i></div>
-      <p class="sw-sub">${M.sub}</p>
-      <div class="sw-row">
-        <div class="sw-cell gold"><b data-to="${P.global.stars}" data-dec="1">0.0</b><span>rating</span></div>
-        <div class="sw-cell"><b data-to="${P.global.n}" data-fmt="big">0</b><span>learners</span></div>
-        <div class="sw-cell"><b data-to="${P.global.countries}" data-suf="+">0</b><span>countries</span></div>
+  dimPreviousSarah();
+  const row = el(`
+    <div class="msg">
+      <div class="dp"><img src="${SARAH}" alt="Sarah"></div>
+      <div class="bubble">
+        <p>You're in the right place. Learners here report feeling
+           <em class="pf-hi">${M.value}${M.unit} more confident</em> speaking within a month.</p>
+        <span class="pf-stats">
+          <span class="pf-item"><b class="pf-n gold" data-to="${P.global.stars}" data-dec="1">0.0</b><i class="pf-star">\u2605</i></span>
+          <i class="pf-dot"></i>
+          <span class="pf-item"><b class="pf-n" data-to="${P.global.ratings}" data-fmt="big">0</b>ratings</span>
+          <i class="pf-dot"></i>
+          <span class="pf-item"><b class="pf-n" data-to="${P.global.countries}" data-suf="+">0</b>countries</span>
+        </span>
       </div>
     </div>`);
-  chatStream.appendChild(card);
+  chatStream.appendChild(row);
   scrollToEnd();
-  if (FF){
-    card.querySelector('.sw-num').textContent = M.value + M.unit;
-    card.querySelector('.sw-track i').style.width = M.value + '%';
-    card.querySelectorAll('.sw-cell b').forEach(b => b.textContent = fmtStat(b));
-    return;
+
+  const cells = [...row.querySelectorAll('.pf-n')];
+  if (FF){ cells.forEach(b => b.textContent = fmtStat(b)); return; }
+
+  /* they land one at a time, left to right, each with a small pop */
+  await wait(520);
+  for (const b of cells){
+    await runFor(620, k => { b.textContent = fmtStat(b, 1 - Math.pow(1 - k, 3)); });
+    b.classList.add('done');
+    await wait(150);
   }
-  /* one clock drives every number so they land together */
-  const cells = [...card.querySelectorAll('.sw-cell b')];
-  const num = card.querySelector('.sw-num'), fill = card.querySelector('.sw-track i');
-  await runFor(950, k => {
-    const e = 1 - Math.pow(1 - k, 3);
-    num.textContent = Math.round(M.value * e) + M.unit;
-    fill.style.width = (M.value * e) + '%';
-    cells.forEach(b => b.textContent = fmtStat(b, e));
-  });
-  card.classList.add('settled');
-  await wait(900);
+  await wait(700);
 }
 
 /* format one stat cell at progress e (1 = final) */

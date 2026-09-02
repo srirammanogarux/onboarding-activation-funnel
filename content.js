@@ -398,10 +398,9 @@ const ACTIVATION = {
    the goal (right after they pick it). Numbers are illustrative. */
 const PROOF = {
   /* the hero metric the counter widget animates to, then the supporting three */
-  metric: { value: 30, unit: '%', label: 'more confident',
-            sub: 'when speaking, within a month' },
-  global: { n: 8000000, label: 'learners practice with Sarah', stars: '4.9',
-            countries: 190 },
+  metric: { value: 32, unit: '%' },
+  /* the three that count up under her sentence, in this order */
+  global: { stars: 4.9, ratings: 12000000, countries: 190 },
   byGoal: {
     exam:     { n: 214000, line: 'passed their English exam with us last year' },
     career:   { n: 380000, line: 'use Stimuler to get ahead at work' },
@@ -460,7 +459,7 @@ const TESTIMONIALS = {
 
 /* ---------- the award credential, shown right before the mic ---------- */
 const AWARD = { kicker:"GOOGLE PLAY'S", title:'Best AI App of 2023',
-                line:'4.9\u2605  \u00b7  8Mn+ learners  \u00b7  190+ countries' };
+                line:'4.9\u2605  \u00b7  12Mn+ learners  \u00b7  190+ countries' };
 
 /* plan-build takeover: the checklist that assembles their plan */
 const PLAN_BUILD = [
@@ -489,7 +488,7 @@ const PRICING = {
   offerMonthlyWas: 'Rp 59.000',
   offerMonthlyNow: 'Rp 29.000',
   perMonthNote: 'Just Rp 12.400 per month paid for a whole year',
-  socialProof:  'What 8Mn+ learners say!',
+  socialProof:  'What 12Mn+ learners say!',
   lovedBy:      '8Mn+',
 };
 
