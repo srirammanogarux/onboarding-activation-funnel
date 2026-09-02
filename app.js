@@ -1123,6 +1123,7 @@ async function planBuildSequence(answers, goal, name, firstLine){
      are a single fact about the learner, read as a block. */
   const beats = [
     [$('pbCoach')],
+    [document.querySelector('.pb-sheet')],   /* the card lands, empty */
     [$('pbKicker')],
     [$('pbTitle')],
     [...stack.children],
@@ -1136,7 +1137,7 @@ async function planBuildSequence(answers, goal, name, firstLine){
     await wait(260);
     for (const group of beats){
       group.forEach(b => b.classList.add('in'));
-      await wait(420);
+      await wait(360);
     }
     await wait(200);
   }
