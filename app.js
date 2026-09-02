@@ -48,79 +48,107 @@ const DBG = {
   sit:    QP.get('sit')  || (COHORT && COHORT.sit ? COHORT.sit : 'Working a job'),
   cohort: COHORT ? COHORT.id : '',
   perf:   QP.get('perf') || '',
+  /* which of the work scenarios they pick. It decides the plan card's
+     FOCUS row, the first session line and the recap, so it needs to be
+     switchable when reviewing the cohort. */
+  focus:  QP.get('focus') || '',
 };
 let FF = DBG.step !== 'intro';   // fast-forward until the target step
 function reach(key){ if (DBG.step === key) FF = false; }
 
+/* The exam sub-tree is gone from this list: a career learner never
+   reaches it, and leaving dead chips in a review panel wastes the
+   reviewer's time. It comes back when the exam cohort is tuned. */
 const DP_STEPS = [
   ['intro', 'Intro'], ['language', 'Native language'], ['applang', 'App language'],
   ['name', 'Name'], ['phone', 'Phone'], ['source', 'Heard from'],
   ['age', 'Age'], ['gender', 'Gender'], ['goal', 'Goal'],
-  ['exam', 'Which exam'], ['examtype', 'Academic/General'], ['examdate', 'Exam date'], ['band', 'Target band'],
-  ['situation', 'Situation'], ['scenarios', 'Scenarios'],
+  ['situation', 'Situation'], ['scenarios', 'Focus'],
   ['testimonials', 'Testimonials'], ['level', 'Level'], ['award', 'Award'],
-  ['planbuild', 'Plan build'], ['stage', 'Sentence 1'], ['read2', 'Sentence 2'], ['echo', 'Sentence 3 · from memory'],
+  ['planbuild', 'Plan'], ['stage', 'Sentence 1'], ['read2', 'Sentence 2'], ['echo', 'Sentence 3 · from memory'],
   ['meter', 'Speech meter'], ['fix', 'Fix pronunciation'],
   ['practice', 'Practice'], ['paywall', 'Graph → Paywall'], ['gift', 'Gift'], ['offer', 'Offer paywall'],
 ];
+/* the workplace scenario list, which is what this cohort actually picks from */
+const DP_FOCUS = (((C.SCENARIOS.career || {}).byMode || {}).office || {}).items || [];
 const DP_LANGS = [['en','English'], ...C.LANGUAGES.map(l => [l.value, l.label])];
 const DP_LVLS  = [['beginner','Beginner'],['intermediate','Intermediate'],['advanced','Advanced']];
 
+/*
+  The review panel is scoped to ONE cohort: Career x Working a job.
+  It used to list twelve branches, seven situations and every cohort at
+  once, which is a map of the whole product rather than a tool for
+  reviewing the one flow that is actually tuned. Everything here answers
+  "what does this cohort look like if I change one thing".
+*/
 function buildDevPanel(){
   const go = (patch) => {
     const p = new URLSearchParams(location.search);
-    Object.entries(patch).forEach(([k, v]) => p.set(k, v));
+    Object.entries(patch).forEach(([k, v]) => (v === null ? p.delete(k) : p.set(k, v)));
+    /* This cohort is the default, not a cage: set it when nothing is
+       set, but never drag a reviewer back off another goal mid-review. */
+    if (!p.get('goal')) p.set('goal', 'career');
+    if (!p.get('sit'))  p.set('sit', 'Working a job');
+    p.delete('cohort');
     location.search = p.toString();
   };
-  const fill = (elId, pairs, param) => {
+  const fill = (elId, pairs, param, opts = {}) => {
     const box = $(elId);
     if (!box) return;
-    pairs.forEach(([val, label]) => {
+    pairs.forEach(([val, label, sub]) => {
       const b = document.createElement('button');
-      b.textContent = label;
-      if (DBG[param] === val) b.classList.add('active');
+      b.innerHTML = sub ? `${label}<i>${sub}</i>` : label;
+      if (String(DBG[param]) === String(val)) b.classList.add('active');
       b.addEventListener('click', () => go({ [param]: val }));
       box.appendChild(b);
     });
+    if (opts.clear){
+      const b = document.createElement('button');
+      b.className = 'dp-clear';
+      b.textContent = opts.clear;
+      if (!DBG[param]) b.classList.add('active');
+      b.addEventListener('click', () => go({ [param]: null }));
+      box.appendChild(b);
+    }
   };
-  /* branch chips — one per distinct scenario list, straight to it */
-  const bBox = $('dpBranches');
-  if (bBox) C.branches().forEach(br => {
-    const b = document.createElement('button');
-    b.innerHTML = `${br.label}${br.skipped ? '' : `<i>${br.count}</i>`}`;
-    if (br.skipped) b.classList.add('skipped');
-    if (DBG.goal === br.goal && (br.mode === '—' || C.WORKMODE[DBG.sit] === br.mode
-        || (br.mode === '_default' && !Object.keys((C.SCENARIOS[br.goal]||{}).byMode || {}).includes(C.WORKMODE[DBG.sit]))))
-      b.classList.add('active');
-    b.addEventListener('click', () => {
-      const p = new URLSearchParams(location.search);
-      p.set('goal', br.goal); p.set('sit', br.sit);
-      p.set('step', br.skipped ? 'situation' : 'scenarios');
-      p.delete('cohort');
-      location.search = p.toString();
-    });
-    bBox.appendChild(b);
-  });
 
-  /* cohort chips clear goal+exam so the cohort wins */
-  const cBox = $('dpCohorts');
-  if (cBox) C.COHORTS.forEach(c => {
-    const b = document.createElement('button');
-    b.innerHTML = `<i>${c.id}</i>${c.label}`;
-    if (DBG.cohort === c.id) b.classList.add('active');
-    b.addEventListener('click', () => {
-      const p = new URLSearchParams(location.search);
-      p.set('cohort', c.id); p.delete('goal'); p.delete('exam');
-      location.search = p.toString();
-    });
-    cBox.appendChild(b);
-  });
-  fill('dpSits', C.SITUATIONS.map(s => [s, s]), 'sit');
-  fill('dpPerf', [['weak','Weak · fails R1'],['mid','Mid · fails R2'],
-                  ['midhigh','Mid-high · fails R3'],['strong','Strong · clean']], 'perf');
   fill('dpSteps', DP_STEPS, 'step');
-  fill('dpLangs', DP_LANGS, 'lang');
+
+  /* focus: the six things they can pick at work. Whichever is chosen
+     becomes picked[0], so it lands in the plan card and the first
+     session line. */
+  fill('dpFocus', DP_FOCUS.map((it, i) => [String(i), `${it.e} ${it.label}`]), 'focus',
+       { clear: 'Default (first two)' });
+
+  /* A slip stops the run there and sends them to the meter, then into
+     pronunciation practice built from the sentence that broke. A clean
+     run walks past the meter to the paywall. */
+  fill('dpPerf', [
+    ['weak',    'Slips on sentence 1'],
+    ['mid',     'Slips on sentence 2'],
+    ['midhigh', 'Slips on sentence 3'],
+    ['strong',  'Clean run', 'no practice'],
+  ], 'perf', { clear: 'Follow level' });
+
   fill('dpLvls',  DP_LVLS,  'lvl');
+  fill('dpLangs', DP_LANGS, 'lang');
+
+  /* The other goals still run, they are just not tuned. Kept reachable
+     so nothing is lost, and marked so nobody reviews them by accident. */
+  const oBox = $('dpOther');
+  if (oBox) [['exam','Exam'],['personal','Personal'],['school','School'],['travel','Travel']]
+    .forEach(([goal, label]) => {
+      const b = document.createElement('button');
+      b.textContent = label;
+      if (DBG.goal === goal) b.classList.add('active');
+      b.addEventListener('click', () => {
+        const p = new URLSearchParams(location.search);
+        p.set('goal', goal); p.delete('cohort'); p.delete('focus');
+        if (goal !== 'career') p.set('sit', 'Studying');
+        location.search = p.toString();
+      });
+      oBox.appendChild(b);
+    });
 }
 buildDevPanel();
 
@@ -1923,8 +1951,11 @@ async function flow(){
     await sarah(sc.prompt);
     earn(76, '76% completed');
     const labels = sc.items.map(i => i.label);
-    picked = await multiSelect(labels, { icons: sc.items.map(i => i.e || '🎯'),
-                                         forced: [labels[0], labels[1]] });
+    /* ?focus= puts a specific scenario first, so a reviewer can see the
+       plan card and the first-session line for any of them. */
+    const fi = Number.isInteger(+DBG.focus) && DBG.focus !== '' && labels[+DBG.focus] ? +DBG.focus : 0;
+    const forced = [labels[fi], labels[(fi + 1) % labels.length]];
+    picked = await multiSelect(labels, { icons: sc.items.map(i => i.e || '🎯'), forced });
     await sarah(T('scenarios_ack'), { typingMs: 900, quick: true });
     /* their own words, replayed — personalization proof for free */
     await recapBubble([
