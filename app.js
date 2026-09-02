@@ -1222,13 +1222,19 @@ function stgRenderPhrase(text, gaps = []){
 function stgWords(){ return [...$('stgText').querySelectorAll('.w')]; }
 
 async function stgFillWords(signal){
+  let prev = null;
   for (const sp of stgWords()){
     if (signal.cancelled) return;
-    sp.classList.add('said');
+    if (prev){ prev.classList.remove('now'); prev.classList.add('said'); }
+    sp.classList.add('now');
+    prev = sp;
     await wait(240);
   }
+  if (prev && !signal.cancelled){ prev.classList.remove('now'); prev.classList.add('said'); }
 }
-function stgResetSaid(){ stgWords().forEach(w => w.classList.remove('said')); }
+function stgResetSaid(){
+  stgWords().forEach(w => w.classList.remove('said', 'now'));
+}
 
 /* one mic turn on the stage: orb → waveform + words fill → ✓ */
 function stageTurn(){
@@ -1245,6 +1251,7 @@ function stageTurn(){
       JUICE.setAmbient('listening');
       $('stgMicRow').classList.add('stg-listen-glow');   /* Gemini input glow */
       $('stgTip').textContent = T('mic_tip_live');       /* nothing to declare */
+      $('stgLine').classList.add('live');                /* now karaoke means something */
       mic.className = 'convmic expanded';
       stgStartWave();
       const signal = { cancelled: false };
@@ -1256,6 +1263,7 @@ function stageTurn(){
         stgStopWave();
         confirm.removeEventListener('click', onConfirm);
         stgResetSaid();
+        $('stgLine').classList.remove('live');
         $('stgTip').classList.remove('hidden');
         $('stgTip').textContent = T('mic_tip_idle');
         mic.className = 'convmic idle';
@@ -1267,13 +1275,11 @@ function stageTurn(){
         cancel.removeEventListener('click', onCancel);
         mic.removeEventListener('click', onOrbTap);
         skip.removeEventListener('click', onSkip);
-        stgWords().forEach(w => w.classList.add('said'));
+        stgWords().forEach(w => { w.classList.remove('now'); w.classList.add('said'); });
         $('stgTip').classList.add('hidden');
         mic.className = 'convmic submitting';
         $('stgMicRow').classList.remove('stg-listen-glow');
         await wait(600);
-        mic.classList.add('gone');
-        setTimeout(() => { $('stgMicRow').classList.add('gone'); mic.classList.remove('gone'); }, 300);
         resolve('spoke');
       };
       cancel.addEventListener('click', onCancel, { once: true });
@@ -1290,6 +1296,17 @@ function stageTurn(){
     mic.addEventListener('click', onOrbTap);
     skip.addEventListener('click', onSkip, { once: true });
   });
+}
+
+/* the mic collapses into a green tick, in the same spot it lived in */
+function stgTick(caption){
+  const mic = $('stgMic'), row = $('stgMicRow');
+  row.classList.remove('gone', 'stg-listen-glow');
+  mic.classList.remove('gone');
+  mic.className = 'convmic tick';
+  const tip = $('stgTip');
+  tip.textContent = caption;
+  tip.classList.remove('hidden');
 }
 
 /* mark the sentence's two words amber on a stumble */
@@ -1325,9 +1342,10 @@ async function stageLadder(goal, level){
     const step = plan[i];
     reach(step.key);
     steps.forEach((d, k) => { d.classList.toggle('on', k === i); });
+    $('stgCount').textContent = `${i + 1}/${plan.length}`;
+    $('stgLine').classList.remove('win', 'live');
     $('stgSay').textContent = step.coach;
     stgRenderPhrase(step.phrase, step.gaps);
-    $('stgLabel').textContent = step.gaps.length ? T('stg_label_echo') : T('stg_label_read');
 
     /* sentence 3 is sentence 2 with two words gone. Nothing is played
        back at them: if they stall, the gaps peek instead. */
@@ -1351,16 +1369,19 @@ async function stageLadder(goal, level){
       PRON_WORDS = step.words;
       HS_PASSAGE = step.phrase;
       stgFlagWords(step.words);
+      $('stgMicRow').classList.add('gone');
       $('stgSay').textContent = T('stg_fail');
       JUICE.setAmbient('idle');
       await wait(FF ? 0 : 1900);
       break;                                     /* the run stops here */
     }
 
-    /* pass beat */
+    /* pass beat: the line goes green and the mic becomes a tick */
     steps[i].classList.remove('on');
     steps[i].classList.add('done');
     JUICE.setAmbient('idle');
+    $('stgLine').classList.add('win');
+    if (!FF) stgTick(i === plan.length - 1 ? T('stg_tick_last') : T('stg_tick_next'));
     if (i === 0){
       if (!FF) JUICE.confetti(36, 'burst');
       $('stgSay').textContent = T('stg_pass1');
