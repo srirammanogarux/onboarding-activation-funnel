@@ -59,7 +59,7 @@ const DP_STEPS = [
   ['exam', 'Which exam'], ['examtype', 'Academic/General'], ['examdate', 'Exam date'], ['band', 'Target band'],
   ['situation', 'Situation'], ['scenarios', 'Scenarios'],
   ['testimonials', 'Testimonials'], ['level', 'Level'], ['award', 'Award'],
-  ['planbuild', 'Plan build'], ['stage', 'R1 · Read'], ['read2', 'R2 · Harder'], ['echo', 'R3 · Echo'],
+  ['planbuild', 'Plan build'], ['stage', 'Sentence 1'], ['read2', 'Sentence 2'], ['echo', 'Sentence 3 · from memory'],
   ['meter', 'Speech meter'], ['fix', 'Fix pronunciation'],
   ['practice', 'Practice'], ['paywall', 'Graph → Paywall'], ['gift', 'Gift'], ['offer', 'Offer paywall'],
 ];
@@ -772,7 +772,7 @@ function closeStory(){
 /* ---------- speaking test ---------- */
 /* The ladder, the flagged words and the hint flow are keyed to the
    GOAL chosen at stage 5. PRON_WORDS / HS_PASSAGE are re-pointed by
-   the ladder to the rung the user actually stumbled on (honesty
+   the ladder to the sentence the user actually stumbled on (honesty
    rule); the R1 defaults below only serve deep links straight into
    fix/practice. */
 let PASSAGE     = ['', ''];   /* legacy, unused */
@@ -1149,11 +1149,14 @@ async function planBuildSequence(answers, goal, name, firstLine){
 
 
 /* ============================================================
-   SPEAKING STAGE — the ladder. The chat ends before this screen.
-   R1 read a simple affirmation → R2 read one with harder words →
-   R3 echo: Sarah "says it" first, the user repeats it with the two
-   complex words hidden. Slip anywhere → pron practice with the
-   words from that exact rung. Clean run → no practice at all.
+   SPEAKING STAGE — three sentences. The chat ends before this.
+   Sentence 1: a simple affirmation.  Sentence 2: same spirit,
+   harder words.  Sentence 3: sentence 2 again with its two hard
+   words hidden, said from memory.
+   Slip on any of them and the run STOPS there. Everyone lands on
+   the speech meter; only a slip earns the pronunciation practice,
+   and its two words come from the sentence that broke.
+   Sarah has no voice here. She is chat only.
    ============================================================ */
 const STG_BARS = 26;
 let stgWaveT = null, stgHintT = null;
@@ -1205,13 +1208,14 @@ function stageTurn(){
     $('stgMicRow').classList.remove('gone');
     mic.className = 'convmic idle';
     $('stgTip').classList.remove('hidden');
+    $('stgTip').textContent = T('mic_tip_idle');
 
     const onOrbTap = () => {
       if (!mic.classList.contains('idle')) return;
       clearTimeout(stgHintT);
       JUICE.setAmbient('listening');
       $('stgMicRow').classList.add('stg-listen-glow');   /* Gemini input glow */
-      $('stgTip').classList.add('hidden');
+      $('stgTip').textContent = T('mic_tip_live');       /* nothing to declare */
       mic.className = 'convmic expanded';
       stgStartWave();
       const signal = { cancelled: false };
@@ -1224,6 +1228,7 @@ function stageTurn(){
         confirm.removeEventListener('click', onConfirm);
         stgResetSaid();
         $('stgTip').classList.remove('hidden');
+        $('stgTip').textContent = T('mic_tip_idle');
         mic.className = 'convmic idle';
         JUICE.setAmbient('idle');
       };
@@ -1234,6 +1239,7 @@ function stageTurn(){
         mic.removeEventListener('click', onOrbTap);
         skip.removeEventListener('click', onSkip);
         stgWords().forEach(w => w.classList.add('said'));
+        $('stgTip').classList.add('hidden');
         mic.className = 'convmic submitting';
         $('stgMicRow').classList.remove('stg-listen-glow');
         await wait(600);
@@ -1257,7 +1263,7 @@ function stageTurn(){
   });
 }
 
-/* mark the rung's two words amber on a stumble */
+/* mark the sentence's two words amber on a stumble */
 function stgFlagWords(words){
   const flag = words.map(w => w.w.toLowerCase());
   stgWords().forEach(sp => {
@@ -1274,9 +1280,9 @@ async function stageLadder(goal, level){
   setTimeout(() => $('chatScreen').classList.add('is-hidden'), FF ? 0 : 500);
   stgBuildWave();
   JUICE.setAmbient('idle');
-  const rungs = [...$('stgRungs').children];
+  const steps = [...$('stgSteps').children];
   const R = ACT.ladder;
-  /* R3 echoes R2's phrase with its complex words hidden */
+  /* sentence 3 is sentence 2 again, its two hard words hidden */
   const plan = [
     { key:'stage', phrase: R[0].text, words: R[0].words, gaps: [],
       coach: ACT_INTRO },
@@ -1287,33 +1293,20 @@ async function stageLadder(goal, level){
   ];
 
   for (let i = 0; i < plan.length; i++){
-    const rung = plan[i];
-    reach(rung.key);
-    rungs.forEach((d, k) => { d.classList.toggle('on', k === i); });
-    $('stgSay').textContent = rung.coach;
-    stgRenderPhrase(rung.phrase, rung.gaps);
-    $('stgLabel').textContent = rung.gaps.length ? T('stg_label_echo') : T('stg_label_read');
+    const step = plan[i];
+    reach(step.key);
+    steps.forEach((d, k) => { d.classList.toggle('on', k === i); });
+    $('stgSay').textContent = step.coach;
+    stgRenderPhrase(step.phrase, step.gaps);
+    $('stgLabel').textContent = step.gaps.length ? T('stg_label_echo') : T('stg_label_read');
 
-    /* echo rung: Sarah "says it" before the mic unlocks */
-    if (rung.gaps.length){
-      $('stgSpeaker').hidden = false;
-      $('stgMicRow').classList.add('gone');
-      /* Sarah "says it": live waveform instead of static bars */
-      const bars = $('stgSpeaker').querySelector('.stg-bars');
-      let wv = null;
-      if (bars && !FF){
-        bars.innerHTML = '';
-        bars.classList.add('stg-wavebox');
-        wv = JUICE.wave(bars, { width: 120, height: 24, energy: .9 });
-      }
-      await wait(FF ? 0 : 2400);
-      if (wv) wv.stop();
-      $('stgSpeaker').hidden = true;
-      /* stall hint — if they don't start in ~4s, the gaps peek */
+    /* sentence 3 is sentence 2 with two words gone. Nothing is played
+       back at them: if they stall, the gaps peek instead. */
+    if (step.gaps.length){
       clearTimeout(stgHintT);
       stgHintT = setTimeout(() => {
         $('stgText').querySelectorAll('.gap').forEach(g => g.classList.add('hinted', 'peek'));
-      }, 4000);
+      }, 6000);
     }
 
     let turn = 'spoke';
@@ -1322,22 +1315,22 @@ async function stageLadder(goal, level){
     } else {
       turn = await stageTurn();
     }
-    if (turn === 'skipped'){ failAt = i + 1; }   /* hint rule: bail = weak here */
+    if (turn === 'skipped'){ failAt = i + 1; }   /* bailing counts as a slip here */
 
     if (failAt === i + 1){
-      /* honesty rule: the practice pair comes from THIS rung */
-      PRON_WORDS = rung.words;
-      HS_PASSAGE = rung.phrase;
-      stgFlagWords(rung.words);
+      /* the practice pair always comes from THIS sentence */
+      PRON_WORDS = step.words;
+      HS_PASSAGE = step.phrase;
+      stgFlagWords(step.words);
       $('stgSay').textContent = T('stg_fail');
       JUICE.setAmbient('idle');
       await wait(FF ? 0 : 1900);
-      break;
+      break;                                     /* the run stops here */
     }
 
     /* pass beat */
-    rungs[i].classList.remove('on');
-    rungs[i].classList.add('done');
+    steps[i].classList.remove('on');
+    steps[i].classList.add('done');
     JUICE.setAmbient('idle');
     if (i === 0){
       if (!FF) JUICE.confetti(36, 'burst');
@@ -1371,7 +1364,10 @@ function hideScreen(id){
   setTimeout(() => { s.hidden = true; }, 500);
 }
 
-/* --- hint flow: level meter → fix pronunciation → practice ---
+/* --- meter flow: level meter → fix pronunciation → practice ---
+   Everyone sees the meter. Only a slip continues past it: the fix and
+   practice views are built from the sentence that actually broke, and
+   a clean run walks straight out to the paywall.
    Interaction ported from usa-onboarding, restyled on our tokens. */
 const HS_LEVELS = ['Proficient', 'Advanced', 'Upper intermediate', 'Intermediate', 'Beginner', 'Novice'];
 const HS_CEFR   = { 'Proficient':'C2', 'Advanced':'C1', 'Upper intermediate':'B2', 'Intermediate':'B1', 'Beginner':'A2', 'Novice':'A1' };
@@ -1508,7 +1504,7 @@ function hsPracticeWord(idx){
 }
 
 async function hintSequence(level, outcome = 'weak'){
-  /* meter position reflects how far up the ladder they got */
+  /* meter position reflects how far they got before stopping */
   const base = LEVEL_METER[level] || LEVEL_METER.beginner;
   const cfg = outcome === 'strong'
     ? (STRONG_METER[level] || STRONG_METER.beginner)
@@ -1547,7 +1543,7 @@ async function hintSequence(level, outcome = 'weak'){
   next.style.visibility = 'visible';
   if (!FF) await new Promise(r => next.addEventListener('click', r, { once: true }));
 
-  /* a clean ladder run has nothing to fix — honesty rule */
+  /* a clean run has nothing to fix, so it never sees practice */
   if (outcome === 'strong'){
     hideScreen('hintScreen');
     await wait(550);
@@ -2000,7 +1996,7 @@ async function flow(){
     ['LANGUAGE', L.label],
   ], goal, name, picked[0] ? `${picked[0]}, out loud` : null);
 
-  /* ---------- 9.3 · the speaking stage (the ladder) ---------- */
+  /* ---------- 9.3 · the speaking stage (three sentences) ---------- */
   const outcome = await stageLadder(goal, level);
 
   /* ---------- 9.3 – 9.7 · takeovers ---------- */

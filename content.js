@@ -304,16 +304,16 @@ const SITUATIONS = [
   'On a career break',
 ];
 
-/* ---------- 6 · activation ladder, keyed to GOAL ----------
-   Three rungs of AFFIRMATION phrases (user direction 2026-08-28):
-   the first things a learner says out loud are self-affirming.
+/* ---------- 6 · activation sentences, keyed to GOAL ----------
+   Three AFFIRMATION phrases (user direction 2026-08-28): the first
+   things a learner says out loud are self-affirming.
 
-   R1 — simple phrase.  R2 — same spirit, more complex words.
-   R3 — ECHO of R2: Sarah "says it" first (mock audio), then the user
-   repeats it with the two complex words hidden (cloze).
+   Sentence 1: simple.  Sentence 2: same spirit, harder words.
+   Sentence 3: sentence 2 again with its two hard words hidden, said
+   from memory. Sarah never plays it back, she has no voice.
 
-   Honesty rule: the pron-practice pair always comes from the rung the
-   user actually stumbled on. A passed rung never shows errors.
+   A slip stops the run there. The pron-practice pair always comes
+   from the sentence that broke; a clean run never sees practice.
    Each word: pre<hot>post render for the pron card. */
 const ACTIVATION = {
   exam: {

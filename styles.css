@@ -1447,18 +1447,6 @@ body{
 .pron-card.done .pc-word,
 .pron-card.done .pc-word i{color:var(--succ-300);}
 .pc-ph{margin-top:4px;font-family:var(--font-body);font-size:13px;color:var(--text-low);}
-.pc-play{
-  display:flex;
-  align-items:center;
-  gap:7px;
-  background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.14);
-  border-radius:999px;
-  padding:5px 11px 5px 5px;
-  color:var(--blue-300);
-}
-.pc-play img{width:26px;height:26px;border-radius:50%;object-fit:cover;background:#1B1D3B;}
-.pc-play svg{width:16px;height:16px;}
 .pc-bottom{display:flex;justify-content:space-between;align-items:flex-end;margin-top:24px;gap:12px;}
 .pc-score b{
   display:block;
@@ -2886,9 +2874,9 @@ body{
 }
 
 /* ============================================================
-   SPEAKING STAGE — the ladder screen (chat ends before this)
+   SPEAKING STAGE — three sentences (the chat ends before this)
    Reuses the read-card + convmic anatomy on a full screen with
-   Sarah as the coach header, like the hint screen.
+   Sarah pinned at the top as the coach, like the hint screen.
    ============================================================ */
 .stage-wrap{
   flex:1;
@@ -2896,17 +2884,17 @@ body{
   flex-direction:column;
   padding:6px 24px 0;
 }
-/* rung progress — three dots, gold fills as rungs pass */
-.stg-rungs{display:flex;gap:8px;margin:18px 2px 14px;}
-.stg-rungs i{
+/* sentence progress: three dots, gold fills as sentences land */
+.stg-steps{display:flex;gap:8px;margin:18px 2px 14px;}
+.stg-steps i{
   flex:1;
   height:5px;
   border-radius:999px;
   background:var(--track);
   transition:background .5s var(--ease-out);
 }
-.stg-rungs i.on{background:var(--accent);}
-.stg-rungs i.done{background:var(--progress);}
+.stg-steps i.on{background:var(--accent);}
+.stg-steps i.done{background:var(--progress);}
 
 .stg-card{margin-top:4px;}
 .stg-card .rc-text{min-height:96px;}
@@ -2924,31 +2912,9 @@ body{
   50%{border-color:var(--blue-200);}
 }
 
-/* Sarah "audio" playing state inside the card */
-.stg-speaker{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  margin-top:14px;
-}
-.stg-speaker img{width:26px;height:26px;border-radius:50%;}
-.stg-speaker em{font-family:var(--font-body);font-style:normal;font-size:13px;color:var(--text-low);}
-.stg-bars{display:flex;align-items:center;gap:2.5px;height:16px;}
-.stg-bars i{
-  width:3px;
-  border-radius:999px;
-  background:var(--blue-300);
-  animation:stg-bar .7s ease-in-out infinite alternate;
-}
-.stg-bars i:nth-child(1){height:6px;animation-delay:0s;}
-.stg-bars i:nth-child(2){height:12px;animation-delay:.12s;}
-.stg-bars i:nth-child(3){height:16px;animation-delay:.24s;}
-.stg-bars i:nth-child(4){height:10px;animation-delay:.36s;}
-.stg-bars i:nth-child(5){height:7px;animation-delay:.48s;}
-@keyframes stg-bar{from{transform:scaleY(.45);}to{transform:scaleY(1);}}
-
 /* mic row pinned low, matching the chat's convmic sizing */
 .stg-microw{
+  position:relative;                     /* the tip anchors to this row */
   margin-top:auto;
   padding-bottom:46px;
   display:flex;
@@ -3317,8 +3283,7 @@ body{
 /* ---------- plan-build ticks glow (Remy checklist) ---------- */
 .pb-checks li.done .tick{box-shadow:0 0 12px rgba(50,225,141,.55);}
 
-/* ---------- stage waveforms + mic glow (Gemini) ---------- */
-.stg-speaker .stg-wavebox{width:120px;height:24px;}
+/* ---------- stage mic glow (Gemini) ---------- */
 .stg-listen-glow{position:relative;}
 .stg-listen-glow::before{
   content:'';
