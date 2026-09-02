@@ -3043,19 +3043,18 @@ body{
    the right, so the screen has weather behind the card instead of a
    flat black plate. */
 #planBuildScreen{overflow:hidden;background:var(--bg);}
+/* Four blooms across the full height, not two crowded into the head.
+   The screen should have weather from the notch to the home indicator. */
 #planBuildScreen::before{
-  content:'';position:absolute;left:-150px;top:-190px;width:540px;height:520px;
-  border-radius:50%;pointer-events:none;z-index:0;filter:blur(10px);
-  background:radial-gradient(circle,
-    rgba(108,99,255,.34) 0%, rgba(108,99,255,.16) 42%, rgba(108,99,255,0) 74%);
-}
-#planBuildScreen::after{
-  content:'';position:absolute;right:-190px;top:60px;width:520px;height:480px;
-  border-radius:50%;pointer-events:none;z-index:0;filter:blur(10px);
-  background:radial-gradient(circle,
-    rgba(217,162,74,.17) 0%, rgba(217,162,74,.07) 45%, rgba(217,162,74,0) 76%);
+  content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(560px 520px at -8% -12%,  rgba(108,99,255,.36), transparent 68%),
+    radial-gradient(520px 470px at 108% 18%,  rgba(217,162,74,.16), transparent 70%),
+    radial-gradient(600px 540px at 112% 82%,  rgba(108,99,255,.22), transparent 72%),
+    radial-gradient(520px 460px at -12% 108%, rgba(158,99,255,.20), transparent 70%);
 }
 #planBuildScreen > *{position:relative;z-index:1;}
+#planBuildScreen::before{z-index:0;}
 
 .pb-wrap{
   flex:1;
@@ -3686,14 +3685,4 @@ body{
 .topbar > .statusbar{position:relative;z-index:1;}
 
 
-/* The rail had no sense of extent: one card filled the view and nothing
-   said there were three more. Dots give it a beginning and an end. */
-.t-dots{
-  display:flex;justify-content:center;align-items:center;gap:6px;
-  padding:12px 24px 0;
-}
-.t-dots i{
-  width:5px;height:5px;border-radius:999px;background:rgba(255,255,255,.26);
-  transition:width .34s var(--ease-spring), background .34s var(--ease-out);
-}
-.t-dots i.on{width:18px;background:var(--accent-soft);}
+

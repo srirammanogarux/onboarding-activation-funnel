@@ -624,8 +624,6 @@ async function testimonialCarousel(goal){
         <div class="tc-who"><b>${t.n}</b><span>${t.r}</span></div>
       </div>
     </div>`)));
-  const dots = el(`<div class="t-dots">${list.map(() => '<i></i>').join('')}</div>`);
-  wrap.appendChild(dots);
   chatStream.appendChild(wrap);
   scrollToEnd();
   if (FF) return;
@@ -633,11 +631,7 @@ async function testimonialCarousel(goal){
   /* It used to sit still for 3.4s before the first move, which reads as
      broken rather than paced. It steps off quickly, then settles into a
      slower rhythm you can actually read at. */
-  railAutoSlide(rail, {
-    firstDelay: 1300,
-    interval: 3000,
-    onActive: (cards, i) => [...dots.children].forEach((d, k) => d.classList.toggle('on', k === i)),
-  });
+  railAutoSlide(rail, { firstDelay: 1300, interval: 3000 });
   await wait(3400);
 }
 
@@ -1122,22 +1116,27 @@ async function planBuildSequence(answers, goal, name, firstLine){
   setTimeout(() => $('chatScreen').classList.add('is-hidden'), FF ? 0 : 500);
   if (!FF) JUICE.sweep();                      /* THE one ambient pass */
 
-  /* Progressive disclosure, strictly in reading order: her line, then the
-     card's head, then each answer, then the first session, and the CTA
-     last so the eye finishes where the thumb has to go. */
+  /* Five beats, in reading order, each one opening the card a little
+     further: the label, the headline, all four answers together, the
+     first session, then the CTA last so the eye finishes where the
+     thumb has to go. The four answers are one beat, not four — they
+     are a single fact about the learner, read as a block. */
   const beats = [
-    $('pbCoach'), $('pbKicker'), $('pbTitle'),
-    ...stack.children,
-    $('pbFirst'), $('pbCta'), $('pbNote'),
-  ].filter(Boolean);
+    [$('pbCoach')],
+    [$('pbKicker')],
+    [$('pbTitle')],
+    [...stack.children],
+    [$('pbFirst')],
+    [$('pbCta'), $('pbNote')],
+  ].map(g => g.filter(Boolean)).filter(g => g.length);
 
   if (FF){
-    beats.forEach(b => b.classList.add('in'));
+    beats.flat().forEach(b => b.classList.add('in'));
   } else {
     await wait(260);
-    for (const b of beats){
-      b.classList.add('in');
-      await wait(b.classList.contains('pb-card') ? 130 : 190);
+    for (const group of beats){
+      group.forEach(b => b.classList.add('in'));
+      await wait(420);
     }
     await wait(200);
   }
