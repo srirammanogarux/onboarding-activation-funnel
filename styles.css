@@ -1529,7 +1529,7 @@ body{
   scrollbar-width:none;
 }
 .pw-scroll::-webkit-scrollbar{display:none;}
-#paywallScreen.merged .pw-scroll{overflow-y:auto;}
+#paywallScreen.merged .pw-scroll{overflow:hidden;}
 
 /* --- hero (the graph act) --- */
 .pw-hero{
@@ -1542,7 +1542,7 @@ body{
     var(--bg);
   transition:height 1s var(--ease-out);
 }
-#paywallScreen.merged .pw-hero{height:340px;}
+#paywallScreen.merged .pw-hero{height:408px;}
 .pw-topbar{
   position:absolute;
   top:56px;
@@ -1604,9 +1604,11 @@ body{
 }
 /* merged: squish the whole graph vertically; dot/tags stay glued to the
    curve because they squish with it (and counter-scale themselves) */
-#paywallScreen.merged .pw-graph{height:232px;transform:scaleY(.54);}
-#paywallScreen.merged .pwg-dot{transform:scale(1) scaleY(1.852);}
-#paywallScreen.merged .pw-tag{transform:scaleY(1.852);transform-origin:center top;}
+#paywallScreen.merged .pw-graph{height:300px;transform:scaleY(.72);}
+#paywallScreen.merged .pwg-dot{transform:scale(1) scaleY(1.389);}
+#paywallScreen.merged .pw-tag{transform:scaleY(1.389);transform-origin:center top;}
+/* the trail has arrived: no travel marker left to draw */
+#paywallScreen.merged .pwg-drop{opacity:0;transition:opacity .5s var(--ease-out);}
 .pwg-area{
   position:absolute;
   left:0;
@@ -1688,7 +1690,7 @@ body{
 }
 .pw-tag2{right:10px;top:-64px;}
 /* once the hero collapses the tag would sit on the headline */
-#paywallScreen.merged .pw-tag2{top:-16px;}
+#paywallScreen.merged .pw-tag2{top:26px;}
 
 /* --- paywall body --- */
 .pw-body{
@@ -3763,3 +3765,59 @@ body{
   text-decoration:line-through;
   font-weight:500;
 }
+
+/* --- the paywall wears the onboarding's indigo, not gold --- */
+#paywallScreen .pw-hero{
+  background:
+    radial-gradient(90% 46% at 50% 0%, rgba(108,99,255,.14), transparent 62%),
+    var(--bg);
+}
+#paywallScreen .pw-pro-pill b{color:var(--blue-300);}
+#paywallScreen .pw-title em{color:var(--blue-300);}
+#paywallScreen .pwg-dot{
+  border-color:var(--blue-400);
+  box-shadow:0 0 18px rgba(108,99,255,.9), 0 0 44px rgba(108,99,255,.5);
+}
+#paywallScreen .pw-tag{
+  background:linear-gradient(180deg, var(--blue-400), var(--blue-500));
+  box-shadow:0 10px 26px -8px rgba(108,99,255,.55);
+}
+#paywallScreen .pw-tag small{color:rgba(255,255,255,.72);}
+#paywallScreen .pw-tag b{color:#FFFFFF;}
+#paywallScreen .pw-plan.selected{
+  border-color:var(--blue-400);
+  background:rgba(108,99,255,.14);
+}
+#paywallScreen .pw-plan.selected .off{background:var(--accent);color:#FFFFFF;}
+#paywallScreen .pw-cta{
+  background:linear-gradient(83deg, var(--blue-500), var(--blue-400));
+  color:#FFFFFF;
+  box-shadow:0 14px 34px -14px rgba(108,99,255,.75);
+}
+/* the body fills what the hero leaves, so nothing scrolls and nothing
+   floats in the middle of a dead gap */
+#paywallScreen.merged .pw-body{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding-bottom:196px;          /* the price bar floats over the bottom */
+}
+#paywallScreen .pw-bottom-pad{display:none;}
+
+/* --- the offer keeps its gold coupon, the rest joins the indigo --- */
+#offerScreen .offer-hero{
+  background:
+    radial-gradient(85% 62% at 50% 0%, rgba(108,99,255,.22), transparent 72%),
+    var(--bg);
+}
+#offerScreen .pw-plan.selected{
+  border-color:var(--blue-400);
+  background:rgba(108,99,255,.14);
+}
+#offerScreen .pw-cta{
+  background:linear-gradient(83deg, var(--blue-500), var(--blue-400));
+  color:#FFFFFF;
+  box-shadow:0 14px 34px -14px rgba(108,99,255,.75);
+}
+#offerScreen .ps-plan.selected{border-color:var(--blue-400);}

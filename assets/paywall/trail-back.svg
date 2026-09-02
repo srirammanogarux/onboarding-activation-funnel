@@ -2,8 +2,8 @@
 <path id="Trail back" opacity="0.2" d="M0.330409 224.738C3.84313 225.206 18.456 221.646 48.8059 203.661C62.3884 194.762 91.6611 164.319 131.706 171.343C171.751 178.367 192.791 122.404 197.745 113.735C208.986 94.0622 232.17 61.7467 272.917 67.367C330.526 75.313 329.402 46.4298 355.817 18.8901C371.976 -6.4889 426.634 6.10386 437.312 2.73165" stroke="url(#paint0_linear_9690_61353)" stroke-width="5"/>
 <defs>
 <linearGradient id="paint0_linear_9690_61353" x1="433.033" y1="-2.27365" x2="-27.922" y2="164.873" gradientUnits="userSpaceOnUse">
-<stop stop-color="#E7B455"/>
-<stop offset="1" stop-color="#D9A24A"/>
+<stop stop-color="#8982FF"/>
+<stop offset="1" stop-color="#6C63FF"/>
 </linearGradient>
 </defs>
 </svg>

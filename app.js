@@ -1722,7 +1722,10 @@ async function paywallSequence(goal){
   g.classList.add('dropon', 'tag2');
   await wait(2400);
 
-  /* state 4 — the graph gels into the paywall */
+  /* state 4 — the graph gels into the paywall. The trail completes to
+     the right edge so the fill has no cut edge once it is sitting
+     behind the headline. */
+  $('pwgReveal').style.width = '447px';
   $('paywallScreen').classList.add('merged');
 
   /* closing the double-price paywall unlocks the gift → offer paywall */
