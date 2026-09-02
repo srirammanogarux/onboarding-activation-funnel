@@ -3027,91 +3027,115 @@ body{
 }
 
 /* ---------- plan-build takeover ---------- */
+/* ============================================================
+   PLAN SCREEN — the chat card, taken full screen.
+
+   It is the same anatomy the card had in the stream (kicker, title,
+   four rows, the first-session band) with the width of the phone
+   instead of a bubble. Everything rises in reading order and the CTA
+   is last, so the eye finishes where the thumb needs to go.
+   ============================================================ */
 .pb-wrap{
   flex:1;
   display:flex;
   flex-direction:column;
-  padding:6px 24px 40px;
+  padding:6px 22px 30px;
+}
+.pb-rise{
+  opacity:0;
+  transform:translateY(14px);
+  transition:opacity .5s var(--ease-out), transform .55s var(--ease-spring);
+}
+.pb-rise.in{opacity:1;transform:none;}
+
+.pb-sheet{
+  display:flex;
+  flex-direction:column;
+  flex:1;
+  margin-top:26px;
+  border-radius:24px;
+  background:linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.015));
+  border:1px solid rgba(157,150,255,.17);
+  box-shadow:0 22px 60px -26px rgba(108,99,255,.55);
+  overflow:hidden;
+}
+.pb-kicker{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:11.5px;
+  letter-spacing:.17em;
+  color:var(--blue-300);
+  padding:24px 24px 0;
 }
 .pb-title{
   font-family:var(--font-display);
   font-weight:600;
-  font-size:44px;
-  line-height:46px;
-  letter-spacing:-.03em;
+  font-size:31px;
+  line-height:38px;
+  letter-spacing:-.028em;
   color:var(--text-hi);
-  margin:22px 0 20px;
+  margin:10px 0 0;
+  padding:0 24px 22px;
 }
-.pb-stack{
+.pb-rows{
   display:flex;
   flex-direction:column;
-  gap:8px;
-  min-height:120px;
+  padding:0 24px;
 }
 .pb-card{
   display:flex;
   align-items:center;
-  gap:10px;
-  padding:12px 16px;
-  border-radius:14px;
-  background:var(--opt-bg);
-  border:1px solid rgba(255,255,255,.07);
+  gap:14px;
+  padding:21px 0;
+  border-top:1px solid rgba(255,255,255,.08);
   opacity:0;
-  transform:translateY(18px);
-  transition:opacity .45s var(--ease-out), transform .45s var(--ease-out);
+  transform:translateY(14px);
+  transition:opacity .5s var(--ease-out), transform .55s var(--ease-spring);
 }
 .pb-card.in{opacity:1;transform:none;}
 .pb-card small{
   font-family:var(--font-body);
-  font-size:11px;
+  font-size:11.5px;
   font-weight:600;
-  letter-spacing:.08em;
+  letter-spacing:.13em;
   color:var(--text-faint);
-  width:82px;
+  width:86px;
   flex-shrink:0;
 }
 .pb-card b{
-  font-family:var(--font-display);
+  font-family:var(--font-body);
   font-weight:500;
-  font-size:15.5px;
-  color:var(--text-hi);
+  font-size:16px;
+  color:var(--text-mid);
 }
-.pb-checks{
-  list-style:none;
+.pb-first{
   display:flex;
   flex-direction:column;
-  gap:12px;
-  margin-top:26px;
-  padding:0;
+  gap:4px;
+  margin-top:auto;
+  padding:18px 24px 20px;
+  background:rgba(108,99,255,.11);
+  border-top:1px solid rgba(157,150,255,.16);
 }
-.pb-checks li{
-  display:flex;
-  align-items:center;
-  gap:10px;
+.pb-first-lbl{font-family:var(--font-body);font-size:14px;color:var(--text-low);}
+.pb-first-val{
+  font-family:var(--font-display);font-weight:600;font-size:17px;
+  line-height:24px;letter-spacing:-.01em;color:var(--text-hi);
+}
+.pb-note{
   font-family:var(--font-body);
-  font-size:14.5px;
-  color:var(--text-low);
-  opacity:0;
-  transform:translateY(10px);
-  transition:opacity .4s var(--ease-out), transform .4s var(--ease-out), color .4s var(--ease-out);
+  font-size:13px;
+  color:var(--text-faint);
+  text-align:center;
+  margin-top:11px;
+  margin-bottom:30px;
 }
-.pb-checks li.in{opacity:1;transform:none;}
-.pb-checks li.done{color:var(--text-mid);}
-.pb-checks li .tick{
-  width:20px;
-  height:20px;
-  border-radius:999px;
-  flex-shrink:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:var(--track);
-  transition:background .35s var(--ease-out);
+.pb-cta{
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  margin-top:22px;margin-bottom:0;
+  background:var(--accent);color:#fff;
 }
-.pb-checks li.done .tick{background:var(--succ-300);}
-.pb-checks li .tick svg{width:11px;height:11px;color:#06301B;opacity:0;transform:scale(.5);transition:opacity .25s, transform .25s var(--ease-out);}
-.pb-checks li.done .tick svg{opacity:1;transform:scale(1);}
-.pb-cta{margin-top:auto;}
+.pb-cta svg{width:18px;height:18px;flex:none;}
 
 /* Sarah flying between surfaces */
 .sarah-fly{

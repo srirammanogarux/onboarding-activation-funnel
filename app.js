@@ -1085,36 +1085,57 @@ function sarahFly(toEl){
 }
 
 /* the chat's exit: their answers assemble into a plan */
-async function planBuildSequence(answers){
+async function planBuildSequence(answers, goal, name, firstLine){
   reach('planbuild');
-  $('pbSay').textContent = T('pb_coach');
-  $('pbTitle').innerHTML = T('pb_title');
-  $('pbCta').textContent = T('pb_cta');
+  const P = (C.PLAN || {})[goal] || C.PLAN.career;
+
+  $('pbSay').textContent      = T('pb_coach', name || '');
+  $('pbKicker').textContent   = T('pb_kicker');
+  $('pbTitle').innerHTML      = P.title;
+  $('pbFirstLbl').textContent = T('pb_first');
+  $('pbFirstVal').textContent = firstLine || P.first;
+  $('pbCta').innerHTML        = T('pb_cta') +
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/><path d="m12 5 7 7-7 7"/></svg>';
+  $('pbNote').textContent     = T('pb_note');
+
   const stack = $('pbStack');
   stack.innerHTML = '';
   answers.filter(a => a && a[1]).forEach(([k, v]) => {
     stack.appendChild(el(`<div class="pb-card"><small>${k}</small><b>${v}</b></div>`));
   });
+
   sarahFly($('pbAvatar').querySelector('img'));
-  JUICE.setAmbient('reward');   /* the room resolves to gold as the plan lands */
+  JUICE.setAmbient('reward');   /* the room resolves as the plan lands */
   showScreen('planBuildScreen');
   setTimeout(() => $('chatScreen').classList.add('is-hidden'), FF ? 0 : 500);
   if (!FF) JUICE.sweep();                      /* THE one ambient pass */
 
-  /* answers slide into the stack, then the checklist ticks */
-  const cards = [...stack.children];
-  for (let i = 0; i < cards.length; i++){
-    await wait(FF ? 0 : 240);
-    cards[i].classList.add('in');
+  /* Progressive disclosure, strictly in reading order: her line, then the
+     card's head, then each answer, then the first session, and the CTA
+     last so the eye finishes where the thumb has to go. */
+  const beats = [
+    $('pbCoach'), $('pbKicker'), $('pbTitle'),
+    ...stack.children,
+    $('pbFirst'), $('pbCta'), $('pbNote'),
+  ].filter(Boolean);
+
+  if (FF){
+    beats.forEach(b => b.classList.add('in'));
+  } else {
+    await wait(260);
+    for (const b of beats){
+      b.classList.add('in');
+      await wait(b.classList.contains('pb-card') ? 130 : 190);
+    }
+    await wait(200);
   }
-  await wait(FF ? 0 : 360);
-  JUICE.bokeh(10);
+
   const cta = $('pbCta');
-  cta.style.visibility = 'visible';
   if (!FF) await new Promise(r => cta.addEventListener('click', r, { once: true }));
   hideScreen('planBuildScreen');
   await wait(FF ? 0 : 500);
 }
+
 
 /* ============================================================
    SPEAKING STAGE — the ladder. The chat ends before this screen.
@@ -1966,7 +1987,7 @@ async function flow(){
     ['FOCUS',    picked[0] || null],
     ['LEVEL',    level.charAt(0).toUpperCase() + level.slice(1)],
     ['LANGUAGE', L.label],
-  ]);
+  ], goal, name, picked[0] ? `${picked[0]}, out loud` : null);
 
   /* ---------- 9.3 · the speaking stage (the ladder) ---------- */
   const outcome = await stageLadder(goal, level);

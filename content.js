@@ -458,6 +458,20 @@ const TESTIMONIALS = {
 };
 
 /* ---------- the award credential, shown right before the mic ---------- */
+/*
+  PLAN — the headline the plan screen leads with, per goal. The rows
+  underneath are the learner's own answers, so this is the only line on
+  that screen we write for them; it has to name the thing they said they
+  wanted, not the product.
+*/
+const PLAN = {
+  career:   { title: 'Speaking up at work,<br>in English',      first: 'Disagreeing in a meeting, out loud' },
+  exam:     { title: 'Sounding certain<br>in the speaking test', first: 'A full answer, nothing rehearsed' },
+  personal: { title: 'Finishing your thoughts<br>in English',    first: 'One sentence, start to end' },
+  school:   { title: 'Being heard<br>in the seminar',            first: 'Saying the first thing, not the third' },
+  travel:   { title: 'Handling it yourself,<br>in English',      first: 'Asking for what you need, out loud' },
+};
+
 const AWARD = { kicker:"GOOGLE PLAY'S", title:'Best AI App of 2023',
                 line:'4.9\u2605  \u00b7  12Mn+ learners  \u00b7  190+ countries' };
 
@@ -550,7 +564,7 @@ function scenarioSet(goal, situation){
 
 window.CONTENT = {
   LANGUAGES, APPLANG_DESC, GOALS, EXAMS, IELTS_TYPES, examDateOptions,
-  bandNote, GOAL_FX, PROOF, OUTCOME, TESTIMONIALS, AWARD, PLAN_BUILD, SCENARIOS, scenarioSet, WORKMODE, MODE_LABEL, branches,
+  bandNote, GOAL_FX, PROOF, OUTCOME, TESTIMONIALS, AWARD, PLAN, PLAN_BUILD, SCENARIOS, scenarioSet, WORKMODE, MODE_LABEL, branches,
   SITUATIONS, SIT_FX, ACTIVATION, PW_TITLE,
   PRICING, COHORTS,
 };

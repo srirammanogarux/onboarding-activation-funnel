@@ -85,13 +85,22 @@
         <img src="assets/status-right.svg" alt="" width="67" height="12">
       </div>
       <div class="pb-wrap">
-        <div class="hs-coach">
+        <div class="hs-coach pb-rise" id="pbCoach">
           <div class="dp" id="pbAvatar"><img src="assets/sarah-avatar.png" alt="Sarah"></div>
           <p class="hs-say" id="pbSay"></p>
         </div>
-        <h2 class="pb-title" id="pbTitle"></h2>
-        <div class="pb-stack" id="pbStack"></div>
-        <button class="hs-cta pb-cta" id="pbCta" style="visibility:hidden"></button>
+        <!-- the chat card, taken full screen: same anatomy, room to breathe -->
+        <div class="pb-sheet">
+          <span class="pb-kicker pb-rise" id="pbKicker"></span>
+          <h2 class="pb-title pb-rise" id="pbTitle"></h2>
+          <div class="pb-rows" id="pbStack"></div>
+          <div class="pb-first pb-rise" id="pbFirst">
+            <span class="pb-first-lbl" id="pbFirstLbl"></span>
+            <b class="pb-first-val" id="pbFirstVal"></b>
+          </div>
+        </div>
+        <button class="hs-cta pb-cta pb-rise" id="pbCta"></button>
+        <span class="pb-note pb-rise" id="pbNote"></span>
       </div>
       <div class="home-indicator"></div>
     </section>
