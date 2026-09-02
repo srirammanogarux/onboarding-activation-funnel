@@ -332,17 +332,17 @@ const ACTIVATION = {
     ],
   },
   career: {
-    intro: "Time to hear you. Say this like you'd say it at work, clear and unhurried.",
+    intro: "Time to hear you. Say this like you'd say it to your manager, clear and unhurried.",
     ladder: [
-      { text: 'My voice matters at work.',
+      { text: "I see it differently, and here's why.",
         words: [
-          { w:'voice',   pre:'v',  hot:'oi', post:'ce',  ph:'voys',    tip:"One beat, ‘oy’ glides into ‘s’", start:56 },
-          { w:'matters', pre:'ma', hot:'tt', post:'ers', ph:'ma.turz', tip:"The ‘tt’ stays soft, like ‘madders’", start:52 },
+          { w:'differently', pre:'dif',  hot:'fer', post:'ently', ph:'di.fer.uhnt.lee', tip:"Four beats, and the third one is ‘uhnt’", start:52 },
+          { w:"here's",      pre:'here', hot:"'s",  post:'',      ph:'heerz',           tip:"Ends on a ‘z’, not an ‘s’",           start:50 },
         ] },
-      { text: 'I speak with confidence in every conversation.',
+      { text: "I'd like to challenge that assumption, respectfully.",
         words: [
-          { w:'confidence',   pre:'con',    hot:'fi', post:'dence', ph:'kon.fi.dens',      tip:"Stress the first beat: ‘kon’", start:50 },
-          { w:'conversation', pre:'conver', hot:'sa', post:'tion',  ph:'kon.vur.say.shun', tip:"Four beats, stress on ‘say’",  start:47 },
+          { w:'challenge',  pre:'chal', hot:'lenge', post:'',     ph:'cha.lenj',    tip:"Two beats, and it ends on a soft ‘j’",   start:49 },
+          { w:'assumption', pre:'as',   hot:'sump',  post:'tion', ph:'uh.sump.shun', tip:"The loud beat is ‘sump’, and it ends ‘shun’", start:47 },
         ] },
     ],
   },
