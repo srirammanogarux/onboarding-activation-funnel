@@ -144,7 +144,7 @@ const STR = {
     lbl_know_you: "Let’s Get to know you!",
     lbl_last_step: "Onto the last step",
     hs_say1: "I listened to how you read. Here is where you stand.",
-    hs_say2: (lv) => `You placed yourself at ${lv}. Under pressure you came in just below it. That gap is the whole game.`,
+    hs_say2: (lv, cefr) => `That run puts you at ${lv}${cefr ? `, ${cefr}` : ''}. Not a guess, that is what I just heard.`,
     hs_say3: (t) => `And this is where we are taking you. ${t}, over the next 8 months.`,
     hs_title: "Your<br>speech<br>level",
     hs_take: (t) => `Let’s take<br>you to<br><em>${t}</em>`,

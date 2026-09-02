@@ -308,9 +308,11 @@ const SITUATIONS = [
    Three AFFIRMATION phrases (user direction 2026-08-28): the first
    things a learner says out loud are self-affirming.
 
-   Sentence 1: simple.  Sentence 2: same spirit, harder words.
+   Sentence 1: short, and it carries their own name.  Sentence 2: the
+   same promise carried further, longer and with harder words.
    Sentence 3: sentence 2 again with its two hard words hidden, said
    from memory. Sarah never plays it back, she has no voice.
+   {name} is replaced with what they told us in the chat.
 
    A slip stops the run there. The pron-practice pair always comes
    from the sentence that broke; a clean run never sees practice.
@@ -319,59 +321,59 @@ const ACTIVATION = {
   exam: {
     intro: "Time to hear you. Say this like you mean it, the examiner listens for exactly this energy.",
     ladder: [
-      { text: 'I am ready to do well in this exam.',
+      { text: 'I am {name}, and I am ready for this exam.',
         words: [
           { w:'ready', pre:'rea', hot:'dy', post:'', ph:'reh.dee', tip:"Two quick beats: ‘reh’ then ‘dee’", start:55 },
           { w:'exam',  pre:'e',   hot:'xam', post:'', ph:'ig.zam', tip:"Stress the second beat: ‘zam’",    start:50 },
         ] },
-      { text: 'I express my opinions with clarity and confidence.',
+      { text: 'I am {name}, and I answer every question with clarity and confidence.',
         words: [
-          { w:'opinions', pre:'o',   hot:'pin', post:'ions', ph:'uh.pin.yunz', tip:"Stress the middle sound ‘pin’", start:51 },
-          { w:'clarity',  pre:'cla', hot:'ri',  post:'ty',   ph:'kla.ri.tee',  tip:"Three even beats, start on ‘kla’", start:49 },
+          { w:'question', pre:'ques', hot:'tio', post:'n',  ph:'kwes.chun',  tip:"The ‘tio’ says ‘chun’",           start:49 },
+          { w:'clarity',  pre:'cla',  hot:'ri',  post:'ty', ph:'kla.ri.tee', tip:"Three even beats, start on ‘kla’", start:49 },
         ] },
     ],
   },
   career: {
-    intro: "Time to hear you. Say this like you'd say it to your manager, clear and unhurried.",
+    intro: "Time to hear you. Say this like you'd say it at work, clear and unhurried.",
     ladder: [
-      { text: "I see it differently, and here's why.",
+      { text: 'I am {name}, and I speak up at work.',
         words: [
-          { w:'differently', pre:'dif',  hot:'fer', post:'ently', ph:'di.fer.uhnt.lee', tip:"Four beats, and the third one is ‘uhnt’", start:52 },
-          { w:"here's",      pre:'here', hot:"'s",  post:'',      ph:'heerz',           tip:"Ends on a ‘z’, not an ‘s’",           start:50 },
+          { w:'speak', pre:'sp', hot:'ea', post:'k', ph:'speek', tip:"One beat, and the ‘ea’ is a long ‘ee’", start:54 },
+          { w:'work',  pre:'w',  hot:'or', post:'k', ph:'wurk',  tip:"The ‘or’ says ‘ur’, not ‘or’",         start:52 },
         ] },
-      { text: "I'd like to challenge that assumption, respectfully.",
+      { text: 'I am {name}, and I speak clearly in every meeting at work.',
         words: [
-          { w:'challenge',  pre:'chal', hot:'lenge', post:'',     ph:'cha.lenj',    tip:"Two beats, and it ends on a soft ‘j’",   start:49 },
-          { w:'assumption', pre:'as',   hot:'sump',  post:'tion', ph:'uh.sump.shun', tip:"The loud beat is ‘sump’, and it ends ‘shun’", start:47 },
+          { w:'clearly', pre:'cl',  hot:'ear',  post:'ly', ph:'kleer.lee', tip:"Two beats, and the ‘ear’ is ‘eer’",  start:50 },
+          { w:'meeting', pre:'mee', hot:'ting', post:'',   ph:'mee.ting',  tip:"The ‘t’ softens, and it ends on ‘ng’", start:51 },
         ] },
     ],
   },
   personal: {
     intro: "Time to hear you. Say this like you'd say it to a friend, relaxed, no rush.",
     ladder: [
-      { text: 'I enjoy speaking English every day.',
+      { text: 'I am {name}, and I enjoy speaking English every day.',
         words: [
-          { w:'enjoy', pre:'en', hot:'joy', post:'', ph:'in.joy', tip:"Starts on ‘in’, not ‘en’", start:55 },
+          { w:'enjoy', pre:'en', hot:'joy', post:'',   ph:'in.joy', tip:"Starts on ‘in’, not ‘en’",      start:55 },
           { w:'every', pre:'e',  hot:'ve',  post:'ry', ph:'ev.ree', tip:"Two beats, not three: ‘ev.ree’", start:53 },
         ] },
-      { text: 'I express myself naturally, without hesitation.',
+      { text: 'I am {name}, and I express myself naturally, without hesitation.',
         words: [
-          { w:'naturally',  pre:'na',   hot:'tu', post:'rally', ph:'na.chruh.lee',   tip:"The ‘tu’ says ‘chruh’", start:48 },
-          { w:'hesitation', pre:'hesi', hot:'ta', post:'tion',  ph:'heh.zi.tay.shun', tip:"The ‘s’ is a soft ‘z’", start:49 },
+          { w:'naturally',  pre:'na',   hot:'tu', post:'rally', ph:'na.chruh.lee',    tip:"The ‘tu’ says ‘chruh’", start:48 },
+          { w:'hesitation', pre:'hesi', hot:'ta', post:'tion',  ph:'heh.zi.tay.shun', tip:"The ‘s’ is a soft ‘z’",  start:49 },
         ] },
     ],
   },
   school: {
     intro: "Time to hear you. Say this like you'd say it in class, steady and proud.",
     ladder: [
-      { text: 'I am proud to share my ideas in class.',
+      { text: 'I am {name}, and I am proud to speak in class.',
         words: [
-          { w:'proud', pre:'pr', hot:'ou', post:'d',  ph:'prowd',       tip:"The ‘ou’ says ‘ow’",          start:55 },
-          { w:'ideas', pre:'i',  hot:'de', post:'as', ph:'eye.dee.uhz', tip:"Three beats, starts on ‘eye’", start:51 },
+          { w:'proud', pre:'pr', hot:'ou', post:'d',  ph:'prowd', tip:"The ‘ou’ says ‘ow’",                  start:55 },
+          { w:'class', pre:'cl', hot:'a',  post:'ss', ph:'klas',  tip:"Two sounds at the front: ‘k’ then ‘l’", start:53 },
         ] },
-      { text: 'I answer difficult questions with confidence.',
+      { text: 'I am {name}, and I answer difficult questions with confidence.',
         words: [
-          { w:'difficult', pre:'di',   hot:'ffi', post:'cult', ph:'di.fi.kult',  tip:"Stress the first beat: ‘di’", start:50 },
+          { w:'difficult', pre:'di',   hot:'ffi', post:'cult', ph:'di.fi.kult', tip:"Stress the first beat: ‘di’", start:50 },
           { w:'questions', pre:'ques', hot:'tio', post:'ns',   ph:'kwes.chunz', tip:"The ‘tio’ says ‘chun’",       start:49 },
         ] },
     ],
@@ -379,12 +381,12 @@ const ACTIVATION = {
   travel: {
     intro: "Time to hear you. Say this like you're already on the trip, easy and sure.",
     ladder: [
-      { text: 'I am comfortable asking for help.',
+      { text: 'I am {name}, and I am comfortable asking for help.',
         words: [
           { w:'comfortable', pre:'com', hot:'for', post:'table', ph:'kumf.tur.bul', tip:"Three beats, not four: ‘kumf.tur.bul’", start:46 },
           { w:'asking',      pre:'a',   hot:'ski', post:'ng',    ph:'ah.sking',     tip:"Open with a long ‘ah’",                 start:54 },
         ] },
-      { text: 'I handle unexpected situations with ease.',
+      { text: 'I am {name}, and I handle unexpected situations with ease.',
         words: [
           { w:'unexpected', pre:'unex', hot:'pec', post:'ted',   ph:'un.ik.spek.tid',  tip:"Stress lands on ‘spek’", start:48 },
           { w:'situations', pre:'situ', hot:'a',   post:'tions', ph:'si.chu.ay.shunz', tip:"The ‘tu’ says ‘chu’",    start:47 },

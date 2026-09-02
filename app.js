@@ -1318,7 +1318,7 @@ function stgFlagWords(words){
   });
 }
 
-async function stageLadder(goal, level){
+async function stageLadder(goal, level, name){
   const outcome = ladderOutcome(level);
   let failAt = { weak: 1, mid: 2, midhigh: 3, strong: 0 }[outcome];
 
@@ -1328,13 +1328,14 @@ async function stageLadder(goal, level){
   JUICE.setAmbient('idle');
   const steps = [...$('stgSteps').children];
   const R = ACT.ladder;
+  const who = (t) => t.replace('{name}', name || 'friend');
   /* sentence 3 is sentence 2 again, its two hard words hidden */
   const plan = [
-    { key:'stage', phrase: R[0].text, words: R[0].words, gaps: [],
+    { key:'stage', phrase: who(R[0].text), words: R[0].words, gaps: [],
       coach: ACT_INTRO },
-    { key:'read2', phrase: R[1].text, words: R[1].words, gaps: [],
+    { key:'read2', phrase: who(R[1].text), words: R[1].words, gaps: [],
       coach: T('stg_r2') },
-    { key:'echo',  phrase: R[1].text, words: R[1].words,
+    { key:'echo',  phrase: who(R[1].text), words: R[1].words,
       gaps: R[1].words.map(w => w.w), coach: T('stg_r3') },
   ];
 
@@ -1422,16 +1423,16 @@ function hideScreen(id){
 const HS_LEVELS = ['Proficient', 'Advanced', 'Upper intermediate', 'Intermediate', 'Beginner', 'Novice'];
 const HS_CEFR   = { 'Proficient':'C2', 'Advanced':'C1', 'Upper intermediate':'B2', 'Intermediate':'B1', 'Beginner':'A2', 'Novice':'A1' };
 const HS_POS    = [8, 25.5, 43, 60.5, 78, 95.5];
-const LEVEL_METER = {
-  beginner:     { name:'A2', score:32, tgt:'Upper intermediate', tgtScore:68 },
-  intermediate: { name:'B1', score:45, tgt:'Advanced',           tgtScore:82 },
-  advanced:     { name:'B2', score:58, tgt:'Proficient',         tgtScore:93 },
-};
-/* a clean ladder run starts a band higher — the placement is earned */
-const STRONG_METER = {
-  beginner:     { name:'B1', score:50, tgt:'Advanced',   tgtScore:82 },
-  intermediate: { name:'B2', score:60, tgt:'Proficient', tgtScore:90 },
-  advanced:     { name:'C1', score:70, tgt:'Proficient', tgtScore:95 },
+/* The run decides the placement, not what they claimed earlier in the
+   chat. Three sentences clean puts you at Advanced and we aim at
+   Proficient; slip on the second or third and you are Intermediate;
+   slip on the very first, simplest line and you are a Beginner. The
+   scores are chosen so the bubble parks on that label's dot. */
+const OUTCOME_METER = {
+  strong:  { name:'Advanced',     cefr:'C1', score:90, tgt:'Proficient', tgtScore:100 },
+  midhigh: { name:'Intermediate', cefr:'B1', score:62, tgt:'Advanced',   tgtScore:90  },
+  mid:     { name:'Intermediate', cefr:'B1', score:58, tgt:'Advanced',   tgtScore:90  },
+  weak:    { name:'Beginner',     cefr:'A2', score:36, tgt:'Advanced',   tgtScore:90  },
 };
 
 function buildMeter(){
@@ -1554,11 +1555,8 @@ function hsPracticeWord(idx){
 }
 
 async function hintSequence(level, outcome = 'weak'){
-  /* meter position reflects how far they got before stopping */
-  const base = LEVEL_METER[level] || LEVEL_METER.beginner;
-  const cfg = outcome === 'strong'
-    ? (STRONG_METER[level] || STRONG_METER.beginner)
-    : { ...base, score: base.score + ({ mid: 8, midhigh: 12 }[outcome] || 0) };
+  /* the meter reads the run, and nothing else */
+  const cfg = OUTCOME_METER[outcome] || OUTCOME_METER.weak;
   buildMeter();
   $('hsPct').textContent = '0%';
   $('hsBub').style.top = '95.5%';
@@ -1579,7 +1577,7 @@ async function hintSequence(level, outcome = 'weak'){
   /* beat 1 — where you stand */
   await wait(900);
   await hsAnimateScore(0, cfg.score, FF ? 60 : 1700);
-  $('hsSay').textContent = T('hs_say2', cfg.name);
+  $('hsSay').textContent = T('hs_say2', cfg.name, cfg.cefr);
   await wait(1900);
 
   /* beat 2 — where we take you (gold) */
@@ -1677,13 +1675,11 @@ function pwTravel(from, to, dur){
 function localizePaywallChrome(){
   const set = (sel, html) => document.querySelectorAll(sel).forEach(n => n.innerHTML = html);
   set('#paywallScreen .pw-cta', T('pw_cta'));
-  set('#paywallScreen .pw-h2:first-of-type', C.PRICING.socialProof);
   document.querySelector('.gift-title').innerHTML = T('gift_title');
   document.querySelector('.gift-tap').textContent = T('gift_tap');
   set('.gc-txt small', T('welcome_offer'));
   document.querySelector('.offer-h').innerHTML = T('limited_time');
   document.querySelector('.op-pill').textContent = T('one_time_offer');
-  document.querySelector('.offer-plan small').textContent = T('per_month_note');
   document.querySelector('#offerScreen .pw-cta').textContent = T('offer_cta');
   $('offerSeeAll').textContent = T('see_all');
   document.querySelector('.plans-sheet h4').textContent = T('choose_plan');
@@ -2050,7 +2046,7 @@ async function flow(){
   ], goal, name, picked[0] ? `${picked[0]}, out loud` : null);
 
   /* ---------- 9.3 · the speaking stage (three sentences) ---------- */
-  const outcome = await stageLadder(goal, level);
+  const outcome = await stageLadder(goal, level, name);
 
   /* ---------- 9.3 – 9.7 · takeovers ---------- */
   await hintSequence(level, outcome);

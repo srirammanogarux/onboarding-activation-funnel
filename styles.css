@@ -1687,6 +1687,8 @@ body{
   color:#241A05;
 }
 .pw-tag2{right:10px;top:-64px;}
+/* once the hero collapses the tag would sit on the headline */
+#paywallScreen.merged .pw-tag2{top:-16px;}
 
 /* --- paywall body --- */
 .pw-body{
@@ -3720,3 +3722,44 @@ body{
   background:#17121F;border-style:solid;color:#fff;
 }
 .devpanel .dp-other button{font-size:11.5px;padding:5px 9px;opacity:.72;}
+
+/* --- what PRO actually buys: four lines, nothing else --- */
+.pw-feats{
+  display:flex;
+  flex-direction:column;
+  gap:22px;
+  padding:34px 26px 8px;
+}
+.pw-feats li{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  list-style:none;
+}
+.pw-feats svg{
+  width:23px;
+  height:23px;
+  flex-shrink:0;
+  color:var(--text-low);
+}
+.pw-feats span{
+  font-family:var(--font-body);
+  font-size:15.5px;
+  line-height:22px;
+  color:var(--text-mid);
+}
+.offer-bar .op-pill{align-self:center;}
+.offer-plans{margin-top:10px;}
+.offer-plans .pw-plan b{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:1px;
+}
+.offer-plans .pw-plan b s{
+  font-size:12.5px;
+  line-height:16px;
+  color:var(--text-faint);
+  text-decoration:line-through;
+  font-weight:500;
+}
