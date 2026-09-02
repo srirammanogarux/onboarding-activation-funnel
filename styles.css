@@ -2136,12 +2136,29 @@ body{
   left:50%;
   top:405px;
   transform:translate(-50%,-50%);
+  transform-origin:50% 68%;      /* it rocks on its base, not its middle */
   width:660px;
   max-width:none;
   z-index:2;
+  transition:opacity .4s var(--ease-out);
+  animation:gift-wobble 3.4s var(--ease-out) .8s infinite;
+}
+/* a shake every few seconds: the box is asking to be tapped */
+@keyframes gift-wobble{
+  0%, 60%, 100%{transform:translate(-50%,-50%) rotate(0deg);}
+  63%{transform:translate(-50%,-51.2%) rotate(-3.4deg);}
+  67%{transform:translate(-50%,-51.8%) rotate(3deg);}
+  71%{transform:translate(-50%,-51%) rotate(-2.3deg);}
+  75%{transform:translate(-50%,-51.4%) rotate(1.7deg);}
+  79%{transform:translate(-50%,-50.4%) rotate(-1deg);}
+  83%{transform:translate(-50%,-50%) rotate(0deg);}
+}
+#giftScreen.open .gift-closed{
+  opacity:0;
+  animation:none;
+  transform:translate(-50%,-50%) scale(.94);
   transition:opacity .4s var(--ease-out), transform .4s var(--ease-out);
 }
-#giftScreen.open .gift-closed{opacity:0;transform:translate(-50%,-50%) scale(.94);}
 .gift-open{
   position:absolute;
   inset:0;
@@ -2859,6 +2876,7 @@ body{
 @media (prefers-reduced-motion: reduce){
   .amb-blob{animation:none;opacity:0 !important;}
   .fx-layer{display:none;}
+  .gift-closed{animation:none;}
 }
 
 /* ============================================================
