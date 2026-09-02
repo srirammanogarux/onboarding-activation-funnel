@@ -1542,7 +1542,7 @@ body{
     var(--bg);
   transition:height 1s var(--ease-out);
 }
-#paywallScreen.merged .pw-hero{height:408px;}
+#paywallScreen.merged .pw-hero{height:392px;}
 .pw-topbar{
   position:absolute;
   top:56px;
@@ -1604,9 +1604,16 @@ body{
 }
 /* merged: squish the whole graph vertically; dot/tags stay glued to the
    curve because they squish with it (and counter-scale themselves) */
-#paywallScreen.merged .pw-graph{height:300px;transform:scaleY(.72);}
-#paywallScreen.merged .pwg-dot{transform:scale(1) scaleY(1.389);}
-#paywallScreen.merged .pw-tag{transform:scaleY(1.389);transform-origin:center top;}
+#paywallScreen.merged .pw-graph{height:236px;transform:scaleY(.6);}
+#paywallScreen.merged .pwg-dot{transform:scale(1) scaleY(1.667);}
+#paywallScreen.merged .pw-tag{transform:scaleY(1.667);transform-origin:center top;}
+/* sleeker once collapsed: the fill is a wash under the line, not a
+   slab with a hard edge across the screen */
+#paywallScreen.merged .pwg-area{
+  opacity:.42;
+  -webkit-mask-image:linear-gradient(180deg, #000 34%, transparent 96%);
+  mask-image:linear-gradient(180deg, #000 34%, transparent 96%);
+}
 /* the trail has arrived: no travel marker left to draw */
 #paywallScreen.merged .pwg-drop{opacity:0;transition:opacity .5s var(--ease-out);}
 .pwg-area{
@@ -1690,7 +1697,7 @@ body{
 }
 .pw-tag2{right:10px;top:-64px;}
 /* once the hero collapses the tag would sit on the headline */
-#paywallScreen.merged .pw-tag2{top:26px;}
+#paywallScreen.merged .pw-tag2{top:34px;}
 
 /* --- paywall body --- */
 .pw-body{
@@ -2074,7 +2081,7 @@ body{
    60964/60094, hue-shifted purple → gold.
    ============================================================ */
 #giftScreen{
-  background:linear-gradient(155deg, var(--bg) 47%, #2C2413 123%);
+  background:linear-gradient(155deg, var(--bg) 47%, #1D1A4E 123%);
   cursor:pointer;
 }
 .gift-status{position:relative;z-index:5;background:none;}
@@ -2154,10 +2161,10 @@ body{
   width:168px;
   height:127px;
   overflow:hidden;
-  background:linear-gradient(180deg, #C6944A 0%, #B8863E 14%, #A2762E 100%);
+  background:linear-gradient(180deg, #7B73FF 0%, #6C63FF 14%, #4A42C4 100%);
   box-shadow:inset 0 -14px 26px rgba(0,0,0,.22);
 }
-.go-lip{position:absolute;top:0;left:0;right:0;height:9px;background:#7E5D22;}
+.go-lip{position:absolute;top:0;left:0;right:0;height:9px;background:#3B34A0;}
 .go-ribbon{position:absolute;left:67px;top:0;bottom:0;width:17px;background:linear-gradient(180deg, #FBEEB8, #EBD891);}
 .go-r2{left:85px;width:16px;background:linear-gradient(180deg, #FFF5CA, #F2E3A6);}
 .go-lidshadow{left:99px;top:502px;width:168px;}
