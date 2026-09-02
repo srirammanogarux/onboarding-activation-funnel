@@ -518,15 +518,19 @@ body{
   animation:sticker-in .6s var(--ease-spring) both;
   flex-shrink:0;
 }
-/* soft indigo spotlight so she reads as a moment, not a pasted cutout */
+/* A whisper of a spotlight. It was a hard-edged purple egg behind her,
+   brighter than anything else on the screen and reading as a sticker
+   pasted on a lamp. Enough now to separate her from the page and no
+   more; the sparkles carry the charm. */
 .sarah-anim::before{
   content:"";
   position:absolute;
-  inset:-20% -38%;
+  inset:-30% -52%;
   border-radius:50%;
-  background:
-    radial-gradient(circle at 50% 44%, color-mix(in srgb, var(--blue-300) 26%, transparent), transparent 52%),
-    radial-gradient(circle at 50% 46%, color-mix(in srgb, var(--accent) 32%, transparent), transparent 72%);
+  background:radial-gradient(circle at 50% 48%,
+    color-mix(in srgb, var(--accent) 11%, transparent) 0%,
+    color-mix(in srgb, var(--accent) 5%, transparent) 46%,
+    transparent 74%);
   pointer-events:none;
 }
 .sarah-anim img{
@@ -3035,6 +3039,24 @@ body{
    instead of a bubble. Everything rises in reading order and the CTA
    is last, so the eye finishes where the thumb needs to go.
    ============================================================ */
+/* Plan B's field: an indigo bloom off the top left and a warm one to
+   the right, so the screen has weather behind the card instead of a
+   flat black plate. */
+#planBuildScreen{overflow:hidden;background:var(--bg);}
+#planBuildScreen::before{
+  content:'';position:absolute;left:-150px;top:-190px;width:540px;height:520px;
+  border-radius:50%;pointer-events:none;z-index:0;filter:blur(10px);
+  background:radial-gradient(circle,
+    rgba(108,99,255,.34) 0%, rgba(108,99,255,.16) 42%, rgba(108,99,255,0) 74%);
+}
+#planBuildScreen::after{
+  content:'';position:absolute;right:-190px;top:60px;width:520px;height:480px;
+  border-radius:50%;pointer-events:none;z-index:0;filter:blur(10px);
+  background:radial-gradient(circle,
+    rgba(217,162,74,.17) 0%, rgba(217,162,74,.07) 45%, rgba(217,162,74,0) 76%);
+}
+#planBuildScreen > *{position:relative;z-index:1;}
+
 .pb-wrap{
   flex:1;
   display:flex;
@@ -3051,8 +3073,7 @@ body{
 .pb-sheet{
   display:flex;
   flex-direction:column;
-  flex:1;
-  margin-top:26px;
+  margin-top:22px;
   border-radius:24px;
   background:linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.015));
   border:1px solid rgba(157,150,255,.17);
@@ -3086,7 +3107,7 @@ body{
   display:flex;
   align-items:center;
   gap:14px;
-  padding:21px 0;
+  padding:16px 0;
   border-top:1px solid rgba(255,255,255,.08);
   opacity:0;
   transform:translateY(14px);
@@ -3112,7 +3133,7 @@ body{
   display:flex;
   flex-direction:column;
   gap:4px;
-  margin-top:auto;
+  margin-top:18px;
   padding:18px 24px 20px;
   background:rgba(108,99,255,.11);
   border-top:1px solid rgba(157,150,255,.16);
@@ -3132,8 +3153,8 @@ body{
 }
 .pb-cta{
   display:flex;align-items:center;justify-content:center;gap:9px;
-  margin-top:22px;margin-bottom:0;
-  background:var(--accent);color:#fff;
+  margin-top:auto;margin-bottom:0;
+  background:#fff;color:#14121A;
 }
 .pb-cta svg{width:18px;height:18px;flex:none;}
 
@@ -3355,21 +3376,30 @@ body{
      4% difference: at speed the lower half of every card dissolved into
      the background. It needs to be a surface, so it gets lifted, edged,
      and floated on an indigo glow. */
-  background:#1A1626;
+  /* Warm charcoal against the cool blue page: it separates by
+     temperature rather than by an indigo glow, which was doing the
+     lifting before and reading as a halo stuck on a flat rectangle. */
+  background:#211D1B;
   scroll-snap-align:center;
-  border:1px solid rgba(157,150,255,.18);
+  border:1px solid rgba(255,255,255,.085);
   padding:0;
   backdrop-filter:none;
   box-shadow:
-    0 20px 46px -14px rgba(0,0,0,.8),
-    0 14px 64px -20px rgba(108,99,255,.62),
-    inset 0 1px 0 rgba(255,255,255,.07);
+    0 18px 40px -16px rgba(0,0,0,.85),
+    inset 0 1px 0 rgba(255,255,255,.06);
 }
 .t-card::after{content:none;}
-.tc-photo{position:absolute;inset:0 0 auto 0;width:100%;height:215px;object-fit:cover;display:block;}
+/* The photo is masked out at its foot instead of stopping on a line,
+   so it dissolves into the card rather than sitting on top of it. */
+.tc-photo{
+  position:absolute;inset:0 0 auto 0;width:100%;height:248px;
+  object-fit:cover;display:block;
+  -webkit-mask-image:linear-gradient(180deg,#000 0%,#000 44%,rgba(0,0,0,.72) 66%,rgba(0,0,0,.28) 84%,transparent 100%);
+          mask-image:linear-gradient(180deg,#000 0%,#000 44%,rgba(0,0,0,.72) 66%,rgba(0,0,0,.28) 84%,transparent 100%);
+}
 .tc-scrim{
-  position:absolute;left:0;right:0;top:105px;height:235px;
-  background:linear-gradient(180deg,rgba(26,22,38,0),rgba(26,22,38,.94) 55%,#1A1626);
+  position:absolute;left:0;right:0;top:120px;height:220px;
+  background:linear-gradient(180deg,rgba(33,29,27,0),rgba(33,29,27,.72) 48%,rgba(33,29,27,.96) 78%,#211D1B);
 }
 .tc-body{position:absolute;left:0;right:0;bottom:0;padding:18px;display:flex;flex-direction:column;gap:11px;}
 .tc-quote{
@@ -3505,23 +3535,45 @@ body{
   transition:background 1.2s var(--ease-out);
 }
 .ambient{overflow:hidden;z-index:0;}
-.amb-a,.amb-b{
+/* These were 360px discs pinned to the corners with a 58px blur, so a
+   bright moment read as a lamp switched on at the top left rather than
+   a room lighting up. They are much larger now, pushed further off the
+   edges, blurred harder and given a long tail, so the falloff crosses
+   the whole screen and the light has nowhere to form an edge. */
+.amb-a,.amb-b,.amb-c{
   position:absolute;display:block;border-radius:50%;
-  filter:blur(58px);
+  filter:blur(96px);
   will-change:transform,opacity;
   transition:background 1.4s var(--ease-out), opacity .8s var(--ease-out);
 }
 .amb-a{
-  width:360px;height:360px;left:-90px;top:-40px;
-  background:radial-gradient(circle, rgba(var(--aur-1)/.42), rgba(var(--aur-1)/0) 70%);
+  width:640px;height:640px;left:-210px;top:-230px;
+  background:radial-gradient(circle,
+    rgba(var(--aur-1)/.40) 0%, rgba(var(--aur-1)/.22) 38%,
+    rgba(var(--aur-1)/.08) 64%, rgba(var(--aur-1)/0) 84%);
   opacity:calc(.34 * var(--aur-boost));
   animation:aurA 13s ease-in-out infinite;
 }
 .amb-b{
-  width:320px;height:320px;right:-80px;top:120px;
-  background:radial-gradient(circle, rgba(var(--aur-2)/.34), rgba(var(--aur-2)/0) 70%);
+  width:580px;height:580px;right:-200px;top:40px;
+  background:radial-gradient(circle,
+    rgba(var(--aur-2)/.32) 0%, rgba(var(--aur-2)/.18) 40%,
+    rgba(var(--aur-2)/.06) 66%, rgba(var(--aur-2)/0) 85%);
   opacity:calc(.26 * var(--aur-boost));
   animation:aurB 17s ease-in-out infinite;
+}
+/* a very wide, very faint wash that ties the two together so the
+   brightening reads as one halo around everything */
+.amb-c{
+  width:760px;height:620px;left:-165px;top:120px;
+  background:radial-gradient(circle,
+    rgba(var(--aur-1)/.16) 0%, rgba(var(--aur-1)/.07) 46%, rgba(var(--aur-1)/0) 78%);
+  opacity:calc(.22 * var(--aur-boost));
+  animation:aurC 21s ease-in-out infinite;
+}
+@keyframes aurC{
+  0%,100%{transform:translate3d(0,0,0) scale(1);}
+  50%    {transform:translate3d(18px,-40px,0) scale(1.08);}
 }
 @keyframes aurA{
   0%,100%{transform:translate3d(0,0,0) scale(1);}
@@ -3544,7 +3596,7 @@ body{
 #phone.amb-lit{
   --aur-1:120 136 255;
   --aur-2: 96 112 246;
-  --aur-boost:calc(1.5 * var(--aur-lift, 1));
+  --aur-boost:calc(1.15 * var(--aur-lift, 1));
 }
 #phone.amb-lit .head-bloom{
   opacity:.95;
@@ -3553,8 +3605,8 @@ body{
 }
 #phone.amb-lit .head-bloom,
 #phone .head-bloom{transition:opacity .5s var(--ease-out), background .5s var(--ease-out);}
-#phone .amb-a,#phone .amb-b{transition:opacity .9s var(--ease-out), background 1.4s var(--ease-out);}
-#phone.amb-lit .amb-a,#phone.amb-lit .amb-b{transition:opacity .34s var(--ease-out);}
+#phone .amb-a,#phone .amb-b,#phone .amb-c{transition:opacity .9s var(--ease-out), background 1.4s var(--ease-out);}
+#phone.amb-lit .amb-a,#phone.amb-lit .amb-b,#phone.amb-lit .amb-c{transition:opacity .34s var(--ease-out);}
 #phone.amb-thinking .amb-a{animation-duration:7s;}
 #phone.amb-listening{--aur-1:120 150 255;--aur-2:217 162 74;--aur-boost:1.35;}
 #phone.amb-reward{--aur-1:217 162 74;--aur-2:231 180 85;--aur-boost:1.6;}
@@ -3570,7 +3622,7 @@ body{
 #phone.tuned .head-bloom{opacity:.8;}
 
 @media (prefers-reduced-motion:reduce){
-  .amb-a,.amb-b{animation:none;}
+  .amb-a,.amb-b,.amb-c{animation:none;}
   .progress-fill{transition:none;}
 }
 

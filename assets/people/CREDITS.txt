@@ -9,8 +9,14 @@ below is now one person, face visible, Southeast Asian, in a context that does n
 fight the quote. Where no honest photo existed for a role, the ROLE was changed
 rather than the photo forced — Adi is now export sales, Ratna a clinic admin.
 
-career-1  7644145   career-2  5668870   career-3  6538850   career-4 11563145
+career-1  7644145   career-2  5668870   career-3  8154160   career-4  8154167
 exam-1    7578810   exam-2   36619715   exam-3   15170792
 personal-1 29204802 personal-2 8154164  personal-3 5206263
 school-1 30736650   school-2  5815067   school-3 18109423
-travel-1  7706963   travel-2 10740491   travel-3 37583497
+travel-1 31112238   travel-2 10740491   travel-3 37583497
+
+Candid pass 2026-09-02. Three slots were still posed-to-camera stock
+(career-3 standing at a desk, career-4 smiling in a white blazer,
+travel-1 holding a clipboard). Replaced with candid environmental work:
+someone at their desk mid-task in window light, and a stock aisle for
+the logistics quote. The brief is documentary, not studio.

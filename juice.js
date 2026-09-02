@@ -158,7 +158,7 @@
     const p = phone();
     if (!p || REDUCED) return;
     hits = Math.min(hits + 1, 5);
-    p.style.setProperty('--aur-lift', (1 + hits * 0.34).toFixed(2));
+    p.style.setProperty('--aur-lift', (1 + hits * 0.18).toFixed(2));
   }
 
   /* the aurora swells on an answer and decays to idle */
@@ -183,7 +183,7 @@
     if (!p) return;
     if (p.classList.contains('amb-lit')){
       /* already flooded by the arrivals: push it to the top of its range */
-      p.style.setProperty('--aur-lift', '2.7');
+      p.style.setProperty('--aur-lift', '1.9');
       return;
     }
     const glow = document.querySelector('.head-bloom');
