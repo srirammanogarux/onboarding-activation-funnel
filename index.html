@@ -143,6 +143,128 @@
       <div class="home-indicator"></div>
     </section>
 
+    <!-- ============ ACT: one real question (intermediate / advanced) ============ -->
+    <section class="screen takeover is-hidden" id="actScreen" hidden>
+      <div class="statusbar">
+        <img src="assets/status-time.svg" alt="9:41" width="54" height="21">
+        <img src="assets/status-right.svg" alt="" width="67" height="12">
+      </div>
+      <div class="stage-wrap">
+        <div class="hs-coach">
+          <div class="dp"><img src="assets/sarah-avatar.png" alt="Sarah"></div>
+          <p class="hs-say" id="actSay"></p>
+        </div>
+        <div class="act-line" id="actLine">
+          <i class="stg-glow" aria-hidden="true"></i>
+          <p class="act-eyebrow">YOUR FIRST PRACTICE</p>
+          <div class="stg-read act-card"><p class="act-q" id="actQ"></p></div>
+        </div>
+        <div class="stg-microw" id="actMicRow">
+          <button class="hint-bulb" id="actBulb" hidden>
+            <span class="hb-tip" id="actBulbTip">See a model answer</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4"/><path d="M12 3a6.5 6.5 0 0 0-3.6 11.9c.7.5 1.1 1.2 1.1 2.1h5a2.6 2.6 0 0 1 1.1-2.1A6.5 6.5 0 0 0 12 3Z"/></svg>
+          </button>
+          <div class="mic-tip" id="actTip">Answer in your own words</div>
+          <div class="convmic idle" id="actMic">
+            <div class="cm-mic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><line x1="12" y1="18" x2="12" y2="22"/></svg>
+            </div>
+            <button class="cm-cancel" id="actCancel" aria-label="Cancel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
+            <div class="cm-wave" id="actWave"></div>
+            <button class="cm-confirm" id="actConfirm" aria-label="Stop"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="2.5"/></svg></button>
+            <span class="cm-tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12.5 9.5 17 19 7.5"/></svg></span>
+          </div>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </section>
+
+    <!-- ============ ANALYSING (impromptu path) ============ -->
+    <section class="screen takeover is-hidden" id="anaScreen" hidden>
+      <div class="statusbar">
+        <img src="assets/status-time.svg" alt="9:41" width="54" height="21">
+        <img src="assets/status-right.svg" alt="" width="67" height="12">
+      </div>
+      <div class="ana-wrap">
+        <div class="ana-dp"><img src="assets/sarah-avatar.png" alt="Sarah"></div>
+        <p class="ana-line" id="anaLine">Analysing your speech.</p>
+        <div class="ana-bar"><i id="anaBar"></i></div>
+      </div>
+      <div class="home-indicator"></div>
+    </section>
+
+    <!-- ============ SCORE REPORT (impromptu path) ============ -->
+    <section class="screen takeover is-hidden" id="scoreScreen" hidden>
+      <div class="statusbar">
+        <img src="assets/status-time.svg" alt="9:41" width="54" height="21">
+        <img src="assets/status-right.svg" alt="" width="67" height="12">
+      </div>
+      <div class="sc-wrap">
+        <p class="act-eyebrow sc-eyebrow" id="scEyebrow">YOUR FIRST SCORE</p>
+        <div class="sc-gauge">
+          <svg width="210" height="130" viewBox="0 0 210 130">
+            <path d="M 25 115 A 80 80 0 1 1 185 115" fill="none" stroke="var(--track)" stroke-width="14" stroke-linecap="round"/>
+            <path id="scArc" d="M 25 115 A 80 80 0 1 1 185 115" fill="none" stroke="var(--accent)" stroke-width="14" stroke-linecap="round" stroke-dasharray="0 500"/>
+          </svg>
+          <b class="sc-num" id="scNum">0</b>
+        </div>
+        <p class="sc-note">Your starting point, before any practice.</p>
+        <div class="sc-cards" id="scCards"></div>
+        <p class="sc-line" id="scLine"></p>
+        <button class="hs-cta sc-cta" id="scGo">Build my plan</button>
+      </div>
+      <div class="home-indicator"></div>
+    </section>
+
+    <!-- ============ FRAMEWORK: the 4-part model answer (hint path) ============ -->
+    <section class="screen takeover is-hidden" id="fwScreen" hidden>
+      <div class="statusbar">
+        <img src="assets/status-time.svg" alt="9:41" width="54" height="21">
+        <img src="assets/status-right.svg" alt="" width="67" height="12">
+      </div>
+      <div class="stage-wrap">
+        <div class="hs-coach">
+          <div class="dp"><img src="assets/sarah-avatar.png" alt="Sarah"></div>
+          <p class="hs-say" id="fwSay">Can't find the words? Borrow mine.</p>
+        </div>
+        <div class="fw-head">
+          <p class="act-eyebrow">HOW TO ANSWER</p>
+          <h2 class="fw-title">A simple 4-part answer.</h2>
+          <div class="fw-prog"><i id="fwFill"></i></div>
+        </div>
+        <div class="fw-card" id="fwCard"></div>
+        <div class="fw-foot">
+          <button class="hs-cta fw-next" id="fwNext">Next</button>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </section>
+
+    <!-- ============ PLAN LOADER (+ pronunciation survey) ============ -->
+    <section class="screen takeover is-hidden" id="ldrScreen" hidden>
+      <div class="statusbar">
+        <img src="assets/status-time.svg" alt="9:41" width="54" height="21">
+        <img src="assets/status-right.svg" alt="" width="67" height="12">
+      </div>
+      <div class="ldr-build">
+        <div class="ldr-ring">
+          <svg width="160" height="160" viewBox="0 0 160 160">
+            <circle cx="80" cy="80" r="70" fill="none" stroke="var(--track)" stroke-width="12"/>
+            <circle id="ldrArc" cx="80" cy="80" r="70" fill="none" stroke="var(--accent)" stroke-width="12" stroke-linecap="round" stroke-dasharray="0 440" transform="rotate(-90 80 80)"/>
+          </svg>
+          <b class="ldr-pct" id="ldrPct">0%</b>
+        </div>
+        <h2 class="ldr-head">Personalizing your plan</h2>
+        <div class="ldr-steps" id="ldrSteps"></div>
+      </div>
+      <div class="ldr-spacer"></div>
+      <div class="ldr-card" id="ldrCard" hidden></div>
+      <div class="ldr-dots" id="ldrDots" hidden>
+        <i></i><i></i><i></i>
+      </div>
+      <div class="home-indicator"></div>
+    </section>
+
     <!-- ============ HINT FLOW: level meter → fix pronunciation → practice ============ -->
     <section class="screen takeover is-hidden" id="hintScreen" hidden>
       <div class="statusbar">

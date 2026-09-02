@@ -118,19 +118,21 @@ function bandNote(band){
    they actually are — asking a colleague to confirm what they said.  */
 
 const WORKMODE = {
-  'Working a job':           'office',
-  'Studying':                'student',
-  'Freelancing':             'ownboss',
-  'Running my own business': 'ownboss',
-  'Looking for work':        'jobhunt',
-  'At home with family':     'athome',
-  'On a career break':       'careerbreak',
+  'Student':               'student',
+  'Working professional':  'office',
+  'Freelancer':            'ownboss',
+  'Business owner':        'ownboss',
+  'Homemaker':             'athome',
+  'On a career break':     'careerbreak',
+  'Looking for work':      'jobhunt',
+  'Something else':        'other',
 };
 
 const SCENARIOS = {
-  /* No set for exam — deliberately. The format is fixed and by this point
-     they have given us the exam, the type, the date and the target band.
-     usa-onboarding does carry three IELTS JTBDs if you want them back. */
+  /* Option lists are usa-onboarding's JTBD lists (GOALS.jtbd + JTBD_MODE
+     overrides), verbatim. Multi-select stays ours: min 1, no cap, plain
+     ticks. THE FIRST TICK IS THE BRANCHING KEY — its `fam` becomes
+     famFirst, which keys the question-noun (PRACTICE_ASK) and plan copy. */
   exam: null,
 
   career: {
@@ -138,67 +140,67 @@ const SCENARIOS = {
       office: {
         prompt: 'At work, which of these do you want to get right?',
         items: [
-          { e: '🗓', label: 'Ask my manager for time off',   who: 'your manager' },
-          { e: '✋', label: 'Disagree in a meeting',         who: 'the team' },
-          { e: '📊', label: 'Give my weekly update',         who: 'the team' },
-          { e: '🔁', label: 'Ask someone to repeat, politely', who: 'a fast-talking colleague' },
-          { e: '🍽', label: 'Join the conversation at lunch', who: 'a colleague' },
-          { e: '📈', label: 'Make my case in an appraisal',  who: 'your manager' },
+          { e:'💼', label: 'Ace a job interview',             fam:'interview' },
+          { e:'✋', label: 'Speak up in meetings',             fam:'meetings' },
+          { e:'⚡️', label: 'Understand fast coworkers',       fam:'fastspeech' },
+          { e:'🪜', label: 'Talk to my boss with confidence',  fam:'interview' },
+          { e:'📞', label: 'Handle customer calls',            fam:'customer' },
         ],
       },
       ownboss: {
         prompt: 'With clients, which of these do you want to get right?',
         items: [
-          { e:'🤝', label: 'Win a new client',              who: 'a prospective client' },
-          { e:'🏷', label: 'Explain and defend my price',   who: 'the client' },
-          { e:'📞', label: 'Run a first discovery call',    who: 'a prospective client' },
-          { e:'⏰', label: 'Chase a late payment',          who: 'the client' },
-          { e:'🛑', label: 'Push back when scope grows',    who: 'the client' },
-          { e:'🧯', label: 'Calm an unhappy customer',      who: 'the customer' },
+          { e:'🎯', label: 'Pitch on a client call',           fam:'pitch' },
+          { e:'🤝', label: 'Win a new client',                 fam:'pitch' },
+          { e:'🏷', label: 'Explain and defend my price',      fam:'pitch' },
+          { e:'⚡️', label: 'Understand fast clients',         fam:'fastspeech' },
+          { e:'⏰', label: 'Chase a late payment',             fam:'pitch' },
+          { e:'🛎', label: 'Handle a walk-in customer',        fam:'customer' },
         ],
       },
       jobhunt: {
         prompt: 'In your search, which of these do you want to get right?',
         items: [
-          { e:'💼', label: 'Ace a job interview',           who: 'the interviewer' },
-          { e:'☎️', label: 'Get through a phone screen',    who: 'the recruiter' },
-          { e:'📄', label: 'Explain a gap in my CV',        who: 'the interviewer' },
-          { e:'⚖️', label: 'Negotiate the offer',           who: 'the recruiter' },
-          { e:'🔗', label: 'Ask a contact for a referral',  who: 'a contact' },
-          { e:'📬', label: 'Follow up without nagging',     who: 'the recruiter' },
+          { e:'💼', label: 'Ace a job interview',              fam:'interview' },
+          { e:'🗣', label: 'Answer "tell me about yourself"',  fam:'interview' },
+          { e:'🔗', label: 'Network to find openings',         fam:'smalltalk' },
+          { e:'⚖️', label: 'Negotiate the offer',              fam:'pitch' },
         ],
       },
       student: {
         prompt: 'Starting out, which of these do you want to get right?',
         items: [
-          { e:'🎓', label: 'Land an internship',            who: 'the interviewer' },
-          { e:'🧪', label: 'Talk about my final project',   who: 'the interviewer' },
-          { e:'🪧', label: 'Approach a recruiter at a fair', who: 'a recruiter' },
-          { e:'🧑‍🏫', label: 'Ask a professor about openings', who: 'your professor' },
-          { e:'🗣', label: 'Speak up in a group assessment', who: 'the panel' },
-          { e:'👋', label: 'Introduce myself on day one',   who: 'a new colleague' },
+          { e:'🎓', label: 'Land an internship',               fam:'interview' },
+          { e:'🗣', label: 'Speak up in interviews',           fam:'interview' },
+          { e:'🔗', label: 'Network on campus',                fam:'smalltalk' },
         ],
       },
       athome: {
         prompt: 'Going back to work, which of these do you want to get right?',
         items: [
-          { e:'🚪', label: 'Interview again after years away',    who: 'the interviewer' },
-          { e:'🏡', label: 'Turn home years into strengths', who: 'the interviewer' },
-          { e:'⏸', label: 'Explain why I stopped working', who: 'the interviewer' },
-          { e:'💬', label: 'Speak up in a meeting again',   who: 'the team' },
-          { e:'🕒', label: 'Ask for flexible hours',        who: 'your manager' },
-          { e:'🧊', label: 'Break the ice at a new job',    who: 'a new colleague' },
+          { e:'🚪', label: 'Start working again',              fam:'interview' },
+          { e:'🏡', label: 'Talk about skills I built at home', fam:'interview' },
+          { e:'💬', label: 'Speak up in meetings',             fam:'meetings' },
+          { e:'🧊', label: 'Make friends at a new workplace',  fam:'smalltalk' },
         ],
       },
       careerbreak: {
         prompt: 'Getting back into it, which of these do you want to get right?',
         items: [
-          { e:'📄', label: 'Explain a gap in my CV',        who: 'the interviewer' },
-          { e:'💼', label: 'Ace a job interview',           who: 'the interviewer' },
-          { e:'💬', label: 'Speak up in a meeting again',   who: 'the team' },
-          { e:'☕️', label: 'Handle work small talk again',  who: 'a colleague' },
-          { e:'📨', label: 'Reach out to an old colleague', who: 'a former colleague' },
-          { e:'⚖️', label: 'Negotiate the offer',           who: 'the recruiter' },
+          { e:'📄', label: 'Explain a gap in my CV',           fam:'interview' },
+          { e:'💼', label: 'Ace a job interview',              fam:'interview' },
+          { e:'💬', label: 'Speak up in meetings again',       fam:'meetings' },
+          { e:'☕️', label: 'Handle work small talk again',     fam:'smalltalk' },
+        ],
+      },
+      _default: {
+        prompt: 'At work, which of these do you want to get right?',
+        items: [
+          { e:'💼', label: 'Ace a job interview',              fam:'interview' },
+          { e:'✋', label: 'Speak up in meetings',              fam:'meetings' },
+          { e:'⚡️', label: 'Understand fast coworkers',        fam:'fastspeech' },
+          { e:'🪜', label: 'Talk to my boss with confidence',  fam:'interview' },
+          { e:'📞', label: 'Handle customer calls',            fam:'customer' },
         ],
       },
     },
@@ -206,102 +208,123 @@ const SCENARIOS = {
 
   personal: {
     byMode: {
-      /* Working, freelancing, running a business and job-hunting share one
-         list. An adult's social life does not change because you invoice
-         instead of drawing a salary. Only the three below genuinely differ. */
       _default: {
         prompt: 'In daily life, which of these do you want to get right?',
         items: [
-          { e:'🧊', label: 'Break the ice with a stranger', who: 'someone you just met' },
-          { e:'🫂', label: 'Catch up after a long time',    who: 'your friend' },
-          { e:'🎉', label: 'Keep a party conversation going', who: 'another guest' },
-          { e:'👵', label: 'Handle the in-law questions',   who: 'your partner’s mother' },
-          { e:'🏘', label: 'Ask a neighbour for a favour',  who: 'your neighbour' },
-          { e:'🙅', label: 'Say no without sounding rude',  who: 'your friend' },
+          { e:'🧊', label: 'Make small talk feel natural',     fam:'smalltalk' },
+          { e:'🫂', label: 'Meet new people and make friends', fam:'smalltalk' },
+          { e:'🏥', label: 'Handle doctors and offices solo',  fam:'services' },
+          { e:'👵', label: "Win over my partner's family",     fam:'family' },
+        ],
+      },
+      office: {
+        prompt: 'In daily life, which of these do you want to get right?',
+        items: [
+          { e:'🧊', label: 'Make small talk feel natural',     fam:'smalltalk' },
+          { e:'🍽', label: 'Chat with colleagues outside work', fam:'smalltalk' },
+          { e:'🏥', label: 'Handle doctors and offices solo',  fam:'services' },
+          { e:'👵', label: "Win over my partner's family",     fam:'family' },
+        ],
+      },
+      ownboss: {
+        prompt: 'In daily life, which of these do you want to get right?',
+        items: [
+          { e:'🥂', label: 'Meet new people at events',        fam:'smalltalk' },
+          { e:'🧊', label: 'Make small talk feel natural',     fam:'smalltalk' },
+          { e:'🏥', label: 'Handle doctors and offices solo',  fam:'services' },
+          { e:'👵', label: "Win over my partner's family",     fam:'family' },
         ],
       },
       student: {
         prompt: 'Day to day, which of these do you want to get right?',
         items: [
-          { e:'👋', label: 'Introduce myself to a classmate', who: 'a classmate' },
-          { e:'↩️', label: 'Join a conversation midway',    who: 'a group of classmates' },
-          { e:'🛋', label: 'Sort things out with my flatmate', who: 'your flatmate' },
-          { e:'🎉', label: 'Keep a party conversation going', who: 'another student' },
-          { e:'🙏', label: 'Ask a friend for a favour',     who: 'your friend' },
-          { e:'🙅', label: 'Say no without sounding rude',  who: 'your friend' },
+          { e:'👋', label: 'Make friends on campus',           fam:'smalltalk' },
+          { e:'🧊', label: 'Make small talk feel natural',     fam:'smalltalk' },
+          { e:'🏥', label: 'Handle doctors and offices solo',  fam:'services' },
         ],
       },
       athome: {
         prompt: 'Day to day, which of these do you want to get right?',
         items: [
-          { e:'🧑‍🏫', label: 'Raise a concern with the teacher', who: 'your child’s teacher' },
-          { e:'🚸', label: 'Break the ice at the school gate', who: 'another parent' },
-          { e:'🎈', label: 'Chat at a children’s party',    who: 'another parent' },
-          { e:'🏘', label: 'Ask a neighbour for a favour',  who: 'your neighbour' },
-          { e:'👵', label: 'Handle the in-law questions',   who: 'your partner’s mother' },
-          { e:'🫂', label: 'Catch up after a long time',    who: 'your friend' },
+          { e:'🧑‍🏫', label: 'Support my kids at school',        fam:'family' },
+          { e:'🏥', label: 'Talk to teachers and doctors solo', fam:'services' },
+          { e:'🚸', label: 'Make friends at the school gate',  fam:'smalltalk' },
+          { e:'👵', label: "Win over my partner's family",     fam:'family' },
+        ],
+      },
+      jobhunt: {
+        prompt: 'In daily life, which of these do you want to get right?',
+        items: [
+          { e:'🫂', label: 'Meet new people and make friends', fam:'smalltalk' },
+          { e:'🧊', label: 'Make small talk feel natural',     fam:'smalltalk' },
+          { e:'🏥', label: 'Handle doctors and offices solo',  fam:'services' },
+          { e:'👵', label: "Win over my partner's family",     fam:'family' },
         ],
       },
       careerbreak: {
         prompt: 'Getting back into it, which of these do you want to get right?',
         items: [
-          { e:'🌤', label: 'Get back into everyday chat',   who: 'a friend you haven’t seen' },
-          { e:'📞', label: 'Reach out after losing touch',  who: 'an old friend' },
-          { e:'🥂', label: 'Work a room at an event',       who: 'a former colleague' },
-          { e:'📖', label: 'Explain what I’ve been doing',  who: 'an old friend' },
-          { e:'🧊', label: 'Break the ice with a stranger', who: 'someone you just met' },
-          { e:'🏘', label: 'Ask a neighbour for a favour',  who: 'your neighbour' },
+          { e:'🌤', label: 'Get back into everyday chat',      fam:'smalltalk' },
+          { e:'🫂', label: 'Meet new people and make friends', fam:'smalltalk' },
+          { e:'🏥', label: 'Handle doctors and offices solo',  fam:'services' },
+          { e:'🧑‍🏫', label: 'Support my kids at school',        fam:'family' },
         ],
       },
     },
   },
 
-  /* No mode refinement below — the counterpart does not change with your job. */
   school: {
-    prompt: 'On campus, which of these do you want to get right?',
+    prompt: 'At school, which of these do you want to get right?',
     items: [
-      { e:'✋', label: 'Answer a question in class',    who: 'your teacher' },
-      { e:'📊', label: 'Present my project to the class', who: 'the class' },
-      { e:'⚖️', label: 'Argue my point in a discussion', who: 'your classmates' },
-      { e:'🔁', label: 'Ask a professor to explain again', who: 'your professor' },
-      { e:'🛡', label: 'Hold my ground in a debate',    who: 'the examiner' },
-      { e:'👋', label: 'Introduce myself to a classmate', who: 'a classmate' },
+      { e:'🎤', label: 'Pass my speaking exam',                fam:'exam' },
+      { e:'⚡️', label: 'Keep up with fast lectures',           fam:'fastspeech' },
+      { e:'✋', label: 'Speak up in class discussions',        fam:'meetings' },
+      { e:'👋', label: 'Make friends on campus',               fam:'smalltalk' },
     ],
   },
   travel: {
     prompt: 'On the road, which of these do you want to get right?',
     items: [
-      { e:'🛫', label: 'Check in at the airport',       who: 'the check-in agent' },
-      { e:'🛎', label: 'Check into a hotel',            who: 'the receptionist' },
-      { e:'🍜', label: 'Order a meal I actually want',  who: 'the waiter' },
-      { e:'🧭', label: 'Ask a stranger for directions', who: 'a stranger' },
-      { e:'💸', label: 'Bargain at a market',           who: 'the seller' },
-      { e:'🧾', label: 'Sort out a booking gone wrong', who: 'the desk agent' },
+      { e:'🛫', label: 'Breeze through airports and hotels',   fam:'services' },
+      { e:'🫂', label: 'Make friends while traveling',         fam:'smalltalk' },
+      { e:'🧾', label: 'Sort out any mix-up abroad',           fam:'services' },
     ],
   },
+};
+
+/* the question-noun per family, straight from usa-onboarding */
+const PRACTICE_ASK = {
+  interview:'interview question', pitch:'question from a client', crew:'question on site',
+  meetings:'question in a meeting', fastspeech:'question at full speed',
+  customer:'question from a customer', services:'question at an appointment',
+  smalltalk:'everyday question', family:'question from a teacher',
+  exam:'IELTS speaking question', pronunciation:'question out loud'
 };
 
 /* ---------- 5 · situations (profile only, no fork) ---------- */
 
 /* an icon per situation, so every row has something to animate and send */
+/* Synced 1:1 with usa-onboarding's qocc options (8 occupations). */
 const SIT_FX = {
-  'Working a job':           '💼',
-  'Studying':                '📚',
-  'Freelancing':             '💻',
-  'Running my own business': '🏪',
-  'Looking for work':        '🔍',
-  'At home with family':     '🏡',
-  'On a career break':       '🌤',
+  'Student':              '📚',
+  'Working professional': '💼',
+  'Freelancer':           '💻',
+  'Business owner':       '🏪',
+  'Homemaker':            '🏡',
+  'On a career break':    '🌤',
+  'Looking for work':     '🔍',
+  'Something else':       '✨',
 };
 
 const SITUATIONS = [
-  'Working a job',
-  'Studying',
-  'Freelancing',
-  'Running my own business',
-  'Looking for work',
-  'At home with family',
+  'Student',
+  'Working professional',
+  'Freelancer',
+  'Business owner',
+  'Homemaker',
   'On a career break',
+  'Looking for work',
+  'Something else',
 ];
 
 /* ---------- 6 · activation sentences, keyed to GOAL ----------
@@ -564,9 +587,241 @@ function scenarioSet(goal, situation){
   return g.byMode[mode] || g.byMode._default || g.byMode.office;
 }
 
+/* ============================================================
+   SPEAKING TASK (intermediate/advanced) — ported VERBATIM from
+   usa-onboarding/practice.js. 12 cohorts keyed goal|workmode for
+   career, plain goal otherwise. Each: {who, q, steps[4], parts[4],
+   es} — es is the localisation slot (unused for the worldwide
+   English build; FR/IT fill it later).
+   Do not edit copy here without editing usa-onboarding too.
+   ============================================================ */
+const PRACTICE = {
+
+  /* ---------- CAREER ---------- split by work mode, because a freelancer and
+     a job seeker are not having the same conversation ---------------------- */
+
+  'career|office': {
+    who:   'Working professional',
+    q:     'How are things going at work?',
+    steps: ['Say how it is going', 'Give one detail', 'Say what is next', 'Close it'],
+    parts: ['Things are going well at work.',
+            'I am busy, but I like my team.',
+            'We finish a big project this week.',
+            'After that it should be calmer.'],
+    es: { q: '¿Cómo te va en el trabajo?',
+          steps: ['Di cómo va', 'Da un detalle', 'Di qué sigue', 'Ciérralo'],
+          parts: ['En el trabajo todo va bien.', 'Estoy ocupado, pero me gusta mi equipo.', 'Terminamos un proyecto grande esta semana.', 'Después de eso será más tranquilo.'] }
+  },
+
+  'career|ownboss': {
+    who:   'Freelancer or business owner',
+    q:     'So what do you charge for this?',
+    steps: ['Say the price', 'Say what is included', 'Give the reason', 'Hold your price'],
+    parts: ['My price for this is two thousand.',
+            'That covers the work and two changes.',
+            'It takes me about three weeks.',
+            'I think that is a fair price.'],
+    es: { q: '¿Y cuánto cobras por esto?',
+          steps: ['Di el precio', 'Di qué incluye', 'Da la razón', 'Mantén tu precio'],
+          parts: ['Mi precio por esto es dos mil.', 'Eso incluye el trabajo y dos cambios.', 'Me toma unas tres semanas.', 'Creo que es un precio justo.'] }
+  },
+
+  'career|jobhunt': {
+    who:   'Looking for a job',
+    q:     'So, why should we hire you?',
+    steps: ['Answer it directly', 'Give your reason', 'Give an example', 'Close it'],
+    parts: ['I am a good fit for this position.',
+            'I stay calm when things get busy.',
+            'Last month I ran our busiest week.',
+            'I know I can do the same here.'],
+    es: { q: '¿Por qué deberíamos contratarte?',
+          steps: ['Responde directo', 'Da tu razón', 'Da un ejemplo', 'Ciérralo'],
+          parts: ['Encajo bien en este puesto.', 'Me mantengo tranquilo cuando hay mucho trabajo.', 'El mes pasado dirigí nuestra semana más ocupada.', 'Sé que puedo hacer lo mismo aquí.'] }
+  },
+
+  'career|careerbreak': {
+    who:   'On a career break',
+    q:     'What were you doing during the career break?',
+    steps: ['Name it plainly', 'Say what you did', 'Show you kept going', 'Bring it back'],
+    parts: ['I took two years off for my family.',
+            'I kept doing small projects in that time.',
+            'I also finished a short course.',
+            'I am ready to work full time now.'],
+    es: { q: '¿Qué hiciste durante tu pausa laboral?',
+          steps: ['Dilo claramente', 'Di qué hiciste', 'Muestra que seguiste', 'Vuelve al presente'],
+          parts: ['Tomé dos años libres por mi familia.', 'Seguí haciendo proyectos pequeños en ese tiempo.', 'También terminé un curso corto.', 'Ahora estoy listo para trabajar tiempo completo.'] }
+  },
+
+  /* someone at home full time is answering the same question, so they get the
+     same task rather than a near-duplicate written twice */
+  'career|athome': {
+    who:   'At home full time',
+    q:     'What were you doing during the career break?',
+    steps: ['Name it plainly', 'Say what you did', 'Show you kept going', 'Bring it back'],
+    parts: ['I took two years off for my family.',
+            'I kept doing small projects in that time.',
+            'I also finished a short course.',
+            'I am ready to work full time now.'],
+    es: { q: '¿Qué hiciste durante tu pausa laboral?',
+          steps: ['Dilo claramente', 'Di qué hiciste', 'Muestra que seguiste', 'Vuelve al presente'],
+          parts: ['Tomé dos años libres por mi familia.', 'Seguí haciendo proyectos pequeños en ese tiempo.', 'También terminé un curso corto.', 'Ahora estoy listo para trabajar tiempo completo.'] }
+  },
+
+  'career|student': {
+    who:   'Student',
+    q:     'You have no work experience. Why take you?',
+    steps: ['Answer it directly', 'Give your reason', 'Give an example', 'Close it'],
+    parts: ['I learn fast and I finish my work.',
+            'I ran the events for our student group.',
+            'We doubled the numbers in one year.',
+            'I would bring the same energy here.'],
+    es: { q: 'No tienes experiencia laboral. ¿Por qué tú?',
+          steps: ['Responde directo', 'Da tu razón', 'Da un ejemplo', 'Ciérralo'],
+          parts: ['Aprendo rápido y termino mi trabajo.', 'Organicé los eventos de nuestro grupo estudiantil.', 'Duplicamos los números en un año.', 'Traería la misma energía aquí.'] }
+  },
+
+  'career|other': {
+    who:   'Something else',
+    q:     'Tell me about yourself.',
+    steps: ['Start with now', 'Say one strength', 'Give an example', 'Say what you want'],
+    parts: ['Right now I work in customer support.',
+            'I am good at staying calm with people.',
+            'Last year I handled our busiest month.',
+            'I want to do more of that.'],
+    es: { q: 'Háblame de ti.',
+          steps: ['Empieza con el ahora', 'Di una fortaleza', 'Da un ejemplo', 'Di qué quieres'],
+          parts: ['Ahora trabajo en atención al cliente.', 'Se me da bien mantener la calma con la gente.', 'El año pasado manejé nuestro mes más ocupado.', 'Quiero hacer más de eso.'] }
+  },
+
+  /* ---------- EVERY OTHER GOAL ---------- one task each ------------------- */
+
+  convo: {
+    who:   'Improve social conversations',
+    q:     'So what are you doing these days?',
+    steps: ['Answer it', 'Add one detail', 'Say what is new', 'Ask them back'],
+    parts: ['I am good. Still at the same job.',
+            'I work with people every day.',
+            'I started running in the mornings.',
+            'What about you?'],
+    es: { q: '¿Y qué haces estos días?',
+          steps: ['Respóndelo', 'Añade un detalle', 'Di qué hay de nuevo', 'Pregunta tú también'],
+          parts: ['Estoy bien. Sigo en el mismo trabajo.', 'Trabajo con gente todos los días.', 'Empecé a correr por las mañanas.', '¿Y tú?'] }
+  },
+
+  travel: {
+    who:   'Travel',
+    q:     'What is your dream travel destination?',
+    steps: ['Name the place', 'Say why', 'Give one detail', 'Say when'],
+    parts: ['My dream place is Japan.',
+            'I want to see the old temples.',
+            'I would also like to try the food.',
+            'I hope to go there next year.'],
+    es: { q: '¿Cuál es tu destino de viaje soñado?',
+          steps: ['Di el lugar', 'Di por qué', 'Da un detalle', 'Di cuándo'],
+          parts: ['Mi lugar soñado es Japón.', 'Quiero ver los templos antiguos.', 'También me gustaría probar la comida.', 'Espero ir el año que viene.'] }
+  },
+
+  school: {
+    who:   'Excel at school',
+    q:     'What is your favorite hobby?',
+    steps: ['Name it', 'Say how often', 'Give one detail', 'Say why you like it'],
+    parts: ['My favorite hobby is painting.',
+            'I paint almost every weekend.',
+            'I like to paint people and places.',
+            'It helps me relax after school.'],
+    es: { q: '¿Cuál es tu pasatiempo favorito?',
+          steps: ['Dilo', 'Di con qué frecuencia', 'Da un detalle', 'Di por qué te gusta'],
+          parts: ['Mi pasatiempo favorito es pintar.', 'Pinto casi todos los fines de semana.', 'Me gusta pintar personas y lugares.', 'Me ayuda a relajarme después de clase.'] }
+  },
+
+  ielts: {
+    who:   'IELTS',
+    q:     'Describe a place you enjoy visiting.',
+    steps: ['Name it', 'Say where it is', 'Give one detail', 'Say why you like it'],
+    parts: ['There is a small beach near my home.',
+            'It is about thirty minutes away.',
+            'It is quiet and you can hear the water.',
+            'I always leave feeling calm.'],
+    es: { q: 'Describe un lugar que te gusta visitar.',
+          steps: ['Dilo', 'Di dónde está', 'Da un detalle', 'Di por qué te gusta'],
+          parts: ['Hay una playa pequeña cerca de mi casa.', 'Está a unos treinta minutos.', 'Es tranquila y se oye el agua.', 'Siempre me voy sintiéndome en calma.'] }
+  },
+
+  other: {
+    who:   'Any other goal',
+    q:     'Tell me a little about yourself.',
+    steps: ['Start with now', 'Say one strength', 'Give an example', 'Say what you want'],
+    parts: ['Right now I work and study English.',
+            'I am good at sticking with things.',
+            'I have practiced every day this month.',
+            'I want to use English without thinking.'],
+    es: { q: 'Háblame un poco de ti.',
+          steps: ['Empieza con el ahora', 'Di una fortaleza', 'Da un ejemplo', 'Di qué quieres'],
+          parts: ['Ahora trabajo y estudio inglés.', 'Se me da bien ser constante.', 'He practicado todos los días este mes.', 'Quiero usar el inglés sin pensarlo.'] }
+  }
+};
+
+
+const WORD = {
+  finish:    { w:'finish',    parts:['fi','ni','sh'],    ph:'fi.nish',     tip:'Ends soft on ‘sh’',              start:48 },
+  project:   { w:'project',   parts:['pro','jec','t'],   ph:'pro.jekt',    tip:'The ‘j’ is sharp',               start:52 },
+  thousand:  { w:'thousand',  parts:['thou','san','d'],  ph:'thow.zund',   tip:'The middle sound is a soft ‘z’', start:51 },
+  covers:    { w:'covers',    parts:['co','ver','s'],    ph:'kuh.vurz',    tip:'Ends on a ‘z’, not an s',        start:47 },
+  position:  { w:'position',  parts:['po','si','tion'],  ph:'puh.zi.shun', tip:'The ‘tion’ sounds like shun',    start:50 },
+  busiest:   { w:'busiest',   parts:['bu','si','est'],   ph:'bi.zee.est',  tip:'Three beats: bi.zee.est',        start:46 },
+  family:    { w:'family',    parts:['fa','mi','ly'],    ph:'fam.uh.lee',  tip:'Three beats, not two',           start:49 },
+  projects:  { w:'projects',  parts:['pro','jec','ts'],  ph:'pro.jekts',   tip:'Keep the ‘ts’ crisp',            start:52 },
+  student:   { w:'student',   parts:['stu','den','t'],   ph:'stew.dnt',    tip:'Two beats: stew.dnt',            start:51 },
+  energy:    { w:'energy',    parts:['e','ner','gy'],    ph:'en.ur.jee',   tip:'The ‘gy’ sounds like jee',       start:48 },
+  customer:  { w:'customer',  parts:['cus','to','mer'],  ph:'kus.tuh.mur', tip:'Stress the first beat ‘kus’',    start:53 },
+  mornings:  { w:'mornings',  parts:['mor','ning','s'],  ph:'mor.ningz',   tip:'Ends on a ‘z’ sound',            start:49 },
+  Japan:     { w:'Japan',     parts:['Ja','pa','n'],     ph:'juh.pan',     tip:'Stress the second beat ‘pan’',   start:50 },
+  temples:   { w:'temples',   parts:['tem','ple','s'],   ph:'tem.pulz',    tip:'Two beats: tem.pulz',            start:47 },
+  favorite:  { w:'favorite',  parts:['fa','vo','rite'],  ph:'fay.vrit',    tip:'Two beats, not three',           start:46 },
+  relax:     { w:'relax',     parts:['re','la','x'],     ph:'ri.laks',     tip:'Stress the second beat ‘laks’',  start:51 },
+  thirty:    { w:'thirty',    parts:['thir','t','y'],    ph:'thur.tee',    tip:'Soft ‘th’, tongue out',          start:46 },
+  minutes:   { w:'minutes',   parts:['mi','nu','tes'],   ph:'mi.nits',     tip:'Two beats only: mi.nits',        start:49 },
+  practiced: { w:'practiced', parts:['prac','ti','ced'], ph:'prak.tist',   tip:'The ending is ‘st’, not ced',    start:50 },
+  English:   { w:'English',   parts:['Eng','li','sh'],   ph:'ing.glish',   tip:'It starts with ‘ing’',           start:47 },
+  people:    { w:'people',    parts:['peo','p','le'],    ph:'pee.pul',     tip:'Two beats: pee.pul',             start:49 },
+  learning:  { w:'learning',  parts:['lear','n','ing'],  ph:'lur.ning',    tip:'The ‘ear’ sounds like ur',       start:48 },
+  practice:  { w:'practice',  parts:['prac','ti','ce'],  ph:'prak.tis',    tip:'End short on ‘tis’',             start:52 },
+  exam:      { w:'exam',      parts:['e','xa','m'],      ph:'ig.zam',      tip:'The ‘x’ sounds like gz',         start:50 },
+  travel:    { w:'travel',    parts:['tra','ve','l'],    ph:'tra.vul',     tip:'Two beats: tra.vul',             start:51 }
+};
+
+
+const PRONWORDS = {
+  'career|office':     [WORD.project,   WORD.finish],
+  'career|ownboss':    [WORD.thousand,  WORD.covers],
+  'career|jobhunt':    [WORD.position,  WORD.busiest],
+  'career|careerbreak':[WORD.family,    WORD.projects],
+  'career|athome':     [WORD.family,    WORD.projects],
+  'career|student':    [WORD.student,   WORD.energy],
+  'career|other':      [WORD.customer,  WORD.busiest],
+  convo:               [WORD.people,    WORD.mornings],
+  travel:              [WORD.Japan,     WORD.temples],
+  school:              [WORD.favorite,  WORD.relax],
+  ielts:               [WORD.thirty,    WORD.minutes],
+  other:               [WORD.practiced, WORD.English]
+};
+
+
+/* goal, plus work mode when the goal is career — usa-onboarding's rule.
+   Our goal names differ slightly: personal→convo, exam(ielts)→ielts. */
+function practiceKey(goal, situation, exam){
+  if (goal === 'career'){
+    const k = 'career|' + (WORKMODE[situation] || 'other');
+    return PRACTICE[k] ? k : 'career|other';
+  }
+  const g = { personal:'convo', exam: exam === 'ielts' ? 'ielts' : 'other' }[goal] || goal;
+  return PRACTICE[g] ? g : 'other';
+}
+
 window.CONTENT = {
   LANGUAGES, APPLANG_DESC, GOALS, EXAMS, IELTS_TYPES, examDateOptions,
   bandNote, GOAL_FX, PROOF, OUTCOME, TESTIMONIALS, AWARD, PLAN, PLAN_BUILD, SCENARIOS, scenarioSet, WORKMODE, MODE_LABEL, branches,
   SITUATIONS, SIT_FX, ACTIVATION, PW_TITLE,
+  PRACTICE, WORD, PRONWORDS, PRACTICE_ASK, practiceKey,
   PRICING, COHORTS,
 };

@@ -43,6 +43,7 @@ const DBG = {
   step:   QP.get('step') || 'intro',
   lang:   QP.get('lang') || 'en',
   lvl:    QP.get('lvl')  || 'beginner',
+  path:   QP.get('path') || '',            /* hint|impromptu — forces the int/adv branch */
   goal:   QP.get('goal') || (COHORT ? COHORT.goal : 'career'),
   exam:   QP.get('exam') || (COHORT ? COHORT.exam : 'ielts'),
   sit:    QP.get('sit')  || (COHORT && COHORT.sit ? COHORT.sit : 'Working a job'),
@@ -66,6 +67,8 @@ const DP_STEPS = [
   ['situation', 'Situation'], ['scenarios', 'Focus'],
   ['testimonials', 'Testimonials'], ['level', 'Level'], ['award', 'Award'],
   ['planbuild', 'Plan'], ['stage', 'Sentence 1'], ['read2', 'Sentence 2'], ['echo', 'Sentence 3 · from memory'],
+  ['act', 'Question'], ['analysing', 'Analysing'], ['scorecard', 'Score report'],
+  ['framework', '4-part answer'], ['readstate', 'Read it aloud'], ['survey', 'Plan loader'],
   ['meter', 'Speech meter'], ['fix', 'Fix pronunciation'],
   ['practice', 'Practice'], ['paywall', 'Graph → Paywall'], ['gift', 'Gift'], ['offer', 'Offer paywall'],
 ];
@@ -1554,14 +1557,25 @@ function hsPracticeWord(idx){
   });
 }
 
-async function hintSequence(level, outcome = 'weak'){
-  /* the meter reads the run, and nothing else */
-  const cfg = OUTCOME_METER[outcome] || OUTCOME_METER.weak;
+/* Intermediate/advanced hint path: the meter quotes their own claim
+   back at them, dips it a touch, and always continues into practice. */
+const SELF_METER = {
+  intermediate: { name:'Intermediate', cefr:'B1', score:56, tgt:'Advanced',   tgtScore:82 },
+  advanced:     { name:'Advanced',     cefr:'C1', score:84, tgt:'Proficient', tgtScore:93 },
+};
+
+async function hintSequence(level, outcome = 'weak', adv = false){
+  /* beginners: the meter reads the run. Adv-hint: it reads the claim. */
+  const cfg = adv
+    ? (SELF_METER[level] || SELF_METER.intermediate)
+    : (OUTCOME_METER[outcome] || OUTCOME_METER.weak);
   buildMeter();
   $('hsPct').textContent = '0%';
   $('hsBub').style.top = '95.5%';
   /* localize the static hint-screen strings */
-  $('hsSay').textContent = outcome === 'strong' ? T('hs_say_strong') : T('hs_say1');
+  $('hsSay').textContent = adv
+    ? 'You used the hint, so I scored your reading on pronunciation first. Here is where you stand.'
+    : (outcome === 'strong' ? T('hs_say_strong') : T('hs_say1'));
   $('hsHead').innerHTML = T('hs_title');
   $('hsNext').textContent = T('continue');
   document.querySelector('#hsErrorsView .hs-fq').innerHTML = T('fix_title');
@@ -1577,7 +1591,9 @@ async function hintSequence(level, outcome = 'weak'){
   /* beat 1 — where you stand */
   await wait(900);
   await hsAnimateScore(0, cfg.score, FF ? 60 : 1700);
-  $('hsSay').textContent = T('hs_say2', cfg.name, cfg.cefr);
+  $('hsSay').textContent = adv
+    ? `You placed yourself at ${cfg.name}. Under pressure you came in just below it. That gap is the whole game.`
+    : T('hs_say2', cfg.name, cfg.cefr);
   await wait(1900);
 
   /* beat 2 — where we take you (gold) */
@@ -1592,7 +1608,7 @@ async function hintSequence(level, outcome = 'weak'){
   if (!FF) await new Promise(r => next.addEventListener('click', r, { once: true }));
 
   /* a clean run has nothing to fix, so it never sees practice */
-  if (outcome === 'strong'){
+  if (!adv && outcome === 'strong'){
     hideScreen('hintScreen');
     await wait(550);
     return;
@@ -1626,6 +1642,305 @@ async function hintSequence(level, outcome = 'weak'){
   await wait(2000);
 
   hideScreen('hintScreen');
+  await wait(550);
+}
+
+/* ============================================================
+   INTERMEDIATE / ADVANCED — one real question (usa-onboarding's
+   act → listen → analysing → score, and the hint path's
+   framework → read → meter). Structure ported, styled on ours.
+   ============================================================ */
+
+/* one mic turn on the act screen: orb → listening bar → auto-stop */
+function actTurn(){
+  return new Promise(resolve => {
+    const mic = $('actMic');
+    mic.className = 'convmic idle';
+    let autoT = null;
+    const onTap = () => {
+      if (!mic.classList.contains('idle')) return;
+      JUICE.setAmbient('listening');
+      $('actMicRow').classList.add('stg-listen-glow');
+      $('actTip').textContent = "I'll stop on my own when you finish";
+      $('actBulb').classList.remove('show');
+      mic.className = 'convmic expanded';
+      const wave = $('actWave');
+      if (!wave.children.length){
+        for (let i = 0; i < STG_BARS; i++) wave.appendChild(document.createElement('i'));
+      }
+      const bars = [...wave.children];
+      const mid = (STG_BARS - 1) / 2;
+      const wt = setInterval(() => {
+        bars.forEach((b, i) => {
+          const env = Math.exp(-Math.pow((i - mid) / (STG_BARS * 0.4), 2));
+          b.style.height = `${4 + Math.random() * 28 * env}px`;
+        });
+      }, 90);
+      const finish = () => {
+        clearInterval(wt); clearTimeout(autoT);
+        bars.forEach(b => b.style.height = '4px');
+        $('actMicRow').classList.remove('stg-listen-glow');
+        JUICE.setAmbient('idle');
+        mic.className = 'convmic tick';
+        $('actTip').textContent = 'Heard you';
+        setTimeout(() => resolve('spoke'), 900);
+      };
+      autoT = setTimeout(finish, FF ? 100 : 5200);   /* auto-stop: the sim "hears" them finish */
+      $('actConfirm').addEventListener('click', finish, { once: true });
+      $('actCancel').addEventListener('click', () => {
+        clearInterval(wt); clearTimeout(autoT);
+        bars.forEach(b => b.style.height = '4px');
+        $('actMicRow').classList.remove('stg-listen-glow');
+        $('actTip').textContent = 'Answer in your own words';
+        mic.className = 'convmic idle';
+        JUICE.setAmbient('idle');
+      }, { once: true });
+    };
+    mic.addEventListener('click', onTap);
+
+    /* the bulb is the other exit */
+    $('actBulb').addEventListener('click', () => {
+      mic.removeEventListener('click', onTap);
+      clearTimeout(autoT);
+      resolve('hint');
+    }, { once: true });
+  });
+}
+
+/* the question screen. Resolves 'impromptu' | 'hint'. */
+async function actSequence(key, level, ask){
+  const sc = C.PRACTICE[key] || C.PRACTICE['career|other'];
+  reach('act');
+  $('actSay').textContent = `One real ${ask}. Answer out loud, in your own words. There is no wrong answer.`;
+  $('actQ').textContent = `\u201C${sc.q}\u201D`;
+  $('actTip').textContent = 'Answer in your own words';
+  $('actBulb').hidden = false;
+  $('actBulb').classList.remove('show');
+  $('actBulbTip').textContent = level === 'advanced' ? 'See a model answer' : "Can't find words? Try this";
+  showScreen('actScreen');
+  setTimeout(() => $('chatScreen').classList.add('is-hidden'), FF ? 0 : 500);
+  /* the bulb only appears once they have sat with the question */
+  const bulbT = setTimeout(() => $('actBulb').classList.add('show'), FF ? 100 : 5000);
+  if (DBG.path === 'hint'){ clearTimeout(bulbT); await wait(FF ? 0 : 1200); hideScreen('actScreen'); await wait(550); return 'hint'; }
+  if (FF){ clearTimeout(bulbT); hideScreen('actScreen'); return DBG.path === 'hint' ? 'hint' : 'impromptu'; }
+  const turn = await actTurn();
+  clearTimeout(bulbT);
+  hideScreen('actScreen');
+  await wait(550);
+  return turn === 'hint' ? 'hint' : 'impromptu';
+}
+
+/* the analysing beat, then the four-bar score report */
+const ANALYSING = [
+  ['You spoke your very first sentence in English.', 1900],
+  ['Analysing your speech.', 1300],
+  ['Evaluating your grammar.', 1300],
+  ['Evaluating your pronunciation.', 1300],
+  ['Almost there.', 900],
+];
+const SCORE_BASE = { fluency: 64, vocabulary: 58, pronunciation: 61, grammar: 71 };
+const SCORE_MSG = {
+  fluency:       { weak:'Long pauses broke your answer up.',  mid:'You paused a few times mid-sentence.',  strong:'You kept going without stopping.' },
+  vocabulary:    { weak:'You reached for the same few words.', mid:'Your words worked, but they repeated.', strong:'You reached for the right words.' },
+  pronunciation: { weak:'Some words were hard to catch.',      mid:'A few sounds landed soft.',             strong:'You were easy to understand.' },
+  grammar:       { weak:'Tenses slipped more than once.',      mid:'A couple of tense slips crept in.',     strong:'Your sentences held together.' },
+};
+const scoreBand = n => n >= 70 ? 'strong' : n >= 50 ? 'mid' : 'weak';
+
+async function analysingSequence(){
+  reach('analysing');
+  showScreen('anaScreen');
+  $('anaBar').style.width = '4%';
+  for (let i = 0; i < ANALYSING.length; i++){
+    $('anaLine').textContent = ANALYSING[i][0];
+    $('anaBar').style.width = `${8 + (i + 1) / ANALYSING.length * 88}%`;
+    await wait(FF ? 40 : ANALYSING[i][1]);
+  }
+  hideScreen('anaScreen');
+  await wait(550);
+}
+
+async function scoreSequence(goal, famLabel){
+  reach('scorecard');
+  /* pronunciation is always the low bar — it is the thing this whole
+     funnel diagnoses and fixes, so the report agrees with the story */
+  const out = {};
+  for (const k in SCORE_BASE) out[k] = Math.max(38, SCORE_BASE[k] - (k === 'pronunciation' ? 14 : 0));
+  const overall = Math.round((out.fluency + out.vocabulary + out.pronunciation + out.grammar) / 4);
+  const ORDER = ['vocabulary', 'grammar', 'pronunciation', 'fluency'];
+  $('scCards').innerHTML = ORDER.map(k => {
+    const band = scoreBand(out[k]);
+    return `<div class="sc-card sc-${band}">
+      <span class="sc-ring">${out[k]}</span>
+      <span class="sc-txt"><b>${k.charAt(0).toUpperCase() + k.slice(1)}</b><span>${SCORE_MSG[k][band]}</span></span>
+    </div>`;
+  }).join('');
+  $('scLine').innerHTML = famLabel
+    ? `That was a real rep of <b>${famLabel}</b>. Imagine week three.`
+    : 'That was a real rep. Imagine week three.';
+  showScreen('scoreScreen');
+  /* the gauge sweeps to the overall — 240° arc is ~419px long */
+  await wait(FF ? 40 : 700);
+  const arc = $('scArc');
+  const t0 = performance.now(), dur = FF ? 60 : 1600, LEN = 419;
+  await new Promise(res => {
+    const step = now => {
+      const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+      $('scNum').textContent = Math.round(overall * e);
+      arc.setAttribute('stroke-dasharray', `${LEN * overall / 100 * e} 500`);
+      k < 1 ? requestAnimationFrame(step) : res();
+    };
+    requestAnimationFrame(step);
+  });
+  if (!FF) JUICE.confetti(40, 'burst');
+  if (!FF) await new Promise(r => $('scGo').addEventListener('click', r, { once: true }));
+  hideScreen('scoreScreen');
+  await wait(550);
+}
+
+/* the 4-part framework walkthrough, then one read of it out loud */
+async function frameworkSequence(key, level, name){
+  const sc = C.PRACTICE[key] || C.PRACTICE['career|other'];
+  reach('framework');
+  $('fwSay').textContent = level === 'advanced'
+    ? 'Here is a model answer. Read it once, and it is yours.'
+    : "Can't find the words? Borrow mine.";
+  $('fwCard').innerHTML = sc.steps.map((st, i) =>
+    `<div class="fw-seg${i === 0 ? ' cur' : ' dim'}"><span class="st">${st}</span><p>${sc.parts[i]}</p></div>`).join('');
+  $('fwFill').style.width = '6%';
+  $('fwNext').textContent = 'Next';
+  showScreen('fwScreen');
+  const segs = [...$('fwCard').children];
+  for (let i = 0; i < 4; i++){
+    segs.forEach((el, k) => {
+      el.classList.toggle('cur', k === i);
+      el.classList.toggle('dim', k > i);
+    });
+    $('fwFill').style.width = `${Math.max(6, i / 8 * 100)}%`;
+    $('fwNext').textContent = i === 3 ? 'Read it aloud' : 'Next';
+    if (FF) continue;
+    await new Promise(r => $('fwNext').addEventListener('click', r, { once: true }));
+  }
+  hideScreen('fwScreen');
+  await wait(550);
+
+  /* the reading state reuses the teleprompter stage, single line mode */
+  reach('readstate');
+  showScreen('stageScreen');
+  document.querySelector('#stageScreen .stg-steps').style.display = 'none';
+  $('stgSay').textContent = 'Try reading this out loud. I will listen.';
+  $('stgLine').classList.remove('win', 'live');
+  stgRenderPhrase(sc.parts.join(' '), []);
+  if (FF){
+    stgWords().forEach(w => w.classList.add('said'));
+  } else {
+    await stageTurn();
+  }
+  $('stgLine').classList.add('win');
+  stgTick('That is the shape of it');
+  if (!FF){ JUICE.confetti(40, 'burst'); }
+  await wait(FF ? 0 : 1800);
+  hideScreen('stageScreen');
+  document.querySelector('#stageScreen .stg-steps').style.display = '';
+  await wait(550);
+}
+
+/* ============================================================
+   PLAN LOADER — the ring builds the plan; anyone who did the
+   pronunciation drill answers three questions on the way through.
+   ============================================================ */
+const LDR_STEPS = [
+  'Analyzing your answers',
+  'Setting your level from your speaking',
+  'Weighing your pronunciation practice',
+  'Building your daily plan',
+];
+const LDR_QS = [
+  { q: null, opts: ['Too easy', 'Just right', 'Still tricky'] },   /* q filled with the drill words */
+  { q: 'Did your score match how you think you speak?', opts: ['Spot on', 'Close', 'Harsher than I expected'] },
+  { q: 'How do you feel about your starting score?', opts: ['Proud of it', "It's okay", 'I want it higher'] },
+];
+function ldrRing(pct){
+  $('ldrArc').setAttribute('stroke-dasharray', `${440 * pct / 100} 440`);
+  $('ldrPct').textContent = `${pct}%`;
+}
+function ldrStepState(states){
+  [...$('ldrSteps').children].forEach((row, i) => {
+    row.classList.toggle('done', states[i] === 'done');
+    row.classList.toggle('on', states[i] === 'on');
+  });
+}
+function ldrAsk(idx, q){
+  return new Promise(resolve => {
+    const card = $('ldrCard');
+    card.innerHTML = `
+      <span class="ldr-kicker">QUICK CHECK · ${idx + 1} OF 3</span>
+      <span class="ldr-q">${q.q}</span>
+      <div class="ldr-opts">${q.opts.map(o => `<button class="ldr-opt">${o}</button>`).join('')}</div>`;
+    card.hidden = false;
+    [...$('ldrDots').children].forEach((d, i) => d.classList.toggle('on', i === idx));
+    $('ldrDots').hidden = false;
+    requestAnimationFrame(() => requestAnimationFrame(() => card.classList.add('in')));
+    if (FF){ SURVEY[idx] = q.opts[1]; card.classList.remove('in'); resolve(); return; }
+    card.querySelectorAll('.ldr-opt').forEach(btn => btn.addEventListener('click', () => {
+      btn.classList.add('sel');
+      SURVEY[idx] = btn.textContent;
+      setTimeout(() => { card.classList.remove('in'); resolve(); }, 550);
+    }, { once: true }));
+  });
+}
+const SURVEY = [];
+
+async function planLoader(didPron){
+  reach('survey');
+  $('ldrSteps').innerHTML = LDR_STEPS.map(t => `
+    <div class="ldr-step">
+      <span class="ldr-ic"><i class="ic-pend"></i><i class="ic-arc"></i><i class="ic-done">
+        <svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5" fill="none" stroke="#0D0B14" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </i></span><span>${t}</span>
+    </div>`).join('');
+  $('ldrCard').hidden = true;
+  $('ldrCard').classList.remove('in');
+  $('ldrDots').hidden = true;
+  $('ldrArc').style.stroke = '';
+  ldrRing(0);
+  ldrStepState(['on', '', '', '']);
+  showScreen('ldrScreen');
+  await wait(FF ? 40 : 900);
+  ldrRing(18);
+  await wait(FF ? 40 : 1100);
+  ldrStepState(['done', 'on', '', '']);
+  ldrRing(34);
+
+  if (didPron){
+    /* Q1 names their own drill words */
+    LDR_QS[0].q = `How did practicing \u201C${PRON_WORDS[0].w}\u201D and \u201C${PRON_WORDS[1].w}\u201D feel?`;
+    await wait(FF ? 40 : 900);
+    ldrStepState(['done', 'done', 'on', '']);
+    ldrRing(45);
+    for (let i = 0; i < 3; i++){
+      await ldrAsk(i, LDR_QS[i]);
+      ldrRing(45 + (i + 1) * 15);
+      await wait(FF ? 30 : 500);
+    }
+    $('ldrCard').hidden = true;
+    $('ldrDots').hidden = true;
+  } else {
+    await wait(FF ? 40 : 1300);
+    ldrStepState(['done', 'done', 'on', '']);
+    ldrRing(62);
+    await wait(FF ? 40 : 1300);
+    ldrRing(84);
+  }
+
+  ldrStepState(['done', 'done', 'done', 'on']);
+  await wait(FF ? 40 : 1100);
+  ldrStepState(['done', 'done', 'done', 'done']);
+  $('ldrArc').style.stroke = 'var(--succ-300)';
+  ldrRing(100);
+  if (!FF) JUICE.confetti(30, 'burst');
+  await wait(FF ? 60 : 1400);
+  hideScreen('ldrScreen');
   await wait(550);
 }
 
@@ -1966,6 +2281,7 @@ async function flow(){
      does properly, objectively, a minute later.                      */
   const sc = C.scenarioSet(goal, situation);
   let picked = [];
+  let famFirst = goal === 'exam' ? 'exam' : 'smalltalk';
   if (sc){
     reach('scenarios');
     await sarah(sc.prompt);
@@ -1976,6 +2292,9 @@ async function flow(){
     const fi = Number.isInteger(+DBG.focus) && DBG.focus !== '' && labels[+DBG.focus] ? +DBG.focus : 0;
     const forced = [labels[fi], labels[(fi + 1) % labels.length]];
     picked = await multiSelect(labels, { icons: sc.items.map(i => i.e || '🎯'), forced });
+    /* THE FIRST TICK IS THE BRANCHING KEY — its family phrases the
+       practice ask and the plan copy (usa-onboarding's rule) */
+    famFirst = (sc.items.find(i => i.label === picked[0]) || {}).fam || famFirst;
     await sarah(T('scenarios_ack'), { typingMs: 900, quick: true });
     /* their own words, replayed — personalization proof for free */
     await recapBubble([
@@ -2030,8 +2349,12 @@ async function flow(){
   await wait(FF ? 0 : 1100);
   setProgress(96, '96% completed');
 
-  /* the handoff — the last thing the chat ever does */
-  await sarah(T('stage_handoff'));
+  /* the handoff — the last thing the chat ever does. Beginners are
+     promised a read; everyone else is promised one real question. */
+  const askNoun = C.PRACTICE_ASK[famFirst] || 'everyday question';
+  await sarah(level === 'beginner'
+    ? T('stage_handoff')
+    : `One last thing before your plan. You will answer one real ${askNoun} out loud, in about 20 seconds. Speak in your own words. There is no wrong answer.`);
   setProgress(100, '100% completed');
   bottomBar.classList.add('gone');
   const cta = el(`<button class="btn-report">${T('stage_cta')}</button>`);
@@ -2048,11 +2371,38 @@ async function flow(){
     ['LANGUAGE', L.label],
   ], goal, name, picked[0] ? `${picked[0]}, out loud` : null);
 
-  /* ---------- 9.3 · the speaking stage (three sentences) ---------- */
-  const outcome = await stageLadder(goal, level, name);
+  /* ---------- 9.3 · the speaking task, forked by level ----------
+     Beginners read the affirmation ladder; the run decides their
+     meter. Intermediate/advanced get one real question: answer it
+     impromptu and see the score report, or take the hint and get the
+     4-part model, one read, and the self-report meter + drill.     */
+  let didPron = false;
+  if (level === 'beginner'){
+    const outcome = await stageLadder(goal, level, name);
+    await hintSequence(level, outcome);
+    didPron = outcome !== 'strong';
+  } else {
+    const key = C.practiceKey(goal, situation, exam);
+    const path = await actSequence(key, level, askNoun);
+    if (path === 'impromptu'){
+      await analysingSequence();
+      await scoreSequence(goal, picked[0] || null);
+    } else {
+      await frameworkSequence(key, level, name);
+      /* the drill words come from this cohort's model answer */
+      /* PRONWORDS already resolves to WORD objects; reshape for the card */
+      PRON_WORDS = (C.PRONWORDS[key] || C.PRONWORDS['career|other'])
+        .map(w => ({ w: w.w, pre: w.parts[0], hot: w.parts[1], post: w.parts[2] || '', ph: w.ph, tip: w.tip, start: w.start }));
+      HS_PASSAGE = (C.PRACTICE[key] || C.PRACTICE['career|other']).parts.join(' ');
+      await hintSequence(level, 'weak', true);
+      didPron = true;
+    }
+  }
 
-  /* ---------- 9.3 – 9.7 · takeovers ---------- */
-  await hintSequence(level, outcome);
+  /* ---------- 9.4 · the plan builds; drill users answer for it ---------- */
+  await planLoader(didPron);
+
+  /* ---------- 9.5 – 9.7 · money ---------- */
   await paywallSequence(goal === 'exam' && exam === 'ielts' ? 'ielts' : goal);
   await giftSequence();
   await offerSequence();
