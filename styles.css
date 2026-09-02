@@ -3075,10 +3075,14 @@ body{
   flex-direction:column;
   margin-top:22px;
   border-radius:24px;
-  background:linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.015));
-  border:1px solid rgba(157,150,255,.17);
-  box-shadow:0 22px 60px -26px rgba(108,99,255,.55);
+  /* A flat, near-opaque fill. The translucent gradient was letting the
+     warm bloom behind the screen through, which is where the brown came
+     from, and the indigo drop shadow was a second glow competing with
+     the field it sat on. */
+  background:#15121F;
+  border:1px solid rgba(157,150,255,.15);
   overflow:hidden;
+  transition:none;
 }
 .pb-kicker{
   font-family:var(--font-display);
@@ -3087,7 +3091,11 @@ body{
   letter-spacing:.17em;
   color:var(--blue-300);
   padding:24px 24px 0;
+  max-height:0;overflow:hidden;padding-top:0;
+  transition:max-height .5s var(--ease-out), padding-top .5s var(--ease-out),
+             opacity .45s var(--ease-out), transform .55s var(--ease-spring);
 }
+.pb-kicker.in{max-height:44px;padding-top:24px;}
 .pb-title{
   font-family:var(--font-display);
   font-weight:600;
@@ -3097,7 +3105,12 @@ body{
   color:var(--text-hi);
   margin:10px 0 0;
   padding:0 24px 22px;
+  max-height:0;overflow:hidden;padding-bottom:0;margin-top:0;
+  transition:max-height .55s var(--ease-out), padding-bottom .55s var(--ease-out),
+             margin-top .55s var(--ease-out),
+             opacity .45s var(--ease-out), transform .55s var(--ease-spring);
 }
+.pb-title.in{max-height:110px;padding-bottom:22px;margin-top:10px;}
 .pb-rows{
   display:flex;
   flex-direction:column;
@@ -3107,13 +3120,21 @@ body{
   display:flex;
   align-items:center;
   gap:14px;
-  padding:16px 0;
-  border-top:1px solid rgba(255,255,255,.08);
+  padding:0;
+  border-top:1px solid rgba(255,255,255,0);
+  max-height:0;
+  overflow:hidden;
   opacity:0;
   transform:translateY(14px);
-  transition:opacity .5s var(--ease-out), transform .55s var(--ease-spring);
+  transition:max-height .5s var(--ease-out), padding .5s var(--ease-out),
+             border-color .5s var(--ease-out),
+             opacity .5s var(--ease-out), transform .55s var(--ease-spring);
 }
-.pb-card.in{opacity:1;transform:none;}
+.pb-card.in{
+  max-height:70px;padding:16px 0;
+  border-top-color:rgba(255,255,255,.08);
+  opacity:1;transform:none;
+}
 .pb-card small{
   font-family:var(--font-body);
   font-size:11.5px;
@@ -3133,11 +3154,16 @@ body{
   display:flex;
   flex-direction:column;
   gap:4px;
-  margin-top:18px;
-  padding:18px 24px 20px;
-  background:rgba(108,99,255,.11);
+  max-height:0;overflow:hidden;
+  transition:max-height .55s var(--ease-out), padding .55s var(--ease-out),
+             margin-top .55s var(--ease-out),
+             opacity .5s var(--ease-out), transform .55s var(--ease-spring);
+  margin-top:0;
+  padding:0 24px;
+  background:#1C1930;
   border-top:1px solid rgba(157,150,255,.16);
 }
+.pb-first.in{max-height:130px;margin-top:18px;padding:18px 24px 20px;}
 .pb-first-lbl{font-family:var(--font-body);font-size:14px;color:var(--text-low);}
 .pb-first-val{
   font-family:var(--font-display);font-weight:600;font-size:17px;
@@ -3368,8 +3394,8 @@ body{
 .t-card{
   position:relative;
   flex-shrink:0;
-  width:275px;
-  height:340px;
+  width:246px;
+  height:308px;
   border-radius:20px;
   overflow:hidden;
   /* The card used to sit at #141119 against a #0D0B14 page, which is a
@@ -3392,23 +3418,23 @@ body{
 /* The photo is masked out at its foot instead of stopping on a line,
    so it dissolves into the card rather than sitting on top of it. */
 .tc-photo{
-  position:absolute;inset:0 0 auto 0;width:100%;height:248px;
+  position:absolute;inset:0 0 auto 0;width:100%;height:222px;
   object-fit:cover;display:block;
   -webkit-mask-image:linear-gradient(180deg,#000 0%,#000 44%,rgba(0,0,0,.72) 66%,rgba(0,0,0,.28) 84%,transparent 100%);
           mask-image:linear-gradient(180deg,#000 0%,#000 44%,rgba(0,0,0,.72) 66%,rgba(0,0,0,.28) 84%,transparent 100%);
 }
 .tc-scrim{
-  position:absolute;left:0;right:0;top:120px;height:220px;
+  position:absolute;left:0;right:0;top:104px;height:204px;
   background:linear-gradient(180deg,rgba(33,29,27,0),rgba(33,29,27,.72) 48%,rgba(33,29,27,.96) 78%,#211D1B);
 }
-.tc-body{position:absolute;left:0;right:0;bottom:0;padding:18px;display:flex;flex-direction:column;gap:11px;}
+.tc-body{position:absolute;left:0;right:0;bottom:0;padding:16px;display:flex;flex-direction:column;gap:9px;}
 .tc-quote{
   margin:0;font-family:var(--font-display);font-weight:600;
-  font-size:17px;line-height:24px;color:#fff;
+  font-size:15.5px;line-height:22px;color:#fff;
 }
 .tc-rule{height:1px;background:rgba(255,255,255,.16);}
-.tc-who b{display:block;font-family:var(--font-display);font-weight:600;font-size:14px;color:var(--text-mid);}
-.tc-who span{font-family:var(--font-body);font-size:13px;color:var(--text-low);}
+.tc-who b{display:block;font-family:var(--font-display);font-weight:600;font-size:13.5px;color:var(--text-mid);}
+.tc-who span{font-family:var(--font-body);font-size:12.5px;color:var(--text-low);}
 
 /* --- 4. the iOS system alert ------------------------------- */
 .ios-alert-wrap{
@@ -3658,3 +3684,16 @@ body{
     rgba(8,6,14,.40) 0%, rgba(8,6,14,.30) 34%, rgba(8,6,14,.16) 62%, rgba(8,6,14,0) 100%);
 }
 .topbar > .statusbar{position:relative;z-index:1;}
+
+
+/* The rail had no sense of extent: one card filled the view and nothing
+   said there were three more. Dots give it a beginning and an end. */
+.t-dots{
+  display:flex;justify-content:center;align-items:center;gap:6px;
+  padding:12px 24px 0;
+}
+.t-dots i{
+  width:5px;height:5px;border-radius:999px;background:rgba(255,255,255,.26);
+  transition:width .34s var(--ease-spring), background .34s var(--ease-out);
+}
+.t-dots i.on{width:18px;background:var(--accent-soft);}

@@ -561,7 +561,7 @@ function phoneInput(flagName, cc){
 /* centre-based auto-slide shared by both testimonial rails: it walks each
    card by its real offset (fixed pixel guesses used to skip the last card)
    and pauses while the user is interacting. */
-function railAutoSlide(rail, { interval = 3200, onActive = null } = {}){
+function railAutoSlide(rail, { interval = 3200, firstDelay = null, onActive = null } = {}){
   const cards = [...rail.children];
   if (cards.length < 2) return () => {};
   const centreOf = (c) => c.offsetLeft - (rail.clientWidth - c.offsetWidth) / 2;
@@ -576,24 +576,27 @@ function railAutoSlide(rail, { interval = 3200, onActive = null } = {}){
     return best;
   };
   let timer = null, resume = null;
-  const start = () => {
-    clearInterval(timer);
-    timer = setInterval(() => {
-      const next = (current() + 1) % cards.length;
-      rail.scrollTo({ left: centreOf(cards[next]), behavior: 'smooth' });
-    }, interval);
+  const step = () => {
+    const next = (current() + 1) % cards.length;
+    rail.scrollTo({ left: centreOf(cards[next]), behavior: 'smooth' });
+  };
+  let lead = null;
+  const start = (delay = null) => {
+    clearInterval(timer); clearTimeout(lead);
+    const begin = () => { timer = setInterval(step, interval); };
+    if (delay === null){ begin(); return; }
+    lead = setTimeout(() => { step(); begin(); }, delay);
   };
   const pause = () => {
-    clearInterval(timer);
-    clearTimeout(resume);
-    resume = setTimeout(start, 4500);
+    clearInterval(timer); clearTimeout(lead); clearTimeout(resume);
+    resume = setTimeout(() => start(), 4500);
   };
   rail.addEventListener('scroll', current, { passive: true });
   rail.addEventListener('pointerdown', pause);
   rail.addEventListener('wheel', pause, { passive: true });
   requestAnimationFrame(current);
-  start();
-  return () => { clearInterval(timer); clearTimeout(resume); };
+  start(firstDelay);
+  return () => { clearInterval(timer); clearTimeout(lead); clearTimeout(resume); };
 }
 
 /* ---------- testimonials ----------
@@ -621,12 +624,21 @@ async function testimonialCarousel(goal){
         <div class="tc-who"><b>${t.n}</b><span>${t.r}</span></div>
       </div>
     </div>`)));
+  const dots = el(`<div class="t-dots">${list.map(() => '<i></i>').join('')}</div>`);
+  wrap.appendChild(dots);
   chatStream.appendChild(wrap);
   scrollToEnd();
   if (FF) return;
-  const stop = railAutoSlide(rail, { interval: 3400 });
-  await wait(3200);
-  return stop;
+
+  /* It used to sit still for 3.4s before the first move, which reads as
+     broken rather than paced. It steps off quickly, then settles into a
+     slower rhythm you can actually read at. */
+  railAutoSlide(rail, {
+    firstDelay: 1300,
+    interval: 3000,
+    onActive: (cards, i) => [...dots.children].forEach((d, k) => d.classList.toggle('on', k === i)),
+  });
+  await wait(3400);
 }
 
 async function videoTestimonialCarousel(){
