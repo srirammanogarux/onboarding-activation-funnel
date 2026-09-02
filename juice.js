@@ -10,7 +10,7 @@
 
    API:
    JUICE.pop(el, {emoji})     copies of the icon burst out and feed the bar
-   JUICE.bloom()              the bar answers with a gold pulse
+   JUICE.bloom()              the room tops out on the last arrival
    JUICE.confetti(n, mode)    'burst' | 'rain'
    JUICE.fireworks()          three staggered shell bursts
    JUICE.bokeh(n)             rising golden dots
@@ -150,11 +150,15 @@
   }
   let absorbT = null;
 
-  /* one small swallow at the tip of the bar per pip that lands */
+  /* Each pip that lands lifts the room one step. The bar used to flash
+     gold here; the glow behind the whole screen carries it now, so the
+     reward builds with the arrivals rather than switching on at the end. */
+  let hits = 0;
   function sip(){
-    const track = document.querySelector('.progress-track');
-    if (!track) return;
-    track.classList.remove('sip'); void track.offsetWidth; track.classList.add('sip');
+    const p = phone();
+    if (!p || REDUCED) return;
+    hits = Math.min(hits + 1, 5);
+    p.style.setProperty('--aur-lift', (1 + hits * 0.34).toFixed(2));
   }
 
   /* the aurora swells on an answer and decays to idle */
@@ -164,14 +168,25 @@
     if (!p || REDUCED) return;
     p.classList.add('amb-lit');
     clearTimeout(flareT);
-    flareT = setTimeout(() => p.classList.remove('amb-lit'), 1600);
+    flareT = setTimeout(() => {
+      p.classList.remove('amb-lit');
+      hits = 0;
+      p.style.removeProperty('--aur-lift');
+    }, 1700);
   }
 
-  /* the bar answers: a gold pulse behind it, and the fill flashes */
+  /* The last arrival tops the room out. On the reduced-motion and
+     fast-forward paths no pips ever fly, so this is also the only
+     acknowledgement those users get and it has to stand on its own. */
   function bloom(){
-    const track = document.querySelector('.progress-track');
-    const glow  = document.querySelector('.head-bloom');
-    if (track){ track.classList.remove('bloom'); void track.offsetWidth; track.classList.add('bloom'); }
+    const p = phone();
+    if (!p) return;
+    if (p.classList.contains('amb-lit')){
+      /* already flooded by the arrivals: push it to the top of its range */
+      p.style.setProperty('--aur-lift', '2.7');
+      return;
+    }
+    const glow = document.querySelector('.head-bloom');
     if (glow){ glow.classList.remove('pulse'); void glow.offsetWidth; glow.classList.add('pulse'); }
   }
 

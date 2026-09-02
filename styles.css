@@ -3327,17 +3327,25 @@ body{
   height:340px;
   border-radius:20px;
   overflow:hidden;
-  background:#141119;
+  /* The card used to sit at #141119 against a #0D0B14 page, which is a
+     4% difference: at speed the lower half of every card dissolved into
+     the background. It needs to be a surface, so it gets lifted, edged,
+     and floated on an indigo glow. */
+  background:#1A1626;
   scroll-snap-align:center;
-  border:none;
+  border:1px solid rgba(157,150,255,.18);
   padding:0;
   backdrop-filter:none;
+  box-shadow:
+    0 20px 46px -14px rgba(0,0,0,.8),
+    0 14px 64px -20px rgba(108,99,255,.62),
+    inset 0 1px 0 rgba(255,255,255,.07);
 }
 .t-card::after{content:none;}
 .tc-photo{position:absolute;inset:0 0 auto 0;width:100%;height:215px;object-fit:cover;display:block;}
 .tc-scrim{
   position:absolute;left:0;right:0;top:105px;height:235px;
-  background:linear-gradient(180deg,rgba(20,17,25,0),rgba(20,17,25,.93) 55%,#141119);
+  background:linear-gradient(180deg,rgba(26,22,38,0),rgba(26,22,38,.94) 55%,#1A1626);
 }
 .tc-body{position:absolute;left:0;right:0;bottom:0;padding:18px;display:flex;flex-direction:column;gap:11px;}
 .tc-quote{
@@ -3423,20 +3431,10 @@ body{
    why the bar never seemed to react. The fill carries its own radius,
    so nothing needed clipping in the first place. */
 .progress-track{position:relative;overflow:visible;}
-.progress-track.bloom::after{
-  content:'';position:absolute;inset:-9px -12px;border-radius:999px;
-  background:radial-gradient(58% 150% at 14% 50%, rgba(217,162,74,.6), transparent 72%);
-  animation:barBloom .9s var(--ease-out) forwards;pointer-events:none;
-}
-@keyframes barBloom{0%{opacity:0;transform:scale(.92);}26%{opacity:1;}100%{opacity:0;transform:scale(1.06);}}
-
-/* one swallow per pip that lands, at the tip */
-.progress-track.sip::before{
-  content:'';position:absolute;inset:-5px -7px;border-radius:999px;
-  background:radial-gradient(34% 130% at 10% 50%, rgba(233,196,124,.5), transparent 66%);
-  animation:barSip .42s var(--ease-out) forwards;pointer-events:none;
-}
-@keyframes barSip{0%{opacity:0;transform:scale(.94);}35%{opacity:1;}100%{opacity:0;transform:scale(1.03);}}
+/* The bar no longer performs. A gold ripple on a blue screen was the one
+   warm thing in the frame and it fought the aurora for the same moment;
+   the width change is the whole reward now. What the pips feed is the
+   ROOM, not the bar. */
 
 /* the width waits for the pips. Without the hold the bar has already
    finished growing before the first one arrives. */
@@ -3514,10 +3512,25 @@ body{
 
 /* --- state machine: idle · thinking · listening · reward --- */
 #phone.amb-thinking{--aur-boost:1.2;}
-#phone.amb-lit{--aur-boost:2.1;}
-#phone.amb-lit .head-bloom{opacity:.72;}
+
+/* An answer floods the room blue. --aur-lift steps up once per pip that
+   lands, so the glow builds with the arrivals instead of switching on.
+   Gold is deliberately excluded here: it is the progress colour, and the
+   moment reads warmer than the rest of the screen if it leaks in. */
+#phone.amb-lit{
+  --aur-1:120 136 255;
+  --aur-2: 96 112 246;
+  --aur-boost:calc(1.5 * var(--aur-lift, 1));
+}
+#phone.amb-lit .head-bloom{
+  opacity:.95;
+  background:radial-gradient(58% 74% at 26% 32%, rgba(120,136,255,.62), transparent 70%),
+             radial-gradient(50% 66% at 76% 16%, rgba(96,112,246,.42), transparent 72%);
+}
+#phone.amb-lit .head-bloom,
+#phone .head-bloom{transition:opacity .5s var(--ease-out), background .5s var(--ease-out);}
 #phone .amb-a,#phone .amb-b{transition:opacity .9s var(--ease-out), background 1.4s var(--ease-out);}
-#phone.amb-lit .amb-a,#phone.amb-lit .amb-b{transition:opacity .28s var(--ease-out);}
+#phone.amb-lit .amb-a,#phone.amb-lit .amb-b{transition:opacity .34s var(--ease-out);}
 #phone.amb-thinking .amb-a{animation-duration:7s;}
 #phone.amb-listening{--aur-1:120 150 255;--aur-2:217 162 74;--aur-boost:1.35;}
 #phone.amb-reward{--aur-1:217 162 74;--aur-2:231 180 85;--aur-boost:1.6;}

@@ -431,7 +431,7 @@ const OUTCOME = {
 const TESTIMONIALS = {
   career: [
     { img:'career-1', q:'I asked for a raise in English. It came back 20% higher than I planned to ask for.', n:'Rizky', r:'Account manager, Jakarta' },
-    { img:'career-2', q:'Foreign buyers stopped going through a middleman. I keep that margin now.',        n:'Adi',   r:'Textile trader, Solo' },
+    { img:'career-2', q:'Foreign buyers stopped going through a middleman. I keep that margin now.',        n:'Adi',   r:'Export sales, Solo' },
     { img:'career-3', q:'I used to email instead of speak. Now I run the Monday call.',                     n:'Nadia', r:'Ops lead, Tangerang' },
     { img:'career-4', q:'Two interviews in English, two offers. I took the better one.',                    n:'Putri', r:'Analyst, Bandung' },
   ],
@@ -442,7 +442,7 @@ const TESTIMONIALS = {
   ],
   personal: [
     { img:'personal-1', q:'I stopped switching back to Bahasa halfway through my own sentences.', n:'Bagus',  r:'Musician, Yogyakarta' },
-    { img:'personal-2', q:'My niece studies abroad. We talk properly now, not in fragments.',      n:'Ratna',  r:'Pharmacist, Semarang' },
+    { img:'personal-2', q:'My niece studies abroad. We talk properly now, not in fragments.',      n:'Ratna',  r:'Clinic admin, Semarang' },
     { img:'personal-3', q:'I answer the tourists on my street instead of pointing.',               n:'Melati', r:'Cafe owner, Bali' },
   ],
   school: [
