@@ -47,10 +47,32 @@
      The original never leaves the button. The copies burst out, arc up,
      shrink as they travel, and dissolve into the progress bar, which
      blooms as the last one lands. */
-  function pop(fromEl, { emoji = '', html = '', n = 10, instant = false } = {}){
+  /* ---------------------------------------------------------------
+     pop — the answer travels to the bar.
+
+     Four beats, deliberately sequenced. Duolingo's gems trail is the
+     reference and its params are the brief: an ARC (not a straight
+     line), a PRONOUNCED stagger, a SUBTLE spring, and the bar filling
+     as its own later beat rather than at the same time.
+
+       1  the icon springs where it stands and throws off one ring
+       2  five pips are born out of it in an ordered fan
+       3  each rides a quadratic arc to the tip of the bar, shrinking,
+          single file, holding its opacity until it is nearly home
+       4  the bar sips each arrival, blooms on the last, and only then
+          grows; the aurora lifts on the first arrival, not on the tap
+
+     The version this replaces threw nine pips along random vectors
+     down one 900ms track with a single easing curve doing three
+     different jobs, faded them out long before they landed, and lit
+     the room before anything had arrived. That reads as scatter.
+     --------------------------------------------------------------- */
+  const BURST_MS = 300, TRAVEL_MS = 720, STAGGER = 62;
+
+  function pop(fromEl, { emoji = '', html = '', n = 5, instant = false } = {}){
     const bar = document.querySelector('.progress-track');
     if (!bar || !fromEl || REDUCED || instant){ bloom(); return; }
-    const host = document.getElementById('phone');
+    const host = phone();
     const hr = host.getBoundingClientRect();
     const fr = fromEl.getBoundingClientRect();
     const br = bar.getBoundingClientRect();
@@ -58,8 +80,15 @@
     const ox = fr.left - hr.left + fr.width / 2;
     const oy = fr.top  - hr.top  + fr.height / 2;
     /* they converge on the filled end of the bar, not its middle */
-    const tx = br.left - hr.left + Math.max(28, br.width * 0.12);
+    const tx = br.left - hr.left + Math.max(26, br.width * 0.10);
     const ty = br.top  - hr.top  + br.height / 2;
+    const ex = tx - ox, ey = ty - oy;
+
+    /* the bar holds its growth back until the pips are nearly home, so
+       the width change reads as a consequence of the arrival */
+    bar.classList.add('absorbing');
+    clearTimeout(absorbT);
+    absorbT = setTimeout(() => bar.classList.remove('absorbing'), 2400);
 
     for (let i = 0; i < n; i++){
       const node = document.createElement('div');
@@ -69,24 +98,63 @@
       node.style.top  = (oy - 11) + 'px';
       host.appendChild(node);
 
-      /* burst outward first, then get pulled to the bar */
-      const ang  = (-Math.PI / 2) + (Math.random() - 0.5) * 2.5;
-      const dist = 34 + Math.random() * 46;
+      /* an ordered fan, not a scatter: the eye can follow any one of
+         them, and no two paths cross */
+      const spread = n === 1 ? 0 : (i / (n - 1)) - 0.5;      /* -0.5 … +0.5 */
+      const ang  = (-Math.PI / 2) + spread * 1.35 + (Math.random() - 0.5) * 0.14;
+      const dist = 42 + Math.random() * 14;
       const bx = Math.cos(ang) * dist;
       const by = Math.sin(ang) * dist;
-      const delay = i * 26;
+      const delay = i * STAGGER;
 
-      const anim = node.animate([
-        { transform: 'translate(0,0) scale(.5)', opacity: 0, offset: 0 },
-        { transform: `translate(${bx}px, ${by}px) scale(1.15)`, opacity: 1, offset: .28 },
-        { transform: `translate(${bx * .6}px, ${by * .6 - 10}px) scale(1)`, opacity: 1, offset: .42 },
-        { transform: `translate(${tx - ox}px, ${ty - oy}px) scale(.18)`, opacity: 0, offset: 1 },
-      ], { duration: 900, delay, easing: 'cubic-bezier(.34,.62,.28,1)', fill: 'forwards' });
+      /* beat 2 — out of the icon with a small overshoot, and stop */
+      node.animate([
+        { transform: 'translate(0,0) scale(.25)', opacity: 0 },
+        { transform: `translate(${bx * .55}px, ${by * .55}px) scale(1.1)`, opacity: 1, offset: .55 },
+        { transform: `translate(${bx}px, ${by}px) scale(1)`, opacity: 1 },
+      ], { duration: BURST_MS, delay, easing: 'cubic-bezier(.22,.9,.3,1)', fill: 'forwards' });
 
-      anim.onfinish = () => { node.remove(); if (i === n - 1) bloom(); };
+      /* beat 3 — a real quadratic arc, sampled into keyframes so the
+         curve is followed while the timing function still eases the
+         whole trip. The control point sits out along the burst vector,
+         so each pip keeps its own lane and they converge only at the
+         very end. */
+      const D  = Math.hypot(ex - bx, ey - by);
+      const ux = bx / dist, uy = by / dist;
+      const cx = bx + ux * D * 0.42;
+      const cy = by + uy * D * 0.42 - D * 0.10;
+      const frames = [];
+      const STEPS = 22;
+      for (let k = 0; k <= STEPS; k++){
+        const t = k / STEPS, u = 1 - t;
+        const x = u * u * bx + 2 * u * t * cx + t * t * ex;
+        const y = u * u * by + 2 * u * t * cy + t * t * ey;
+        frames.push({
+          offset: t,
+          transform: `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) scale(${(1 - 0.68 * t).toFixed(3)})`,
+          opacity: t < 0.9 ? 1 : (1 - t) / 0.1,
+        });
+      }
+      const fly = node.animate(frames, {
+        duration: TRAVEL_MS, delay: delay + BURST_MS,
+        easing: 'cubic-bezier(.55,.02,.25,1)', fill: 'forwards',
+      });
+
+      fly.onfinish = () => {
+        node.remove();
+        sip();                     /* the bar takes this one in */
+        if (i === 0) flare();      /* the room lifts on the first arrival */
+        if (i === n - 1) bloom();  /* and blooms on the last */
+      };
     }
-    /* the room brightens for the moment, then settles back */
-    flare();
+  }
+  let absorbT = null;
+
+  /* one small swallow at the tip of the bar per pip that lands */
+  function sip(){
+    const track = document.querySelector('.progress-track');
+    if (!track) return;
+    track.classList.remove('sip'); void track.offsetWidth; track.classList.add('sip');
   }
 
   /* the aurora swells on an answer and decays to idle */
@@ -96,7 +164,7 @@
     if (!p || REDUCED) return;
     p.classList.add('amb-lit');
     clearTimeout(flareT);
-    flareT = setTimeout(() => p.classList.remove('amb-lit'), 1500);
+    flareT = setTimeout(() => p.classList.remove('amb-lit'), 1600);
   }
 
   /* the bar answers: a gold pulse behind it, and the fill flashes */
@@ -314,5 +382,5 @@
     return { stop(){ cancelAnimationFrame(raf); svg.remove(); } };
   }
 
-  window.JUICE = { pop, flare, bloom, tint, deepen, confetti, fireworks, bokeh, sweep, setAmbient, wave };
+  window.JUICE = { pop, sip, flare, bloom, tint, deepen, confetti, fireworks, bokeh, sweep, setAmbient, wave };
 })();

@@ -148,6 +148,25 @@ function setProgress(pct, label){
   if (label !== undefined) progressLabel.textContent = label;
 }
 
+/*
+  earn(pct, label) — progress the user has not taken yet.
+
+  The bar used to grow the moment Sarah ASKED, which meant that by the
+  time the pips from a tapped option reached it there was nothing left
+  for them to do. Anything set through earn() is held until the answer
+  lands in the chat, so the width and the label arrive together with
+  the pips and the bar reads as something you filled rather than
+  something that was announced to you.
+*/
+let heldProgress = null;
+function earn(pct, label){ heldProgress = [pct, label]; }
+function releaseProgress(){
+  if (!heldProgress) return;
+  const [pct, label] = heldProgress;
+  heldProgress = null;
+  setProgress(pct, label);
+}
+
 function dimPreviousSarah(){
   chatStream.querySelectorAll('.msg:not(.dim)').forEach(m => m.classList.add('dim'));
 }
@@ -198,6 +217,7 @@ async function sarah(text, { typingMs = 650, holdMs = 350, perWord = 130, quick 
 }
 
 function userChip(text, icon = ''){
+  releaseProgress();          /* the answer is in: the bar may grow */
   const row = el(`
     <div class="chip-row">
       <div class="chip">${icon ? `<span class="chip-ico">${icon}</span>` : ''}${text}</div>
@@ -285,11 +305,12 @@ function options(items, { head = null, link = null, linkValue = null, wide = fal
           ico.classList.add(item.anim || 'oa-bounce');
           /* the icon stays where it is; copies of it feed the bar */
           /* whatever the row actually shows is what sprays: flag, glyph, emoji */
-          JUICE.pop(ico, { html: ico.innerHTML, n: 9, instant: FF });
+          JUICE.pop(ico, { html: ico.innerHTML, n: 5, instant: FF });
         } else {
-          JUICE.pop(btn, { emoji: '\u2726', n: 6, instant: FF });
+          JUICE.pop(btn, { emoji: '\u2726', n: 4, instant: FF });
         }
-        setTimeout(() => finish(item), ico ? 430 : 200);
+        /* the row holds until its icon has finished throwing the pips */
+        setTimeout(() => finish(item), ico ? 560 : 240);
       });
       list.appendChild(btn);
     });
@@ -373,7 +394,7 @@ function multiSelect(items, { head = 'Select all that apply', cta = 'Continue', 
       wrap.remove();
       const picked = items.filter(i => chosen.has(i));   /* source order, not tap order */
       const first = items.indexOf(picked[0]);
-      JUICE.pop(cta_, { emoji: icons[first] || '\u2726', n: 9, instant: FF });
+      JUICE.pop(cta_, { emoji: icons[first] || '\u2726', n: 5, instant: FF });
       userChip(picked.length > 1 ? `${picked[0]} +${picked.length - 1}` : picked[0], icons[first] || '');
       resolve(picked);
     });
@@ -1734,21 +1755,20 @@ async function flow(){
   /* ---------- 2 · name ---------- */
   reach('name');
   await sarah(T('name_q'));
-  setProgress(15, '15% completed');
   const name = await nameInput();
   setProgress(15, T('lbl_coolname'));
 
   /* ---------- 2.2 · phone ---------- */
   reach('phone');
   await sarah(T('ack_name'));
-  setProgress(23, '23% completed');
+  earn(23, '23% completed');
   await sarah(T('phone_q'));
   const phone = await phoneInput(L.flag, L.cc);
 
   /* ---------- 3 · heard from (India's flat list, unchanged) ---------- */
   reach('source');
   await sarah(phone ? T('source_thanks') : T('source_noproblem'));
-  setProgress(30, '30% completed');
+  earn(30, '30% completed');
   await options([
     { value: 'play',      label: 'Just searched on Play Store', icon: ICONS.play },
     { value: 'tiktok',    label: 'Tiktok',                icon: ICONS.tiktok },
@@ -1767,7 +1787,6 @@ async function flow(){
   /* ---------- 4 · age + gender (data capture only) ---------- */
   reach('age');
   await sarah(T('age_q'));
-  setProgress(38, '38% completed');
   await options([
     { value: 'u18',   label: 'Under 18',     icon: '🎒', e: '🎒', anim: 'oa-bounce' },
     { value: '18_24', label: '18 – 24',      icon: '🎓', e: '🎓', anim: 'oa-tilt' },
@@ -1790,7 +1809,6 @@ async function flow(){
   /* ---------- 5 · goal — the only real fork ---------- */
   reach('goal');
   await sarah(T('goal_q'));
-  setProgress(46, '46% completed');
   const goal = await options(
     C.GOALS.map(g => ({
       value: g.value, label: g.label,
@@ -1810,7 +1828,7 @@ async function flow(){
   if (goal === 'exam'){
     reach('exam');
     await sarah(T('exam_q'));
-    setProgress(50, '50% completed');
+    earn(50, '50% completed');
     exam = await options(
       C.EXAMS.map(e => ({ value: e.value, label: e.label,
                           defaultOnSkip: e.value === 'ielts' })),
@@ -1824,7 +1842,7 @@ async function flow(){
       /* the only exam that branches further */
       reach('examtype');
       await sarah(T('ielts_type_q'));
-      setProgress(53, '53% completed');
+      earn(53, '53% completed');
       examType = await options(
         C.IELTS_TYPES.map(t => ({ value: t.value, label: t.label, desc: t.desc,
                                   defaultOnSkip: t.value === 'academic' })),
@@ -1832,14 +1850,14 @@ async function flow(){
 
       reach('examdate');
       await sarah(T('exam_date_q'));
-      setProgress(57, '57% completed');
+      earn(57, '57% completed');
       examDate = await options(
         C.examDateOptions().map(d => ({ value: d.value, label: d.label, note: d.note,
                                         defaultOnSkip: d.value === '2m' })));
 
       reach('band');
       await sarah(T('band_q'));
-      setProgress(61, '61% completed');
+      earn(61, '61% completed');
       band = await bandSlider({ start: 7 });
     } else {
       /* TOEFL / TOEIC / PTE — recorded, then straight on */
@@ -1856,7 +1874,7 @@ async function flow(){
   /* ---------- 6 · situation (profile only, no fork) ---------- */
   reach('situation');
   await sarah(T('situation_q'));
-  setProgress(69, '69% completed');
+  earn(69, '69% completed');
   const situation = await options(
     C.SITUATIONS.map(s => ({ value: s, label: s,
       icon: C.SIT_FX[s], e: C.SIT_FX[s], anim: 'oa-bounce',
@@ -1874,7 +1892,7 @@ async function flow(){
   if (sc){
     reach('scenarios');
     await sarah(sc.prompt);
-    setProgress(76, '76% completed');
+    earn(76, '76% completed');
     const labels = sc.items.map(i => i.label);
     picked = await multiSelect(labels, { icons: sc.items.map(i => i.e || '🎯'),
                                          forced: [labels[0], labels[1]] });
