@@ -103,26 +103,44 @@ All state is in the URL:
 - `lvl` — `beginner · intermediate · advanced`
 - `perf` — ladder outcome override: `weak · mid · midhigh · strong` (defaults by level)
 
-## The interaction layer (juice v2)
+## The interaction layer (v3)
 
-Seven primitives in `juice.js`, placed by one rule — everything that flies
-lands somewhere and stays:
+Six primitives in `juice.js`, placed by one rule: **everything that flies
+lands somewhere and changes it.**
 
-- **Star tray** — six slots in the header. Milestone answers pop off the
-  user's chip and land as gold stars (slotPunch · ringPulse · barGlow,
-  vocabulary from the conversation-lead prototype). Stars persist and fly
-  down into the plan-build stack.
-- **Punch + icon micro-anims** on every option tap (flag waves, briefcase
-  bounces) — no particles on menu taps.
-- **Canvas confetti engine** (ported from Activation v3): burst on ladder
-  passes and practice wins, rain on the offer, fireworks on the gift.
-- **The one sweep** — a single Gemini-style indigo→gold gradient pass at
-  plan-build. Gold appears only when earned.
-- **Live waveform** while Sarah "says it" on the echo rung; glow around the
-  mic while it listens.
-- **Permission card** — the notification ask as a self-granting toggle.
-- Everything is FF-aware (instant during deep-link fast-forward) and dies
-  under `prefers-reduced-motion`.
+- **fly()** — the whole reward in one move. On every answer the option's
+  icon animates where it stands, the row collapses into the user's chip,
+  and the icon detaches and arcs into the progress bar, which blooms and
+  grows. The answer literally becomes progress. There is no star tray and
+  no confetti on a menu tap.
+- **Icons on every option** — age, gender, situation and scenarios all
+  carry one now, because an icon is the thing that animates and travels.
+  Levels are one family: seedling, sprig, tree.
+- **Living aurora** — two blurred blobs drift on a slow loop over a
+  gradient base, keyed to state: idle, thinking (Sarah typing), listening
+  (mic open) and reward. The header holds a bloom that pulses on landing.
+- **The room becomes theirs** — the aurora hue shifts to the goal they
+  pick and deepens once they give their level, so the plan-build takeover
+  resolves in their colour.
+- **Canvas confetti / fireworks / bokeh** — reserved for real peaks:
+  ladder passes, the gift, the offer.
+- **The one sweep** — a single indigo-to-gold pass at plan build. Gold
+  appears only when earned.
+- Everything is FF-aware and dies under `prefers-reduced-motion`.
+
+## The widgets
+
+Six objects Sarah can send, each a deliberately different shape so no two
+read as "another card":
+
+| Widget | Shape | When |
+|---|---|---|
+| Social proof | counters that run 0 to target and settle together, then the hero pops | after attribution |
+| Goal proof | the outcome claim plus faces, inside her own bubble | after the goal |
+| Recap | her bubble replaying their chips | after scenarios |
+| Testimonials | photo cards, result as the quote, rail keyed to goal | after the recap |
+| Notification | the real iOS system alert | before level |
+| Award | the Google Play trophy credential, animating in | before the mic |
 
 ## What's new versus the India prototype
 

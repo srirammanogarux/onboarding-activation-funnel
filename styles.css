@@ -3256,3 +3256,250 @@ body{
   pointer-events:none;
 }
 @keyframes micGlow{from{opacity:.5;transform:scale(.9);}to{opacity:1;transform:scale(1.12);}}
+
+/* ============================================================
+   WIDGETS v3 — counters, faces, photo testimonials, iOS alert,
+   award credential. One rule: each widget has its own shape.
+   ============================================================ */
+
+/* --- 1. the counter widget --------------------------------- */
+.stat-widget{
+  align-self:flex-start;
+  margin-left:42px;
+  width:300px;
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+  animation:msg-in .45s var(--ease-out) both;
+}
+.sw-hero{display:flex;align-items:baseline;gap:9px;}
+.sw-num{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:52px;
+  line-height:54px;
+  letter-spacing:-.03em;
+  color:var(--blue-300);
+  font-variant-numeric:tabular-nums;
+  transition:transform .3s var(--ease-spring);
+}
+.stat-widget.settled .sw-num{animation:swPop .42s var(--ease-spring);}
+@keyframes swPop{0%{transform:scale(1);}45%{transform:scale(1.12);}100%{transform:scale(1);}}
+.sw-lab{font-family:var(--font-display);font-weight:600;font-size:18px;color:var(--text-hi);}
+.sw-track{height:6px;border-radius:999px;background:var(--opt-bg);overflow:hidden;}
+.sw-track i{
+  display:block;height:6px;width:0;border-radius:999px;
+  background:linear-gradient(90deg,var(--accent),var(--accent-light));
+}
+.stat-widget.settled .sw-track i{box-shadow:0 0 14px rgba(157,150,255,.6);}
+.sw-sub{margin:0;font-family:var(--font-body);font-size:14.5px;line-height:20px;color:var(--text-low);}
+.sw-row{display:flex;margin-top:7px;padding-top:14px;border-top:1px solid rgba(255,255,255,.09);}
+.sw-cell{flex:1;display:flex;flex-direction:column;gap:1px;}
+.sw-cell b{
+  font-family:var(--font-display);font-weight:700;font-size:21px;
+  color:var(--text-hi);font-variant-numeric:tabular-nums;
+}
+.sw-cell.gold b{color:var(--progress);}
+.sw-cell span{font-family:var(--font-body);font-size:12.5px;color:var(--text-faint);}
+
+/* --- 2. the faces widget, inside Sarah's bubble ------------- */
+.gp-claim{margin:0;}
+.gp-claim em{font-style:normal;font-weight:600;color:var(--blue-300);}
+.gp-faces{display:flex;align-items:center;gap:10px;margin-top:12px;}
+.gp-av{display:flex;flex:none;}
+.gp-av img{
+  width:32px;height:32px;border-radius:50%;object-fit:cover;
+  border:2px solid var(--bubble-fill);
+}
+.gp-av img + img{margin-left:-11px;}
+.gp-line{font-family:var(--font-body);font-size:14.5px;line-height:19px;color:var(--text-low);}
+.gp-line b{color:var(--text-hi);font-weight:600;}
+
+/* --- 3. photo testimonials (Beside) ------------------------ */
+.t-card{
+  position:relative;
+  flex-shrink:0;
+  width:275px;
+  height:340px;
+  border-radius:20px;
+  overflow:hidden;
+  background:#141119;
+  scroll-snap-align:center;
+  border:none;
+  padding:0;
+  backdrop-filter:none;
+}
+.t-card::after{content:none;}
+.tc-photo{position:absolute;inset:0 0 auto 0;width:100%;height:215px;object-fit:cover;display:block;}
+.tc-scrim{
+  position:absolute;left:0;right:0;top:105px;height:235px;
+  background:linear-gradient(180deg,rgba(20,17,25,0),rgba(20,17,25,.93) 55%,#141119);
+}
+.tc-body{position:absolute;left:0;right:0;bottom:0;padding:18px;display:flex;flex-direction:column;gap:11px;}
+.tc-quote{
+  margin:0;font-family:var(--font-display);font-weight:600;
+  font-size:17px;line-height:24px;color:#fff;
+}
+.tc-rule{height:1px;background:rgba(255,255,255,.16);}
+.tc-who b{display:block;font-family:var(--font-display);font-weight:600;font-size:14px;color:var(--text-mid);}
+.tc-who span{font-family:var(--font-body);font-size:13px;color:var(--text-low);}
+
+/* --- 4. the iOS system alert ------------------------------- */
+.ios-alert-wrap{
+  position:absolute;inset:0;z-index:60;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,0);
+  opacity:0;transition:opacity .24s var(--ease-out), background .24s var(--ease-out);
+  pointer-events:none;
+}
+.ios-alert-wrap.in{opacity:1;background:rgba(0,0,0,.45);pointer-events:auto;}
+.ios-alert{
+  width:270px;border-radius:14px;overflow:hidden;
+  background:rgba(44,44,46,.98);
+  -webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);
+  transform:scale(1.12);opacity:0;
+  transition:transform .26s var(--ease-spring), opacity .2s var(--ease-out);
+}
+.ios-alert-wrap.in .ios-alert{transform:scale(1);opacity:1;}
+.ia-head{padding:19px 16px 15px;text-align:center;}
+.ia-title{margin:0 0 4px;font-family:-apple-system,system-ui,sans-serif;font-weight:600;font-size:17px;line-height:22px;color:#fff;}
+.ia-body{margin:0;font-family:-apple-system,system-ui,sans-serif;font-size:13px;line-height:17px;color:rgba(235,235,245,.85);}
+.ia-actions{display:flex;border-top:.5px solid rgba(255,255,255,.18);}
+.ia-btn{
+  flex:1;padding:11px 6px;background:none;border:none;
+  font-family:-apple-system,system-ui,sans-serif;font-size:17px;color:#0A84FF;
+}
+.ia-btn.bold{font-weight:600;}
+.ia-btn + .ia-btn{border-left:.5px solid rgba(255,255,255,.18);}
+.ia-btn:active{background:rgba(255,255,255,.08);}
+
+/* --- 5. the award credential ------------------------------- */
+.award-card{
+  position:relative;
+  align-self:flex-start;
+  margin-left:42px;
+  width:322px;
+  padding:16px 18px;
+  border-radius:20px;
+  overflow:hidden;
+  background:linear-gradient(135deg,#3A2470,#1E1338);
+  border:1px solid rgba(179,140,255,.3);
+  opacity:0;transform:translateY(10px);
+  transition:opacity .4s var(--ease-out), transform .5s var(--ease-spring);
+}
+.award-card.in{opacity:1;transform:translateY(0);}
+.aw-trophy{
+  position:absolute;left:-15px;top:-10px;
+  width:95px;height:95px;object-fit:contain;
+  transform:scale(.86) rotate(-6deg);opacity:0;
+  transition:transform .55s var(--ease-spring) .1s, opacity .35s var(--ease-out) .1s;
+}
+.award-card.in .aw-trophy{transform:scale(1) rotate(0);opacity:1;}
+.aw-text{position:relative;display:flex;flex-direction:column;gap:3px;padding-left:80px;}
+.aw-kicker{font-family:var(--font-display);font-weight:700;font-size:10.5px;letter-spacing:.15em;color:#C4A9FF;}
+.aw-title{font-family:var(--font-display);font-weight:700;font-size:21px;line-height:25px;letter-spacing:-.015em;color:#fff;white-space:nowrap;}
+.aw-line{font-family:var(--font-body);font-size:12.5px;line-height:17px;color:var(--text-low);white-space:nowrap;}
+
+/* ============================================================
+   INTERACTION v3 — the answer becomes progress
+   ============================================================ */
+.fx-fly{
+  position:absolute;z-index:40;pointer-events:none;
+  width:28px;height:28px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;line-height:1;
+  filter:drop-shadow(0 4px 14px rgba(108,99,255,.55));
+}
+/* the chip keeps its shape but the icon has gone to the bar */
+.chip-ico.spent{opacity:0;transform:scale(.6);transition:opacity .2s var(--ease-out), transform .2s var(--ease-out);}
+
+/* the bar answers when something lands in it */
+.progress-track{position:relative;}
+.progress-track.bloom::after{
+  content:'';position:absolute;inset:-6px -8px;border-radius:999px;
+  background:radial-gradient(60% 140% at 18% 50%, rgba(217,162,74,.55), transparent 70%);
+  animation:barBloom .72s var(--ease-out) forwards;pointer-events:none;
+}
+@keyframes barBloom{0%{opacity:0;transform:scale(.9);}30%{opacity:1;}100%{opacity:0;transform:scale(1.04);}}
+.progress-fill{transition:width .62s var(--ease-spring);}
+
+/* the header is the light source */
+.head-bloom{
+  position:absolute;left:0;right:0;top:-40px;height:190px;
+  pointer-events:none;z-index:0;opacity:.55;
+  background:radial-gradient(58% 70% at 24% 34%, rgba(108,99,255,.42), transparent 70%),
+             radial-gradient(46% 62% at 78% 18%, rgba(217,162,74,.20), transparent 72%);
+  transition:opacity .6s var(--ease-out);
+}
+.head-bloom.pulse{animation:headPulse .9s var(--ease-out);}
+@keyframes headPulse{0%{opacity:.55;}28%{opacity:1;}100%{opacity:.55;}}
+
+/* multi-select rows carry an icon now */
+.ms-opt{gap:14px;}
+.ms-opt .ico{flex-shrink:0;width:24px;font-size:20px;line-height:1;display:flex;justify-content:center;}
+.ms-opt .opt-label{flex:1;}
+
+/* ============================================================
+   VIBRANCY v3 — the room is alive, and it becomes theirs
+   The hue variable shifts as they answer, so by plan-build the
+   background is the colour of the goal they picked.
+   ============================================================ */
+#phone{
+  --aur-1:108 99 255;      /* indigo, the default room  */
+  --aur-2:158 99 255;      /* violet companion          */
+  --aur-boost:1;           /* raised while Sarah thinks */
+  background:
+    radial-gradient(120% 90% at 50% 0%, #171130 0%, transparent 55%),
+    linear-gradient(180deg, #0E0B18 0%, #100C1C 46%, #16112A 100%);
+  transition:background 1.2s var(--ease-out);
+}
+.ambient{overflow:hidden;z-index:0;}
+.amb-a,.amb-b{
+  position:absolute;display:block;border-radius:50%;
+  filter:blur(58px);
+  will-change:transform,opacity;
+  transition:background 1.4s var(--ease-out), opacity .8s var(--ease-out);
+}
+.amb-a{
+  width:360px;height:360px;left:-90px;top:-40px;
+  background:radial-gradient(circle, rgba(var(--aur-1)/.42), rgba(var(--aur-1)/0) 70%);
+  opacity:calc(.62 * var(--aur-boost));
+  animation:aurA 13s ease-in-out infinite;
+}
+.amb-b{
+  width:320px;height:320px;right:-80px;top:120px;
+  background:radial-gradient(circle, rgba(var(--aur-2)/.34), rgba(var(--aur-2)/0) 70%);
+  opacity:calc(.5 * var(--aur-boost));
+  animation:aurB 17s ease-in-out infinite;
+}
+@keyframes aurA{
+  0%,100%{transform:translate3d(0,0,0) scale(1);}
+  33%    {transform:translate3d(38px,54px,0) scale(1.12);}
+  66%    {transform:translate3d(-22px,26px,0) scale(.94);}
+}
+@keyframes aurB{
+  0%,100%{transform:translate3d(0,0,0) scale(1);}
+  40%    {transform:translate3d(-46px,72px,0) scale(1.14);}
+  75%    {transform:translate3d(24px,-18px,0) scale(.96);}
+}
+
+/* --- state machine: idle · thinking · listening · reward --- */
+#phone.amb-thinking{--aur-boost:1.45;}
+#phone.amb-thinking .amb-a{animation-duration:7s;}
+#phone.amb-listening{--aur-1:120 150 255;--aur-2:217 162 74;--aur-boost:1.35;}
+#phone.amb-reward{--aur-1:217 162 74;--aur-2:231 180 85;--aur-boost:1.6;}
+
+/* --- the room takes on their goal --- */
+#phone.goal-career  {--aur-1:108 120 255;--aur-2:217 162 74;}
+#phone.goal-exam    {--aur-1: 96 108 255;--aur-2:140 108 255;}
+#phone.goal-personal{--aur-1: 96 190 150;--aur-2:108 120 255;}
+#phone.goal-school  {--aur-1:130 108 255;--aur-2: 96 170 220;}
+#phone.goal-travel  {--aur-1: 86 160 235;--aur-2:217 162 74;}
+/* deeper once we know their level, so the takeover feels earned */
+#phone.tuned{--aur-boost:1.25;}
+#phone.tuned .head-bloom{opacity:.8;}
+
+@media (prefers-reduced-motion:reduce){
+  .amb-a,.amb-b{animation:none;}
+  .progress-fill{transition:none;}
+}

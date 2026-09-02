@@ -138,7 +138,6 @@ skipBtn.addEventListener('click', () => {
   rushing = true;
 });
 muteBtn.addEventListener('click', () => muteBtn.classList.toggle('muted'));
-$('restartBtn').addEventListener('click', () => location.reload());
 
 function scrollToEnd(smooth = true){
   chatScroll.scrollTo({ top: chatScroll.scrollHeight, behavior: smooth ? 'smooth' : 'auto' });
@@ -163,6 +162,7 @@ function el(html){
 /* voice state: typing dots → full text appears → gradient sheen
    sweeps the fill + bubble pulses for the duration of the "voice" */
 async function sarah(text, { typingMs = 650, holdMs = 350, perWord = 130, quick = false } = {}){
+  if (!FF) JUICE.setAmbient('thinking');
   if (quick){ perWord = 85; typingMs = Math.min(typingMs, 450); holdMs = 220; }
   dimPreviousSarah();
   if (FF || rushing){
@@ -192,6 +192,7 @@ async function sarah(text, { typingMs = 650, holdMs = 350, perWord = 130, quick 
   scrollToEnd();
   await wait(Math.max(1200, text.split(' ').length * perWord));
   row.classList.remove('speaking');
+  JUICE.setAmbient('idle');
   await wait(holdMs);
   return row;
 }
@@ -252,7 +253,15 @@ function options(items, { head = null, link = null, linkValue = null, wide = fal
     const finish = (item) => {
       disarmSkip();
       wrap.remove();
-      userChip(item.label, chipIcons ? (item.icon || '') : '');
+      const row = userChip(item.label, item.icon || '');
+      /* the answer becomes progress: its icon leaves the chip for the bar */
+      const ico = row.querySelector('.chip-ico');
+      if (ico && item.e){
+        setTimeout(() => {
+          JUICE.fly(ico, { emoji: item.e, instant: FF });
+          ico.classList.add('spent');
+        }, 220);
+      }
       resolve(item.value);
     };
 
@@ -277,11 +286,11 @@ function options(items, { head = null, link = null, linkValue = null, wide = fal
           return;
         }
         btn.classList.add('selected');
-        /* juice v2: the row punches, the icon does its own little move.
-           Stars are awarded at milestones by the flow, not here. */
+        /* the icon animates where it stands, then the row collapses into
+           the chip and the icon carries on to the bar. One continuous move. */
         const ico = btn.querySelector('.ico');
-        if (ico && item.anim) ico.classList.add(item.anim);
-        setTimeout(() => finish(item), item.anim ? 420 : 180);
+        if (ico) ico.classList.add(item.anim || 'oa-bounce');
+        setTimeout(() => finish(item), ico ? 400 : 180);
       });
       list.appendChild(btn);
     });
@@ -315,7 +324,7 @@ const flag = (name) => `<img src="assets/flag-${name}.svg" alt="">`;
 */
 const TICK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
 
-function multiSelect(items, { head = 'Select all that apply', cta = 'Continue', forced = null, fx = null } = {}){
+function multiSelect(items, { head = 'Select all that apply', cta = 'Continue', forced = null, icons = [] } = {}){
   if (FF){
     const picked = forced && forced.length ? forced : [items[0]];
     userChip(picked.length > 1 ? `${picked[0]} +${picked.length - 1}` : picked[0]);
@@ -341,15 +350,19 @@ function multiSelect(items, { head = 'Select all that apply', cta = 'Continue', 
       cta_.classList.toggle('ready', chosen.size > 0);
     };
 
-    items.forEach(label => {
+    items.forEach((label, i) => {
       const btn = el(`
         <button class="opt ms-opt">
+          ${icons[i] ? `<span class="ico">${icons[i]}</span>` : ''}
           <span class="opt-label">${label}</span>
           <span class="ms-box">${TICK}</span>
         </button>`);
       btn.addEventListener('click', () => {
-        if (chosen.has(label)) chosen.delete(label); else chosen.add(label);
-        btn.classList.toggle('on', chosen.has(label));
+        const on = !chosen.has(label);
+        if (on) chosen.add(label); else chosen.delete(label);
+        btn.classList.toggle('on', on);
+        const ico = btn.querySelector('.ico');
+        if (on && ico){ ico.classList.remove('oa-bounce'); void ico.offsetWidth; ico.classList.add('oa-bounce'); }
         sync();
       });
       list.appendChild(btn);
@@ -360,7 +373,10 @@ function multiSelect(items, { head = 'Select all that apply', cta = 'Continue', 
       disarmSkip();
       wrap.remove();
       const picked = items.filter(i => chosen.has(i));   /* source order, not tap order */
-      userChip(picked.length > 1 ? `${picked[0]} +${picked.length - 1}` : picked[0]);
+      const first = items.indexOf(picked[0]);
+      const row = userChip(picked.length > 1 ? `${picked[0]} +${picked.length - 1}` : picked[0], icons[first] || '');
+      const ico = row.querySelector('.chip-ico');
+      if (ico) setTimeout(() => { JUICE.fly(ico, { emoji: icons[first] || '🎯', instant: FF }); ico.classList.add('spent'); }, 220);
       resolve(picked);
     });
 
@@ -572,39 +588,27 @@ const SRC_ICONS = {
 const T_AVATARS = ['avatar-syahrier.png', 'avatar-t2.png', 'avatar-t3.png'];
 const T_SOURCES = ['x', 'play', 'app'];
 
-async function testimonialCarousel(){
+async function testimonialCarousel(goal){
+  const list = (C.TESTIMONIALS[goal] || C.TESTIMONIALS.career);
   const wrap = el(`<div class="testimonials"><div class="testimonial-rail"></div></div>`);
   const rail = wrap.querySelector('.testimonial-rail');
-  T('testimonials').forEach((t, i) => rail.appendChild(el(`
-    <article class="t-card">
-      <div class="t-head">
-        <div class="t-id">
-          <img src="assets/${T_AVATARS[i]}" alt="">
-          <div><p class="t-name">${t.name}</p><p class="t-handle">${t.handle}</p></div>
-        </div>
-        <span class="t-src t-src-${T_SOURCES[i]}">${SRC_ICONS[T_SOURCES[i]]}</span>
+  list.forEach(t => rail.appendChild(el(`
+    <div class="t-card">
+      <img class="tc-photo" src="assets/people/${t.img}.jpg" alt="">
+      <div class="tc-scrim"></div>
+      <div class="tc-body">
+        <p class="tc-quote">\u201C${t.q}\u201D</p>
+        <i class="tc-rule"></i>
+        <div class="tc-who"><b>${t.n}</b><span>${t.r}</span></div>
       </div>
-      <p class="t-body">${t.body}</p>
-    </article>`)));
+    </div>`)));
   chatStream.appendChild(wrap);
   scrollToEnd();
-  await wait(700);
-  railAutoSlide(rail, { interval: 2600 });
-  await wait(4600);
+  if (FF) return;
+  const stop = railAutoSlide(rail, { interval: 3400 });
+  await wait(3200);
+  return stop;
 }
-
-/* ---------- variant B: video testimonial carousel ---------- */
-const VT = [
-  { photo:'assets/videos/t1.jpg', video:'assets/videos/t1.mp4', name:'Ananya Sharma',   role:'Marketing Exec, Delhi',   src:'play',
-    quote:'“At last I found an app that really helps you to grow. Direct to the point instructions for every lesson”' },
-  { photo:'assets/videos/t2.jpg', video:'assets/videos/t2.mp4', name:'Meera Krishnan',  role:'Software Engineer, Bengaluru', src:'x',
-    quote:'“I am an introvert. The app is really helpful for me personally. I am practicing English consistently now“' },
-  { photo:'assets/videos/t3.jpg', video:'assets/videos/t3.mp4', name:'Nikita Desai',    role:'HR Manager, Ahmedabad',   src:'app',
-    quote:'“This app really helped me with my pronunciation. The features improved my English”' },
-  { photo:'assets/videos/t4.png', video:'assets/videos/t4.mp4', name:'Rohan Verma',     role:'Product Manager, Mumbai', src:'play',
-    quote:'“Excellent app for speaking and chatting! It’s improved my English with effective practice”' },
-];
-const vtHasVideo = VT.map(() => false);
 
 async function videoTestimonialCarousel(){
   const wrap = el(`<div class="testimonials"><div class="testimonial-rail vt-rail" id="vtRail"></div></div>`);
@@ -910,34 +914,92 @@ function countUp(elm, to, dur = 1200){
   requestAnimationFrame(step);
 }
 
-/* global stat card — after attribution */
+/* the counter widget: one hero metric plus three supporting numbers.
+   Everything runs 0 -> target together, settles, then the hero pops. */
 async function proofCard(){
   await sarah(T('proof_lead'), { typingMs: 600, quick: true });
+  const P = C.PROOF, M = P.metric;
   const card = el(`
-    <div class="proof-card">
-      <b>0</b>
-      <span>${C.PROOF.global.label}</span>
-      <span class="stars">★★★★★ &nbsp;${C.PROOF.global.stars} learner rating</span>
+    <div class="stat-widget">
+      <div class="sw-hero">
+        <b class="sw-num">0${M.unit}</b>
+        <span class="sw-lab">${M.label}</span>
+      </div>
+      <div class="sw-track"><i></i></div>
+      <p class="sw-sub">${M.sub}</p>
+      <div class="sw-row">
+        <div class="sw-cell gold"><b data-to="${P.global.stars}" data-dec="1">0.0</b><span>rating</span></div>
+        <div class="sw-cell"><b data-to="${P.global.n}" data-fmt="big">0</b><span>learners</span></div>
+        <div class="sw-cell"><b data-to="${P.global.countries}" data-suf="+">0</b><span>countries</span></div>
+      </div>
     </div>`);
   chatStream.appendChild(card);
   scrollToEnd();
-  countUp(card.querySelector('b'), C.PROOF.global.n);
-  await wait(1600);
+  if (FF){
+    card.querySelector('.sw-num').textContent = M.value + M.unit;
+    card.querySelector('.sw-track i').style.width = M.value + '%';
+    card.querySelectorAll('.sw-cell b').forEach(b => b.textContent = fmtStat(b));
+    return;
+  }
+  /* one clock drives every number so they land together */
+  const cells = [...card.querySelectorAll('.sw-cell b')];
+  const num = card.querySelector('.sw-num'), fill = card.querySelector('.sw-track i');
+  await runFor(950, k => {
+    const e = 1 - Math.pow(1 - k, 3);
+    num.textContent = Math.round(M.value * e) + M.unit;
+    fill.style.width = (M.value * e) + '%';
+    cells.forEach(b => b.textContent = fmtStat(b, e));
+  });
+  card.classList.add('settled');
+  await wait(900);
 }
 
-/* one-liner keyed to the goal — right after they pick it */
+/* format one stat cell at progress e (1 = final) */
+function fmtStat(b, e = 1){
+  const to = parseFloat(b.dataset.to), v = to * e;
+  if (b.dataset.dec) return v.toFixed(+b.dataset.dec);
+  if (b.dataset.fmt === 'big')
+    return v >= 1000000 ? (v/1000000).toFixed(v>=10000000?0:1).replace('.0','') + 'Mn+'
+         : v >= 1000 ? Math.round(v/1000) + 'k+' : String(Math.round(v));
+  return Math.round(v) + (b.dataset.suf || '');
+}
+
+/* drive a callback across dur ms, resolve on the last frame */
+function runFor(dur, fn){
+  return new Promise(res => {
+    const t0 = performance.now();
+    const step = now => {
+      const k = Math.min(1, (now - t0) / dur);
+      fn(k);
+      if (k < 1) requestAnimationFrame(step); else res();
+    };
+    requestAnimationFrame(step);
+  });
+}
+
+/* the faces widget: the outcome claim, then who else is doing this.
+   Lives inside Sarah's own bubble so it reads as her speaking, not a card. */
 async function goalProofCard(goal){
-  const p = C.PROOF.byGoal[goal];
-  if (!p) return;
-  const card = el(`
-    <div class="proof-card">
-      <b>0</b>
-      <span>${p.line}</span>
+  const o = C.OUTCOME[goal], p = C.PROOF.byGoal[goal];
+  if (!o || !p) return;
+  const claim = o.claim.replace(o.hi, `<em>${o.hi}</em>`);
+  const faces = ['avatar-syahrier.png','avatar-t2.png','avatar-t3.png']
+    .map(f => `<img src="assets/${f}" alt="">`).join('');
+  dimPreviousSarah();
+  const row = el(`
+    <div class="msg">
+      <div class="dp"><img src="${SARAH}" alt="Sarah"></div>
+      <div class="bubble">
+        <p class="gp-claim">${claim}</p>
+        <span class="gp-faces">
+          <span class="gp-av">${faces}</span>
+          <span class="gp-line"><b>${Math.round(p.n/1000)}k+</b> ${o.who}<br>practising right now</span>
+        </span>
+      </div>
     </div>`);
-  chatStream.appendChild(card);
+  chatStream.appendChild(row);
   scrollToEnd();
-  countUp(card.querySelector('b'), p.n);
-  await wait(1500);
+  await wait(FF ? 0 : 1700);
 }
 
 /* Sarah replays their own answers as chips — personalization proof */
@@ -958,20 +1020,30 @@ async function recapBubble(chips){
 /* notification ask as a Remy-style permission moment: a card with a
    bell and a toggle that grants itself — satisfying, not a dialog */
 function permissionCard(){
-  const BELL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>';
-  const card = el(`
-    <div class="perm-card">
-      <span class="bell">${BELL}</span>
-      <p>Daily reminders from Sarah</p>
-      <span class="perm-toggle"></span>
+  /* the real thing: a system alert over a dimmed chat, Allow / Don't Allow */
+  const alertEl = el(`
+    <div class="ios-alert-wrap">
+      <div class="ios-alert">
+        <div class="ia-head">
+          <p class="ia-title">\u201CStimuler\u201D Would Like to Send You Notifications</p>
+          <p class="ia-body">Notifications may include alerts, sounds and icon badges. These can be configured in Settings.</p>
+        </div>
+        <div class="ia-actions">
+          <button class="ia-btn">Don\u2019t Allow</button>
+          <button class="ia-btn bold">Allow</button>
+        </div>
+      </div>
     </div>`);
-  chatStream.appendChild(card);
-  scrollToEnd();
+  $('phone').appendChild(alertEl);
+  requestAnimationFrame(() => alertEl.classList.add('in'));
   return new Promise(resolve => {
-    const grant = () => { card.classList.add('granted'); setTimeout(resolve, FF ? 0 : 800); };
-    if (FF){ grant(); return; }
-    const t = setTimeout(grant, 1600);                       /* grants itself */
-    card.addEventListener('click', () => { clearTimeout(t); grant(); }, { once: true });
+    const done = () => {
+      alertEl.classList.remove('in');
+      setTimeout(() => alertEl.remove(), 260);
+      resolve();
+    };
+    if (FF){ done(); return; }
+    alertEl.querySelectorAll('.ia-btn').forEach(b => b.addEventListener('click', done, { once: true }));
   });
 }
 
@@ -1008,15 +1080,11 @@ async function planBuildSequence(answers){
   answers.filter(a => a && a[1]).forEach(([k, v]) => {
     stack.appendChild(el(`<div class="pb-card"><small>${k}</small><b>${v}</b></div>`));
   });
-  const TICK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
-  $('pbChecks').innerHTML = C.PLAN_BUILD.map(t =>
-    `<li><span class="tick">${TICK_SVG}</span>${t}</li>`).join('');
-
   sarahFly($('pbAvatar').querySelector('img'));
+  JUICE.setAmbient('reward');   /* the room resolves to gold as the plan lands */
   showScreen('planBuildScreen');
   setTimeout(() => $('chatScreen').classList.add('is-hidden'), FF ? 0 : 500);
   if (!FF) JUICE.sweep();                      /* THE one ambient pass */
-  if (!FF) setTimeout(() => JUICE.trayToPlan(stack), 350);   /* stars come down */
 
   /* answers slide into the stack, then the checklist ticks */
   const cards = [...stack.children];
@@ -1024,13 +1092,7 @@ async function planBuildSequence(answers){
     await wait(FF ? 0 : 240);
     cards[i].classList.add('in');
   }
-  const checks = [...$('pbChecks').children];
-  for (const li of checks){
-    await wait(FF ? 0 : 420);
-    li.classList.add('in');
-    await wait(FF ? 0 : 520);
-    li.classList.add('done');
-  }
+  await wait(FF ? 0 : 360);
   JUICE.bokeh(10);
   const cta = $('pbCta');
   cta.style.visibility = 'visible';
@@ -1673,7 +1735,6 @@ async function flow(){
   ], { wide: true, link: T('other_lang_link'), forced: DBG.lang === 'en' ? 'english' : 'native' });
   if (applang === 'native' && STR[lang]) L10N = lang;
   setProgress(7, '7% completed');
-  JUICE.star({ emoji: '🌐', instant: FF });                 /* ★ 1 — language chosen */
   await wait(300);
 
   /* ---------- 2 · name ---------- */
@@ -1714,23 +1775,22 @@ async function flow(){
   await sarah(T('age_q'));
   setProgress(38, '38% completed');
   await options([
-    { value: 'u18',   label: 'Under 18' },
-    { value: '18_24', label: '18 – 24' },
-    { value: '25_34', label: '25 – 34', defaultOnSkip: true },
-    { value: '35_44', label: '35 – 44' },
-    { value: '45p',   label: '45 and above' },
+    { value: 'u18',   label: 'Under 18',     icon: '🎒', e: '🎒', anim: 'oa-bounce' },
+    { value: '18_24', label: '18 – 24',      icon: '🎓', e: '🎓', anim: 'oa-tilt' },
+    { value: '25_34', label: '25 – 34',      icon: '💼', e: '💼', anim: 'oa-bounce', defaultOnSkip: true },
+    { value: '35_44', label: '35 – 44',      icon: '🏡', e: '🏡', anim: 'oa-wave' },
+    { value: '45p',   label: '45 and above', icon: '🧭', e: '🧭', anim: 'oa-spin' },
   ], { link: T('rather_not_say'), linkValue: 'na' });
   setProgress(42, '42% completed');
 
   reach('gender');
   await sarah(T('gender_q'));
   await options([
-    { value: 'woman',  label: 'Woman' },
-    { value: 'man',    label: 'Man', defaultOnSkip: true },
-    { value: 'nonbin', label: 'Non-binary' },
+    { value: 'woman',  label: 'Woman',      icon: '🙋‍♀️', e: '🙋‍♀️', anim: 'oa-wave' },
+    { value: 'man',    label: 'Man',        icon: '🙋‍♂️', e: '🙋‍♂️', anim: 'oa-wave', defaultOnSkip: true },
+    { value: 'nonbin', label: 'Non-binary', icon: '🌈',   e: '🌈',   anim: 'oa-pulse' },
   ], { link: T('rather_not_say'), linkValue: 'na' });
   setProgress(46, T('lbl_plan'));
-  JUICE.star({ emoji: '🙋', instant: FF });                 /* ★ 2 — about you complete */
   await wait(300);
 
   /* ---------- 5 · goal — the only real fork ---------- */
@@ -1748,8 +1808,8 @@ async function flow(){
     })),
     { forced: DBG.goal });
   setActivation(goal);
+  JUICE.tint(goal);          /* the room takes their colour */
   const goalLabel = (C.GOALS.find(g => g.value === goal) || {}).label;
-  JUICE.star({ emoji: (C.GOAL_FX[goal] || {}).e || '🎯', big: true, instant: FF });  /* ★ 3 — the goal */
 
   /* ---------- 5.2 – 5.5 · exam sub-tree (IELTS branches; the rest are noted) ---------- */
   let exam = null, examType = null, examDate = null, band = null;
@@ -1766,7 +1826,6 @@ async function flow(){
       await sarah(T('exam_other_q'));
       await textInput(T('exam_other_ph'), { skip: T('skip_for_now') });
       setProgress(61, '61% completed');
-      JUICE.star({ emoji: '🎯', instant: FF });             /* ★ 4 — target set (own exam) */
     } else if (exam === 'ielts'){
       /* the only exam that branches further */
       reach('examtype');
@@ -1788,12 +1847,10 @@ async function flow(){
       await sarah(T('band_q'));
       setProgress(61, '61% completed');
       band = await bandSlider({ start: 7 });
-      JUICE.star({ emoji: '🎯', instant: FF });             /* ★ 4 — target set (band) */
     } else {
       /* TOEFL / TOEIC / PTE — recorded, then straight on */
       await sarah(T('exam_noted', (C.EXAMS.find(e => e.value === exam) || {}).label), { typingMs: 700 });
       setProgress(61, '61% completed');
-      JUICE.star({ emoji: '🎯', instant: FF });             /* ★ 4 — target set (exam noted) */
     }
   } else {
     await sarah(T(`ack_goal_${goal}`), { typingMs: 1200 });
@@ -1807,8 +1864,10 @@ async function flow(){
   await sarah(T('situation_q'));
   setProgress(69, '69% completed');
   const situation = await options(
-    C.SITUATIONS.map(s => ({ value: s, label: s, defaultOnSkip: s === DBG.sit })),
-    { forced: DBG.sit });
+    C.SITUATIONS.map(s => ({ value: s, label: s,
+      icon: C.SIT_FX[s], e: C.SIT_FX[s], anim: 'oa-bounce',
+      defaultOnSkip: s === DBG.sit })),
+    { chipIcons: true, forced: DBG.sit });
 
   /* ---------- 7 · scenarios — multi-select, keyed to goal ----------
      Exam cohorts skip this. Their scenario is already fixed — the test
@@ -1823,8 +1882,8 @@ async function flow(){
     await sarah(sc.prompt);
     setProgress(76, '76% completed');
     const labels = sc.items.map(i => i.label);
-    picked = await multiSelect(labels, { forced: [labels[0], labels[1]] });
-    JUICE.star({ emoji: '✅', instant: FF });               /* ★ 4 — focus set (scenarios) */
+    picked = await multiSelect(labels, { icons: sc.items.map(i => i.e || '🎯'),
+                                         forced: [labels[0], labels[1]] });
     await sarah(T('scenarios_ack'), { typingMs: 900, quick: true });
     /* their own words, replayed — personalization proof for free */
     await recapBubble([
@@ -1838,7 +1897,7 @@ async function flow(){
   reach('testimonials');
   setProgress(80, T('lbl_know_you'));
   await sarah(T('testi_lead'), { quick: true });
-  await testimonialCarousel();
+  await testimonialCarousel(goal);
   await sarah(T('testi_follow'), { quick: true });
   await sarah(T('notif_ask'));
   await permissionCard();
@@ -1849,24 +1908,34 @@ async function flow(){
   reach('level');
   await sarah(T('level_q'));
   const level = await options([
-    { value: 'beginner',     label: 'Beginner',     icon: ICONS.seedling,
+    { value: 'beginner',     label: 'Beginner',     icon: '🌱',
       desc: T('lvl_beg_d'), defaultOnSkip: true, e: '🌱', anim: 'oa-bounce' },
-    { value: 'intermediate', label: 'Intermediate', icon: ICONS.herb,
-      desc: T('lvl_int_d'), e: '🌿', anim: 'oa-bounce' },
-    { value: 'advanced',     label: 'Advanced',     icon: ICONS.brain,
-      desc: T('lvl_adv_d'), e: '🧠', anim: 'oa-pulse' },
+    { value: 'intermediate', label: 'Intermediate', icon: '🌿',
+      desc: T('lvl_int_d'), e: '🌿', anim: 'oa-wave' },
+    { value: 'advanced',     label: 'Advanced',     icon: '🌳',
+      desc: T('lvl_adv_d'), e: '🌳', anim: 'oa-bounce' },
   ], { wide: true, chipIcons: true, forced: DBG.lvl });
-  JUICE.star({ emoji: { beginner:'🌱', intermediate:'🌿', advanced:'🧠' }[level], instant: FF });  /* ★ 5 */
+  JUICE.deepen();            /* and deepens now that we know them */
   await sarah(T(`ack_${level}`), { typingMs: 1100 });
   setProgress(88, T('lbl_last_step'));
 
   /* ---------- 9.1 · award, then the chat ENDS ---------- */
   reach('award');
   await sarah(T('award_msg'), { typingMs: 1100 });
-  const award = el(`<div class="award"><img src="assets/award-trophy.png" alt="Google Play’s Best AI App 2023"></div>`);
+  const A = C.AWARD;
+  const award = el(`
+    <div class="award-card">
+      <img class="aw-trophy" src="assets/paywall/trophy.png" alt="">
+      <div class="aw-text">
+        <span class="aw-kicker">${A.kicker}</span>
+        <b class="aw-title">${A.title}</b>
+        <span class="aw-line">${A.line}</span>
+      </div>
+    </div>`);
   chatStream.appendChild(award);
   scrollToEnd();
-  await wait(900);
+  if (!FF) requestAnimationFrame(() => award.classList.add('in'));
+  await wait(FF ? 0 : 1100);
   setProgress(96, '96% completed');
 
   /* the handoff — the last thing the chat ever does */
@@ -1877,13 +1946,11 @@ async function flow(){
   chatStream.appendChild(cta);
   scrollToEnd();
   if (!FF) await new Promise(r => cta.addEventListener('click', r, { once: true }));
-  JUICE.star({ emoji: '🎙', instant: FF });                 /* ★ 6 — ready to speak */
   if (!FF) await wait(700);                     /* let the last star land */
 
   /* ---------- 9.2 · plan build — the chat's exit ---------- */
   await planBuildSequence([
     ['GOAL',     goalLabel],
-    ['TARGET',   exam === 'ielts' && band ? `Band ${band.toFixed(1)}` : (exam ? exam.toUpperCase() : null)],
     ['FOCUS',    picked[0] || null],
     ['LEVEL',    level.charAt(0).toUpperCase() + level.slice(1)],
     ['LANGUAGE', L.label],

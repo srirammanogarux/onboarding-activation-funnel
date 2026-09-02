@@ -1,8 +1,8 @@
 /* ============================================================
-   Stimuler · India Onboarding — localization
+   Stimuler · India Onboarding, localization
    Base copy: "Old flow" column of the content sheet.
    Localized copies are ROMANIZED (Latin script, WhatsApp-style),
-   never native script — per product decision 2026-08-11.
+   never native script, per product decision 2026-08-11.
    ⚠ Machine-drafted translations: needs native-speaker review.
    ============================================================ */
 
@@ -52,36 +52,36 @@ const STR = {
     exam_q: "Which one are you sitting?",
     exam_other_q: "Which exam is it? Type it in and I'll note it down.",
     exam_other_ph: "Name of the exam",
-    exam_noted: (e) => `Noted — ${e}. I'll shape your practice around it.`,
+    exam_noted: (e) => `Noted, ${e}. I'll shape your practice around it.`,
     ielts_type_q: "Academic or General Training?",
     exam_date_q: "When are you sitting it? I'll pace your plan to that.",
     band_q: "What band are you aiming for? Slide to your target.",
     situation_q: "And what’s your situation right now?",
     scenarios_ack: "Good. That tells me exactly what to build for you.",
-    ack_goal_career: "Great — work is where English pays off fastest. Let’s make those conversations easy.",
+    ack_goal_career: "Work is where English pays off fastest. Let’s make those conversations easy.",
     ack_goal_personal: "Lovely. Speaking freely in everyday life is the most useful skill there is.",
     ack_goal_school: "Perfect. Let’s get you speaking up with confidence at school.",
     ack_goal_travel: "Nice! Let’s get you comfortable anywhere you land.",
     /* ---- speaking stage (the ladder) ---- */
     /* ---- conviction widgets + plan-build ---- */
     proof_lead: "You're in good company, by the way.",
-    goal_proof_lead: "Good choice —",
+    goal_proof_lead: "Good choice.",
     recap_lead: "Here's what I've got so far:",
-    pb_coach: "Give me a second — I'm putting yours together.",
+    pb_coach: "Give me a second. I'm putting yours together.",
     pb_title: "Building<br>your plan",
-    pb_cta: "Let's calibrate it",
-    stage_handoff:  "One last thing before your plan — I want to hear you. Ready to say something out loud?",
+    pb_cta: "Let’s get you started",
+    stage_handoff:  "One last thing before your plan. I want to hear you. Ready to say something out loud?",
     stage_cta: "I'm ready",
     stg_label_read: "SAY IT OUT LOUD",
     stg_label_echo: "LISTEN, THEN SAY IT BACK",
-    stg_r2: "Clean! Same energy — this one has trickier words.",
-    stg_r3: "Now listen to me say it… then say it back. I've hidden two words — they're yours to fill.",
+    stg_r2: "Clean! Same energy. This one has trickier words.",
+    stg_r3: "Now listen to me say it, then say it back. I've hidden two words and they're yours to fill.",
     stg_pass1: "Clean. Let's raise it a little.",
-    stg_pass2: "You're flying. One more — this time from memory.",
+    stg_pass2: "You're flying. One more, this time from memory.",
     stg_strong: "Honestly? Nothing to fix. Let's see where that puts you.",
-    stg_fail: "Almost. Two words tripped you — let's fix them together.",
+    stg_fail: "Almost. Two words tripped you. Let's fix them together.",
     hs_say_strong: "You cleared every rung without a wobble. Here is where that puts you.",
-    intro1: "Hey! I’m Sarah. I’m here to help you speak English with confidence — in a friendly, relaxed way.",
+    intro1: "Hey! I’m Sarah. I’m here to help you speak English with confidence, in a friendly and relaxed way.",
     intro2: "Together, we’ll work on your speaking skills in a comfortable, relaxed way.",
     lang_q: "So, what’s your native language? This helps me support you better.",
     other_langs: "Other languages",
@@ -164,7 +164,7 @@ const STR = {
      Machine-drafted: needs native-speaker review before any test.
      Anything missing falls back to English via T().                 */
   id: {
-    intro1: "Hai! Aku Sarah. Aku di sini untuk membantumu bicara bahasa Inggris dengan percaya diri — santai saja.",
+    intro1: "Hai! Aku Sarah. Aku di sini untuk membantumu bicara bahasa Inggris dengan percaya diri, santai saja.",
     intro2: "Bersama-sama, kita akan melatih kemampuan bicaramu dengan cara yang nyaman dan tanpa tekanan.",
     lang_q: "Jadi, apa bahasa ibumu? Ini membantuku mendukungmu lebih baik.",
     other_langs: "Bahasa lainnya",
@@ -192,7 +192,7 @@ const STR = {
     band_q: "Target band berapa? Geser ke targetmu.",
     situation_q: "Dan bagaimana situasimu sekarang?",
     scenarios_ack: "Bagus. Itu memberitahuku persis apa yang harus kusiapkan untukmu.",
-    ack_goal_career: "Bagus — di dunia kerja, bahasa Inggris paling cepat terasa manfaatnya.",
+    ack_goal_career: "Bagus, di dunia kerja, bahasa Inggris paling cepat terasa manfaatnya.",
     ack_goal_personal: "Bagus sekali. Bicara lepas sehari-hari itu keterampilan paling berguna.",
     ack_goal_school: "Sempurna. Ayo bikin kamu percaya diri bicara di sekolah.",
     ack_goal_travel: "Mantap! Ayo bikin kamu nyaman di mana pun kamu mendarat.",
@@ -232,7 +232,7 @@ const STR = {
     per_month_note: "Just Rp 12.400 per month paid for a whole year",
     testimonials: [
       { name:'Ankit Verma',  handle:'@ankitv',       body:'Thanks for sharing.. turant download kiya aur seedha “lat” lag gayi, pata chala abhi bahut kuch improve karna hai 😄' },
-      { name:'Priya Singh',  handle:'@priyaspeaks',  body:'HAHAHA isse aap busy hone ka natak kar sakte ho call pe, jabki baat AI se ho rahi hoti hai — aur sabse badi baat, ENGLISH PRACTICE ho jaati hai!' },
+      { name:'Priya Singh',  handle:'@priyaspeaks',  body:'HAHAHA isse aap busy hone ka natak kar sakte ho call pe, jabki baat AI se ho rahi hoti hai, aur sabse badi baat, ENGLISH PRACTICE ho jaati hai!' },
       { name:'Nikhil Yadav', handle:'@nikhil_y',     body:'Agar English speaking improve karni hai par practice partner nahi hai, toh yeh app try karo! Sach mein bahut madad karta hai, vocab ka feedback itna detailed hai...' },
     ],
     vt_quotes: [
@@ -317,7 +317,7 @@ const STR = {
     per_month_note: "Just Rp 12.400 per month paid for a whole year",
     testimonials: [
       { name:'Sanket Kulkarni', handle:'@sanketk',   body:'Thanks for sharing.. lagech download kela ani vyasan lagla, kalala ki ajun khup improve karaycha aahe 😄' },
-      { name:'Snehal Joshi',    handle:'@snehalj',   body:'HAHAHA yane tumhi call var busy asalyacha natak karu shakta, ani kharach AI shi bolat asta — ani mukhya mhanje ENGLISH PRACTICE hote!' },
+      { name:'Snehal Joshi',    handle:'@snehalj',   body:'HAHAHA yane tumhi call var busy asalyacha natak karu shakta, ani kharach AI shi bolat asta, ani mukhya mhanje ENGLISH PRACTICE hote!' },
       { name:'Omkar Patil',     handle:'@omkarp',    body:'English speaking sudharaychi aahe pan practice partner nahi? Ha app try kara! Kharach khup madat hote, vocab cha feedback khup detailed aahe...' },
     ],
     vt_quotes: [
@@ -402,7 +402,7 @@ const STR = {
     per_month_note: "Just Rp 12.400 per month paid for a whole year",
     testimonials: [
       { name:'Karthik Raja',  handle:'@karthikr',      body:'Thanks for sharing.. udane download panniten, apparam “addiction” aagiduchu. Innum niraya improve panna irukku nu puriyuthu 😄' },
-      { name:'Divya Ramesh',  handle:'@divya_speaks',  body:'HAHAHA idhula busy ah call la irukra maadhiri nadikkalaam, aana actual la AI kitta dhaan pesreenga — mukkiyama ENGLISH PRACTICE aagum!' },
+      { name:'Divya Ramesh',  handle:'@divya_speaks',  body:'HAHAHA idhula busy ah call la irukra maadhiri nadikkalaam, aana actual la AI kitta dhaan pesreenga, mukkiyama ENGLISH PRACTICE aagum!' },
       { name:'Vignesh S',     handle:'@vigneshs',      body:'English speaking improve panna vendum aana practice panna aal illaya? Indha app try pannunga! Romba help aagudhu, vocab feedback ellam semma detail ah irukku...' },
     ],
     vt_quotes: [
@@ -487,7 +487,7 @@ const STR = {
     per_month_note: "Just Rp 12.400 per month paid for a whole year",
     testimonials: [
       { name:'Sai Teja',      handle:'@saiteja',   body:'Thanks for sharing.. venatane download chesanu, addiction ayipoyindi. Inka chala improve cheyali ani ardham ayindi 😄' },
-      { name:'Harika Reddy',  handle:'@harikar',   body:'HAHAHA deenitho call lo busy ga unnattu natinchochu, nijaniki AI tho matladutunnam — mukhyam ga ENGLISH PRACTICE avutundi!' },
+      { name:'Harika Reddy',  handle:'@harikar',   body:'HAHAHA deenitho call lo busy ga unnattu natinchochu, nijaniki AI tho matladutunnam, mukhyam ga ENGLISH PRACTICE avutundi!' },
       { name:'Praveen Kumar', handle:'@praveenk',  body:'English speaking improve cheyalanukuntunnara kani practice partner leda? Ee app try cheyandi! Nijam ga chala help avutundi, vocab feedback chala detailed ga untundi...' },
     ],
     vt_quotes: [
@@ -572,7 +572,7 @@ const STR = {
     per_month_note: "Just Rp 12.400 per month paid for a whole year",
     testimonials: [
       { name:'Manoj Gowda',  handle:'@manojg',    body:'Thanks for sharing.. takshana download maadide, aamele chataka hattitu. Innu tumba improve maadbeku anta gottaytu 😄' },
-      { name:'Ashwini Rao',  handle:'@ashwinir',  body:'HAHAHA idarinda call alli busy iddante nataka maadbahudu, nijavaagi AI jothe maatadtha irtivi — mukhyavaagi ENGLISH PRACTICE aagutte!' },
+      { name:'Ashwini Rao',  handle:'@ashwinir',  body:'HAHAHA idarinda call alli busy iddante nataka maadbahudu, nijavaagi AI jothe maatadtha irtivi, mukhyavaagi ENGLISH PRACTICE aagutte!' },
       { name:'Kiran Shetty', handle:'@kirans',    body:'English speaking sudharisbeku aadre practice partner illva? Ee app try maadi! Nijakku tumba help aagutte, vocab feedback tumba detailed agide...' },
     ],
     vt_quotes: [
@@ -657,7 +657,7 @@ const STR = {
     per_month_note: "Just Rp 12.400 per month paid for a whole year",
     testimonials: [
       { name:'Arjun Nair',   handle:'@arjunnair', body:'Thanks for sharing.. udane download cheythu, pinne adiction aayi. Ini othiri improve cheyyanam ennu manassilayi 😄' },
-      { name:'Anjali Menon', handle:'@anjalim',   body:'HAHAHA ithu vechu call il busy aanenna bhaavam nadikkam, sathyathil AI yodu aanu samsaarikkunnathu — ettavum pradhaanam ENGLISH PRACTICE aakum!' },
+      { name:'Anjali Menon', handle:'@anjalim',   body:'HAHAHA ithu vechu call il busy aanenna bhaavam nadikkam, sathyathil AI yodu aanu samsaarikkunnathu, ettavum pradhaanam ENGLISH PRACTICE aakum!' },
       { name:'Rahul Pillai', handle:'@rahulp',    body:'English speaking mecchappeduthanam pakshe practice partner illey? Ee app try cheyyu! Sathyathil othiri help aakum, vocab feedback othiri detailed aanu...' },
     ],
     vt_quotes: [

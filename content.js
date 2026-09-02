@@ -65,7 +65,7 @@ const EXAMS = [
   { value: 'toefl', label: 'TOEFL' },
   { value: 'toeic', label: 'TOEIC' },
   { value: 'pte',   label: 'PTE' },
-  { value: 'other', label: "Others — I'll type it", freeText: true },
+  { value: 'other', label: "Others, I'll type it", freeText: true },
 ];
 
 const IELTS_TYPES = [
@@ -95,8 +95,8 @@ function bandNote(band){
   if (band < 5)   return 'Below most entry requirements';
   if (band < 6)   return 'Entry level for some colleges';
   if (band < 6.5) return 'Accepted by many universities';
-  if (band < 7.5) return 'Competitive — most top universities';
-  if (band < 8.5) return 'Strong — competitive programmes and PR';
+  if (band < 7.5) return 'Competitive, most top universities';
+  if (band < 8.5) return 'Strong, competitive programmes and PR';
   return 'Near-native. A very high bar.';
 }
 
@@ -138,12 +138,12 @@ const SCENARIOS = {
       office: {
         prompt: 'At work, which of these do you want to get right?',
         items: [
-          { label: 'Ask my manager for time off',   who: 'your manager' },
-          { label: 'Disagree in a meeting',         who: 'the team' },
-          { label: 'Give my weekly update',         who: 'the team' },
-          { label: 'Ask someone to repeat, politely', who: 'a fast-talking colleague' },
-          { label: 'Join the conversation at lunch', who: 'a colleague' },
-          { label: 'Make my case in an appraisal',  who: 'your manager' },
+          { e: '🗓', label: 'Ask my manager for time off',   who: 'your manager' },
+          { e: '✋', label: 'Disagree in a meeting',         who: 'the team' },
+          { e: '📊', label: 'Give my weekly update',         who: 'the team' },
+          { e: '🔁', label: 'Ask someone to repeat, politely', who: 'a fast-talking colleague' },
+          { e: '🍽', label: 'Join the conversation at lunch', who: 'a colleague' },
+          { e: '📈', label: 'Make my case in an appraisal',  who: 'your manager' },
         ],
       },
       ownboss: {
@@ -282,6 +282,18 @@ const SCENARIOS = {
 };
 
 /* ---------- 5 · situations (profile only, no fork) ---------- */
+
+/* an icon per situation, so every row has something to animate and send */
+const SIT_FX = {
+  'Working a job':           '💼',
+  'Studying':                '📚',
+  'Freelancing':             '💻',
+  'Running my own business': '🏪',
+  'Looking for work':        '🔍',
+  'At home with family':     '🏡',
+  'On a career break':       '🌤',
+};
+
 const SITUATIONS = [
   'Working a job',
   'Studying',
@@ -305,7 +317,7 @@ const SITUATIONS = [
    Each word: pre<hot>post render for the pron card. */
 const ACTIVATION = {
   exam: {
-    intro: "Time to hear you. Say this like you mean it — the examiner listens for exactly this energy.",
+    intro: "Time to hear you. Say this like you mean it, the examiner listens for exactly this energy.",
     ladder: [
       { text: 'I am ready to do well in this exam.',
         words: [
@@ -320,11 +332,11 @@ const ACTIVATION = {
     ],
   },
   career: {
-    intro: "Time to hear you. Say this like you'd say it at work — clear and unhurried.",
+    intro: "Time to hear you. Say this like you'd say it at work, clear and unhurried.",
     ladder: [
       { text: 'My voice matters at work.',
         words: [
-          { w:'voice',   pre:'v',  hot:'oi', post:'ce',  ph:'voys',    tip:"One beat — ‘oy’ glides into ‘s’", start:56 },
+          { w:'voice',   pre:'v',  hot:'oi', post:'ce',  ph:'voys',    tip:"One beat, ‘oy’ glides into ‘s’", start:56 },
           { w:'matters', pre:'ma', hot:'tt', post:'ers', ph:'ma.turz', tip:"The ‘tt’ stays soft, like ‘madders’", start:52 },
         ] },
       { text: 'I speak with confidence in every conversation.',
@@ -335,7 +347,7 @@ const ACTIVATION = {
     ],
   },
   personal: {
-    intro: "Time to hear you. Say this like you'd say it to a friend — relaxed, no rush.",
+    intro: "Time to hear you. Say this like you'd say it to a friend, relaxed, no rush.",
     ladder: [
       { text: 'I enjoy speaking English every day.',
         words: [
@@ -350,7 +362,7 @@ const ACTIVATION = {
     ],
   },
   school: {
-    intro: "Time to hear you. Say this like you'd say it in class — steady and proud.",
+    intro: "Time to hear you. Say this like you'd say it in class, steady and proud.",
     ladder: [
       { text: 'I am proud to share my ideas in class.',
         words: [
@@ -365,7 +377,7 @@ const ACTIVATION = {
     ],
   },
   travel: {
-    intro: "Time to hear you. Say this like you're already on the trip — easy and sure.",
+    intro: "Time to hear you. Say this like you're already on the trip, easy and sure.",
     ladder: [
       { text: 'I am comfortable asking for help.',
         words: [
@@ -385,7 +397,11 @@ const ACTIVATION = {
    One global stat card (after attribution) + a one-liner keyed to
    the goal (right after they pick it). Numbers are illustrative. */
 const PROOF = {
-  global: { n: 8000000, label: 'learners practice with Sarah', stars: '4.9' },
+  /* the hero metric the counter widget animates to, then the supporting three */
+  metric: { value: 30, unit: '%', label: 'more confident',
+            sub: 'when speaking, within a month' },
+  global: { n: 8000000, label: 'learners practice with Sarah', stars: '4.9',
+            countries: 190 },
   byGoal: {
     exam:     { n: 214000, line: 'passed their English exam with us last year' },
     career:   { n: 380000, line: 'use Stimuler to get ahead at work' },
@@ -394,6 +410,57 @@ const PROOF = {
     travel:   { n: 190000, line: 'travellers ordered, bargained and got home fine' },
   },
 };
+
+
+/* ---------- outcome claim shown with the faces widget, keyed to GOAL ----------
+   Only career carries an external citation (Azam et al. is a real study on
+   English proficiency and wages). The rest are our own learner data. */
+const OUTCOME = {
+  exam:     { claim: 'Speaking is where most candidates lose the band.', hi: 'lose the band',
+              who: 'exam takers' },
+  career:   { claim: 'Professionals with fluent English earn up to 34% more.', hi: '34% more',
+              who: 'working professionals' },
+  personal: { claim: 'Confident speakers have 3x more everyday conversations.', hi: '3x more',
+              who: 'learners' },
+  school:   { claim: 'Students who speak in class score higher in orals.', hi: 'score higher',
+              who: 'students' },
+  travel:   { claim: 'Travellers who speak up get better help, faster.', hi: 'better help, faster',
+              who: 'travellers' },
+};
+
+/* ---------- testimonials, keyed to GOAL (Beside model: photo + outcome quote) ---------- */
+const TESTIMONIALS = {
+  career: [
+    { img:'career-1', q:'I asked for a raise in English. It came back 20% higher than I planned to ask for.', n:'Rizky', r:'Account manager, Jakarta' },
+    { img:'career-2', q:'Foreign buyers stopped going through a middleman. I keep that margin now.',        n:'Adi',   r:'Textile trader, Solo' },
+    { img:'career-3', q:'I used to email instead of speak. Now I run the Monday call.',                     n:'Nadia', r:'Ops lead, Tangerang' },
+    { img:'career-4', q:'Two interviews in English, two offers. I took the better one.',                    n:'Putri', r:'Analyst, Bandung' },
+  ],
+  exam: [
+    { img:'exam-1', q:'Band 6.0 to 7.5 in ten weeks. My visa cleared first try.',            n:'Ayu',   r:'Nurse, Surabaya' },
+    { img:'exam-2', q:'Speaking was my worst section. It ended up my highest.',              n:'Intan', r:'IELTS 7.5, Jakarta' },
+    { img:'exam-3', q:'I stopped freezing in part two. Two minutes, no panic.',              n:'Salsa', r:'Scholarship applicant, Depok' },
+  ],
+  personal: [
+    { img:'personal-1', q:'I stopped switching back to Bahasa halfway through my own sentences.', n:'Bagus',  r:'Musician, Yogyakarta' },
+    { img:'personal-2', q:'My niece studies abroad. We talk properly now, not in fragments.',      n:'Ratna',  r:'Pharmacist, Semarang' },
+    { img:'personal-3', q:'I answer the tourists on my street instead of pointing.',               n:'Melati', r:'Cafe owner, Bali' },
+  ],
+  school: [
+    { img:'school-1', q:'I went from silent in seminars to running them.',                  n:'Rina',   r:'Final year, Bandung' },
+    { img:'school-2', q:'Top marks in the oral. I had practised the exact questions.',      n:'Zahra',  r:'Grade 12, Makassar' },
+    { img:'school-3', q:'Group projects used to be the others talking. Now I present.',     n:'Kirana', r:'Undergrad, Malang' },
+  ],
+  travel: [
+    { img:'travel-1', q:'Missed my connection in Doha and sorted the whole thing myself.', n:'Sinta', r:'Logistics, Medan' },
+    { img:'travel-2', q:'I argued a wrong hotel charge down to zero. In English.',         n:'Gita',  r:'Solo traveller, Bali' },
+    { img:'travel-3', q:'Umrah with my mother. I handled every counter for us.',           n:'Fitri', r:'Teacher, Bekasi' },
+  ],
+};
+
+/* ---------- the award credential, shown right before the mic ---------- */
+const AWARD = { kicker:"GOOGLE PLAY'S", title:'Best AI App of 2023',
+                line:'4.9\u2605  \u00b7  8Mn+ learners  \u00b7  190+ countries' };
 
 /* plan-build takeover: the checklist that assembles their plan */
 const PLAN_BUILD = [
@@ -484,7 +551,7 @@ function scenarioSet(goal, situation){
 
 window.CONTENT = {
   LANGUAGES, APPLANG_DESC, GOALS, EXAMS, IELTS_TYPES, examDateOptions,
-  bandNote, GOAL_FX, PROOF, PLAN_BUILD, SCENARIOS, scenarioSet, WORKMODE, MODE_LABEL, branches,
-  SITUATIONS, ACTIVATION, PW_TITLE,
+  bandNote, GOAL_FX, PROOF, OUTCOME, TESTIMONIALS, AWARD, PLAN_BUILD, SCENARIOS, scenarioSet, WORKMODE, MODE_LABEL, branches,
+  SITUATIONS, SIT_FX, ACTIVATION, PW_TITLE,
   PRICING, COHORTS,
 };

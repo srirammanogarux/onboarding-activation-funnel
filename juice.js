@@ -1,7 +1,7 @@
 /* ============================================================
    Stimuler · Onboarding v2 — JUICE v2
    Rebuilt after review. The rules:
-   - Everything that flies LANDS somewhere and STAYS (star tray).
+   - Everything that flies LANDS somewhere and CHANGES it (the bar grows).
    - One voice per moment. No rains on menu taps.
    - Gold only when something is earned.
    - Confetti is a real canvas engine (ported from Activation v3's
@@ -9,8 +9,8 @@
    - All of it is non-blocking and dies under reduced motion.
 
    API:
-   JUICE.star({emoji, big})   answer → gold star lands in the tray
-   JUICE.trayToPlan(el)       tray stars fly down into the plan stack
+   JUICE.fly(el, {emoji})     answer's icon arcs into the progress bar
+   JUICE.bloom()              the bar answers with a gold pulse
    JUICE.confetti(n, mode)    'burst' | 'rain'
    JUICE.fireworks()          three staggered shell bursts
    JUICE.bokeh(n)             rising golden dots
@@ -39,122 +39,46 @@
   /* ============================================================
      1 · STAR TRAY — the destination that persists
      Six slots in the header. Each milestone answer pops off the
-     user's chip, flies up as a gold star, and clicks into the
      next empty slot (slotPunch + ringPulse + barGlow — motion
      vocabulary lifted from conversation-lead-to-first-chat).
      ============================================================ */
   const STAR_PATH = 'M12 2.6l2.8 5.9 6.4.8-4.7 4.4 1.2 6.3L12 17l-5.7 3 1.2-6.3L2.8 9.3l6.4-.8z';
-  const starSVG = (cls) =>
-    `<svg class="${cls}" viewBox="0 0 24 24"><path d="${STAR_PATH}"/></svg>`;
+  /* fly(fromEl, {emoji}) — the whole reward in one move.
+     The icon lifts out of the chip, arcs to the progress bar, and the bar
+     blooms as it lands. Nothing is left behind: the answer becomes progress. */
+  function fly(fromEl, { emoji = '', instant = false } = {}){
+    const bar = document.querySelector('.progress-track');
+    if (!bar || !fromEl || REDUCED || instant){ bloom(); return; }
+    const host = document.getElementById('phone');
+    const hr = host.getBoundingClientRect();
+    const fr = fromEl.getBoundingClientRect();
+    const br = bar.getBoundingClientRect();
 
-  function tray(){ return document.getElementById('starsTray'); }
-  function nextSlot(){
-    const t = tray();
-    return t ? t.querySelector('.star-slot:not(.filled)') : null;
+    const node = document.createElement('div');
+    node.className = 'fx-fly';
+    node.textContent = emoji;
+    node.style.left = (fr.left - hr.left + fr.width / 2 - 14) + 'px';
+    node.style.top  = (fr.top  - hr.top  + fr.height / 2 - 14) + 'px';
+    host.appendChild(node);
+
+    const dx = (br.left - hr.left + br.width * 0.18) - (fr.left - hr.left + fr.width / 2 - 14);
+    const dy = (br.top  - hr.top  + br.height / 2 - 14) - (fr.top - hr.top + fr.height / 2 - 14);
+
+    /* anticipation, then travel: lift a little before it commits */
+    node.animate([
+      { transform: 'translate(0,0) scale(1)',              opacity: 1, offset: 0 },
+      { transform: `translate(${dx*.12}px, ${-18}px) scale(1.22)`, opacity: 1, offset: .26 },
+      { transform: `translate(${dx}px, ${dy}px) scale(.42)`, opacity: .9, offset: 1 },
+    ], { duration: 620, easing: 'cubic-bezier(.32,.72,.28,1)', fill: 'forwards' })
+      .onfinish = () => { node.remove(); bloom(); };
   }
 
-  function star({ emoji = '⭐', big = false, instant = false } = {}){
-    const slot = nextSlot();
-    if (!slot) return;
-    if (REDUCED || instant){ slot.classList.add('filled'); barGlow(); return; }
-
-    /* origin: the chip the user's answer just became */
-    const chips = document.querySelectorAll('#chatStream .chip');
-    const from = chips.length ? chips[chips.length - 1] : null;
-    const pr = phone().getBoundingClientRect();
-    const fr = (from || phone()).getBoundingClientRect();
-    const sr = slot.getBoundingClientRect();
-    const x0 = fr.left + Math.min(fr.width - 20, 24) - pr.left;
-    const y0 = fr.top + fr.height / 2 - pr.top;
-
-    /* beat 1 — the Honk pop: the answer's emoji lifts off the chip */
-    const pop = document.createElement('span');
-    pop.className = 'fx-pop';
-    pop.textContent = emoji;
-    pop.style.left = x0 + 'px';
-    pop.style.top = y0 + 'px';
-    getLayer().appendChild(pop);
-    pop.animate([
-      { transform: 'translateY(6px) scale(.4)',  opacity: 0 },
-      { transform: 'translateY(-10px) scale(1.25)', opacity: 1, offset: .3 },
-      { transform: 'translateY(-14px) scale(1)', opacity: 1, offset: .6 },
-      { transform: 'translateY(-20px) scale(.85)', opacity: 0 },
-    ], { duration: 520, easing: 'cubic-bezier(.25,.1,.25,1)' }).onfinish = () => pop.remove();
-
-    /* beat 2 — a gold star arcs from the chip into the slot */
-    const fly = document.createElement('span');
-    fly.className = 'fx-star' + (big ? ' big' : '');
-    fly.innerHTML = starSVG('sf');
-    fly.style.left = x0 + 'px';
-    fly.style.top = (y0 - 14) + 'px';
-    getLayer().appendChild(fly);
-    const dx = (sr.left + sr.width / 2 - pr.left) - x0;
-    const dy = (sr.top + sr.height / 2 - pr.top) - (y0 - 14);
-    fly.animate([
-      { transform: 'translate(0,0) scale(.5) rotate(-30deg)', opacity: 0 },
-      { transform: `translate(${dx * .35}px, ${dy * .45 - 30}px) scale(${big ? 1.5 : 1.15}) rotate(0deg)`, opacity: 1, offset: .45 },
-      { transform: `translate(${dx}px, ${dy}px) scale(.62) rotate(20deg)`, opacity: 1 },
-    ], { duration: 560, easing: 'cubic-bezier(.3,.6,.3,1)' }).onfinish = () => {
-      fly.remove();
-      /* beat 3 — the slot receives: punch + ring + the bar glows */
-      slot.classList.add('filled', 'pop');
-      if (big) slot.classList.add('twinkle');
-      setTimeout(() => slot.classList.remove('pop', 'twinkle'), 1500);
-      barGlow();
-    };
-  }
-
-  function barGlow(){
-    const bar = document.getElementById('progressFill');
-    if (!bar) return;
-    bar.classList.remove('glowing');
-    void bar.offsetWidth;
-    bar.classList.add('glowing');
-  }
-
-  /* tray stars fly down into the plan-build stack — the payoff */
-  function trayToPlan(targetEl){
-    const t = tray();
-    if (!t || !targetEl || REDUCED) return;
-    const pr = phone().getBoundingClientRect();
-    const tr = targetEl.getBoundingClientRect();
-    const filled = [...t.querySelectorAll('.star-slot.filled')];
-    filled.forEach((slot, i) => {
-      const sr = slot.getBoundingClientRect();
-      const fly = document.createElement('span');
-      fly.className = 'fx-star';
-      fly.innerHTML = starSVG('sf');
-      fly.style.left = (sr.left + sr.width / 2 - pr.left) + 'px';
-      fly.style.top = (sr.top + sr.height / 2 - pr.top) + 'px';
-      getLayer().appendChild(fly);
-      const dx = (tr.left + tr.width * (0.2 + 0.12 * i) - pr.left) - (sr.left + sr.width / 2 - pr.left);
-      const dy = (tr.top + 40 - pr.top) - (sr.top + sr.height / 2 - pr.top);
-      fly.animate([
-        { transform: 'translate(0,0) scale(.62)', opacity: 1 },
-        { transform: `translate(${dx}px, ${dy}px) scale(.9)`, opacity: .9, offset: .8 },
-        { transform: `translate(${dx}px, ${dy + 14}px) scale(.4)`, opacity: 0 },
-      ], { duration: 640, delay: i * 70, easing: 'cubic-bezier(.4,.1,.4,1)' })
-        .onfinish = () => fly.remove();
-    });
-  }
-
-  /* ============================================================
-     2 · CONFETTI ENGINE — ported from Activation v3 usaflow.js
-     (burst + rain), extended with a fireworks mode. One canvas.
-     ============================================================ */
-  let confC = null, confCtx = null, confParts = [], confRaf = null;
-  const COLS = ['#D9A24A', '#E7B455', '#6C63FF', '#9D96FF', '#F5F4FA', '#32E18D', '#B09CFF'];
-
-  function canvas(){
-    if (!confC){
-      confC = document.createElement('canvas');
-      confC.className = 'fx-canvas';
-      phone().appendChild(confC);
-      confCtx = confC.getContext('2d');
-    }
-    confC.width = phone().clientWidth;
-    confC.height = phone().clientHeight;
-    return confC;
+  /* the bar answers: a gold pulse behind it, and the fill flashes */
+  function bloom(){
+    const track = document.querySelector('.progress-track');
+    const glow  = document.querySelector('.head-bloom');
+    if (track){ track.classList.remove('bloom'); void track.offsetWidth; track.classList.add('bloom'); }
+    if (glow){ glow.classList.remove('pulse'); void glow.offsetWidth; glow.classList.add('pulse'); }
   }
 
   function confetti(n = 60, mode = 'burst', origin = null){
@@ -268,18 +192,15 @@
   function ambient(){
     if (!ambientEl){
       ambientEl = document.querySelector('.ambient');
-      if (ambientEl && !ambientEl.querySelector('.amb-blob')){
-        ambientEl.insertAdjacentHTML('beforeend',
-          '<i class="amb-blob amb-a"></i><i class="amb-blob amb-b"></i><i class="amb-sweep"></i>');
+      /* the drifting blobs are in the markup; only the sweep is injected */
+      if (ambientEl && !ambientEl.querySelector('.amb-sweep')){
+        ambientEl.insertAdjacentHTML('beforeend', '<i class="amb-sweep"></i>');
       }
     }
     return ambientEl;
   }
-  function setAmbient(state){
-    const a = ambient();
-    if (!a) return;
-    a.dataset.state = REDUCED ? 'idle' : state;
-  }
+
+  /* THE one gold pass, at plan build. Gold appears only when earned. */
   function sweep(){
     const a = ambient();
     if (!a || REDUCED) return;
@@ -290,11 +211,25 @@
     sw.classList.add('go');
     setTimeout(() => sw.classList.remove('go'), 3200);
   }
+  function setAmbient(state){
+    const p = document.getElementById('phone');
+    if (!p) return;
+    p.classList.remove('amb-thinking','amb-listening','amb-reward');
+    if (state && state !== 'idle') p.classList.add('amb-' + state);
+  }
 
-  /* ============================================================
-     4 · WAVEFORM — one smooth reactive line (Gemini voice vibe)
-     Used while the user speaks and while Sarah "says it".
-     ============================================================ */
+  /* the room becomes theirs: hue follows the goal, depth follows the level */
+  function tint(goal){
+    const p = document.getElementById('phone');
+    if (!p) return;
+    [...p.classList].filter(c => c.startsWith('goal-')).forEach(c => p.classList.remove(c));
+    if (goal) p.classList.add('goal-' + goal);
+  }
+  function deepen(){
+    const p = document.getElementById('phone');
+    if (p) p.classList.add('tuned');
+  }
+
   function wave(host, { width = 220, height = 30, color = 'rgba(157,150,255,.9)', energy = 1 } = {}){
     if (!host) return { stop(){} };
     const NS = 'http://www.w3.org/2000/svg';
@@ -334,5 +269,5 @@
     return { stop(){ cancelAnimationFrame(raf); svg.remove(); } };
   }
 
-  window.JUICE = { star, trayToPlan, confetti, fireworks, bokeh, sweep, setAmbient, wave };
+  window.JUICE = { fly, bloom, tint, deepen, confetti, fireworks, bokeh, sweep, setAmbient, wave };
 })();
