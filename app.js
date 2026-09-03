@@ -178,21 +178,45 @@ function buildDevPanel(){
       next === 'intro' ? p.delete('step') : p.set('step', next);
       location.search = p.toString();
     };
+    const I = {
+      replay: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 2.6-6.3"/><path d="M5.5 2.5v3.6h3.6"/></svg>',
+      back:   '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="2.6" height="14" rx="1"/><path d="M19 5.8v12.4a1 1 0 0 1-1.6.8l-8-6.2a1 1 0 0 1 0-1.6l8-6.2a1 1 0 0 1 1.6.8Z"/></svg>',
+      pause:  '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.4"/><rect x="14" y="5" width="4" height="14" rx="1.4"/></svg>',
+      play:   '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 5.4v13.2a1 1 0 0 0 1.6.8l9.6-6.6a1 1 0 0 0 0-1.6L8.6 4.6A1 1 0 0 0 7 5.4Z"/></svg>',
+      fwd:    '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="16.4" y="5" width="2.6" height="14" rx="1"/><path d="M5 5.8v12.4a1 1 0 0 0 1.6.8l8-6.2a1 1 0 0 0 0-1.6l-8-6.2A1 1 0 0 0 5 5.8Z"/></svg>',
+    };
     const ctrls = el(`
       <div class="auto-ctrls">
-        <button data-a="replay" title="Replay from the start">\u27F2</button>
-        <button data-a="back" title="Back one step">\u25C0</button>
-        <button data-a="pause" title="Pause">\u275A\u275A</button>
-        <button data-a="fwd" title="Forward one step">\u25B6</button>
+        <button data-a="replay" title="Replay from the start">${I.replay}</button>
+        <button data-a="back" title="Back one step">${I.back}</button>
+        <button data-a="pause" title="Pause">${I.pause}</button>
+        <button data-a="fwd" title="Forward one step">${I.fwd}</button>
       </div>`);
     document.body.appendChild(ctrls);
+    /* dock OUTSIDE the mockup, hugging its left edge */
+    const dock = () => {
+      const ph = document.querySelector('.mockup') || $('phone');
+      const r = ph.getBoundingClientRect();
+      const left = r.left - 46 - 22;
+      if (left < 6){
+        ctrls.classList.add('row');
+        ctrls.style.left = '10px';
+        ctrls.style.top = '10px';
+      } else {
+        ctrls.classList.remove('row');
+        ctrls.style.left = `${left}px`;
+        ctrls.style.top = `${r.top + r.height / 2 - ctrls.offsetHeight / 2}px`;
+      }
+    };
+    requestAnimationFrame(dock);
+    window.addEventListener('resize', dock);
     ctrls.addEventListener('click', (ev) => {
       const b = ev.target.closest('button');
       if (!b) return;
       const a = b.dataset.a;
       if (a === 'pause'){
         window.__autoPaused = !window.__autoPaused;
-        b.innerHTML = window.__autoPaused ? '\u25B6' : '\u275A\u275A';
+        b.innerHTML = window.__autoPaused ? I.play : I.pause;
         b.title = window.__autoPaused ? 'Resume' : 'Pause';
         ctrls.classList.toggle('paused', window.__autoPaused);
         return;

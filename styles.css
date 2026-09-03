@@ -4530,14 +4530,13 @@ body{
 /* auto-run transport, docked beside the mockup */
 .auto-ctrls{
   position:fixed;
-  top:50%;
-  right:calc(50% + var(--phone-w) / 2 + 22px);
-  transform:translateY(-50%);
   z-index:400;
   display:flex;
   flex-direction:column;
   gap:10px;
 }
+.auto-ctrls.row{flex-direction:row;}
+.auto-ctrls button svg{width:19px;height:19px;display:block;}
 .auto-ctrls button{
   width:46px;
   height:46px;
@@ -4558,10 +4557,5 @@ body{
   background:var(--accent);
   border-color:var(--accent);
   color:#fff;
-  font-size:12px;
-  letter-spacing:-2px;
 }
-.auto-ctrls.paused button[data-a="pause"]{background:var(--succ-300);border-color:var(--succ-300);color:#0D0B14;font-size:15px;letter-spacing:0;}
-@media (max-width: 900px){
-  .auto-ctrls{right:auto;left:12px;top:auto;bottom:14px;transform:none;flex-direction:row;}
-}
+.auto-ctrls.paused button[data-a="pause"]{background:var(--succ-300);border-color:var(--succ-300);color:#0D0B14;}
