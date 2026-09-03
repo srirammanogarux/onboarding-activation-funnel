@@ -1,0 +1,14 @@
+{
+  "name": "onboarding-activation-funnel",
+  "private": true,
+  "description": "No-build prototype — see README.md. Playwright is only needed for tests/.",
+  "scripts": {
+    "serve": "python3 -m http.server 8901",
+    "test:ghost": "node tests/ghost.mjs",
+    "test:ui": "node tests/mic-ui.mjs",
+    "test:l10n": "node tests/l10n.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.49.0"
+  }
+}
