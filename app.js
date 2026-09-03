@@ -66,7 +66,7 @@ const DP_STEPS = [
   ['age', 'Age'], ['gender', 'Gender'], ['goal', 'Goal'],
   ['situation', 'Situation'], ['scenarios', 'Focus'],
   ['testimonials', 'Testimonials'], ['level', 'Level'], ['award', 'Award'],
-  ['planbuild', 'Plan'], ['stage', 'Sentence 1'], ['read2', 'Sentence 2'], ['echo', 'Sentence 3 · from memory'],
+  ['planbuild', 'Plan'], ['stage', 'Reading 1'], ['read2', 'Reading 2'], ['echo', 'Reading 3'],
   ['act', 'Question'], ['analysing', 'Analysing'], ['scorecard', 'Score report'],
   ['framework', '4-part answer'], ['readstate', 'Read it aloud'], ['survey', 'Plan loader'],
   ['meter', 'Speech meter'], ['fix', 'Fix pronunciation'],
@@ -1131,9 +1131,8 @@ async function planBuildSequence(answers, goal, name, firstLine){
   $('pbTitle').innerHTML      = P.title;
   $('pbFirstLbl').textContent = T('pb_first');
   $('pbFirstVal').textContent = firstLine || P.first;
-  $('pbCta').innerHTML        = T('pb_cta') +
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/><path d="m12 5 7 7-7 7"/></svg>';
-  $('pbNote').textContent     = T('pb_note');
+  $('pbCta').innerHTML        = T('pb_cta');
+  $('pbNote').textContent     = '';
 
   const stack = $('pbStack');
   stack.innerHTML = '';
@@ -1214,12 +1213,15 @@ function stgStopWave(){
   [...$('stgWave').children].forEach(b => b.style.height = '4px');
 }
 
-/* render a phrase as word spans; gap words start invisible (cloze) */
+/* render a phrase as word spans. *starred* words become emphasis
+   (semibold) words — and double as the sentence's drill pair. */
 function stgRenderPhrase(text, gaps = []){
   const g = gaps.map(w => w.toLowerCase());
-  $('stgText').innerHTML = text.split(' ').map(w => {
-    const clean = w.replace(/[.,!?]/g, '').toLowerCase();
-    return `<span class="w${g.includes(clean) ? ' gap' : ''}">${w}</span>`;
+  $('stgText').innerHTML = text.split(' ').map(raw => {
+    const em = /^\*.*\*[.,!?]?$/.test(raw.replace(/[.,!?]+$/, '') + (raw.match(/\*[.,!?]+$/) ? '*' : '')) || (raw.startsWith('*') && raw.includes('*', 1));
+    const w = raw.replace(/\*/g, '');
+    const clean = w.replace(/[.,!?\u2019']/g, '').toLowerCase();
+    return `<span class="w${em ? ' em' : ''}${g.includes(clean) ? ' gap' : ''}">${w}</span>`;
   }).join(' ');
 }
 function stgWords(){ return [...$('stgText').querySelectorAll('.w')]; }
@@ -1321,44 +1323,42 @@ function stgFlagWords(words){
   });
 }
 
-async function stageLadder(goal, level, name){
-  const outcome = ladderOutcome(level);
-  let failAt = { weak: 1, mid: 2, midhigh: 3, strong: 0 }[outcome];
+/* the unified bar */
+function bgBar(pct){ $('bgFill').style.width = `${pct}%`; }
+
+/* ============================================================
+   BEGINNER RUN — three escalating affirmations on one bar.
+   Clear a state: everything flashes green, confetti grows each
+   time, Sarah celebrates, then it resets for the next one.
+   Slip on 1 or 2: amber state, then the meter and the drill.
+   Slip on 3: the two words go quietly into their practice and
+   the run still ends on a win. Clean run: straight through.
+   ============================================================ */
+async function stageLadder(goal, level, name, famFirst, exam){
+  const perf = ['weak','mid','midhigh','strong'].includes(DBG.perf)
+    ? DBG.perf
+    : { beginner:'weak', intermediate:'mid', advanced:'strong' }[level] || 'mid';
+  let failAt = { weak: 1, mid: 2, midhigh: 3, strong: 0 }[perf];
+
+  const key = C.affirmKey(goal, famFirst, exam);
+  const SET = C.AFFIRM3[key];
+  const examName = { ielts:'IELTS', toefl:'TOEFL', toeic:'TOEIC', pte:'PTE' }[exam] || 'English';
+  const fill = (t) => t.replace('{name}', name || 'friend').replace(/\{EXAM\}/g, examName);
+  const screen = $('stageScreen');
 
   showScreen('stageScreen');
   setTimeout(() => $('chatScreen').classList.add('is-hidden'), FF ? 0 : 500);
   stgBuildWave();
   JUICE.setAmbient('idle');
-  const steps = [...$('stgSteps').children];
-  const R = ACT.ladder;
-  const who = (t) => t.replace('{name}', name || 'friend');
-  /* sentence 3 is sentence 2 again, its two hard words hidden */
-  const plan = [
-    { key:'stage', phrase: who(R[0].text), words: R[0].words, gaps: [],
-      coach: ACT_INTRO },
-    { key:'read2', phrase: who(R[1].text), words: R[1].words, gaps: [],
-      coach: T('stg_r2') },
-    { key:'echo',  phrase: who(R[1].text), words: R[1].words,
-      gaps: R[1].words.map(w => w.w), coach: T('stg_r3') },
-  ];
 
-  for (let i = 0; i < plan.length; i++){
-    const step = plan[i];
-    reach(step.key);
-    steps.forEach((d, k) => { d.classList.toggle('on', k === i); });
-    $('stgCount').textContent = `${i + 1}/${plan.length}`;
+  for (let i = 0; i < 3; i++){
+    reach(['stage', 'read2', 'echo'][i]);
+    const sen = SET[i];
+    screen.classList.remove('win', 'amber');
     $('stgLine').classList.remove('win', 'live');
-    $('stgSay').textContent = step.coach;
-    stgRenderPhrase(step.phrase, step.gaps);
-
-    /* sentence 3 is sentence 2 with two words gone. Nothing is played
-       back at them: if they stall, the gaps peek instead. */
-    if (step.gaps.length){
-      clearTimeout(stgHintT);
-      stgHintT = setTimeout(() => {
-        $('stgText').querySelectorAll('.gap').forEach(g => g.classList.add('hinted', 'peek'));
-      }, 6000);
-    }
+    $('stgSay').innerHTML = C.BG_LINES.inst[i];
+    bgBar(i * 33 + 4);
+    stgRenderPhrase(fill(sen.t), []);
 
     let turn = 'spoke';
     if (FF){
@@ -1366,37 +1366,54 @@ async function stageLadder(goal, level, name){
     } else {
       turn = await stageTurn();
     }
-    if (turn === 'skipped'){ failAt = i + 1; }   /* bailing counts as a slip here */
+    if (turn === 'skipped'){ failAt = i + 1; }
 
     if (failAt === i + 1){
-      /* the practice pair always comes from THIS sentence */
-      PRON_WORDS = step.words;
-      HS_PASSAGE = step.phrase;
-      stgFlagWords(step.words);
-      $('stgMicRow').classList.add('gone');
-      $('stgSay').textContent = T('stg_fail');
+      /* the drill pair is this sentence's two emphasised words */
+      PRON_WORDS = sen.w;
+      HS_PASSAGE = fill(sen.t).replace(/\*/g, '');
+
+      if (i < 2){
+        /* amber beat: the two words light up, then the meter */
+        screen.classList.add('amber');
+        $('stgLine').classList.remove('live');
+        stgFlagWords(sen.w);
+        $('stgSay').innerHTML = C.BG_LINES.slip;
+        const mic = $('stgMic'), row = $('stgMicRow');
+        row.classList.remove('gone', 'stg-listen-glow');
+        mic.className = 'convmic go';
+        const tip = $('stgTip');
+        tip.textContent = C.BG_LINES.slipTip;
+        tip.classList.remove('hidden');
+        JUICE.setAmbient('idle');
+        await wait(FF ? 0 : 2400);
+        break;
+      }
+
+      /* slip on the last one: the win stands, the words go to practice */
+      screen.classList.add('win');
+      $('stgLine').classList.add('win');
+      bgBar(100);
+      $('stgSay').innerHTML = C.BG_LINES.slip3;
+      stgTick(C.BG_LINES.done[2]);
+      if (!FF) JUICE.confetti(60, 'burst');
       JUICE.setAmbient('idle');
-      await wait(FF ? 0 : 1900);
-      break;                                     /* the run stops here */
+      await wait(FF ? 0 : 2400);
+      break;
     }
 
-    /* pass beat: the line goes green and the mic becomes a tick */
-    steps[i].classList.remove('on');
-    steps[i].classList.add('done');
-    JUICE.setAmbient('idle');
+    /* the win beat — green everywhere, confetti louder each state */
+    screen.classList.add('win');
     $('stgLine').classList.add('win');
-    if (!FF) stgTick(i === plan.length - 1 ? T('stg_tick_last') : T('stg_tick_next'));
-    if (i === 0){
-      if (!FF) JUICE.confetti(36, 'burst');
-      $('stgSay').textContent = T('stg_pass1');
-    } else if (i === 1){
-      if (!FF) JUICE.confetti(50, 'burst');
-      $('stgSay').textContent = T('stg_pass2');
-    } else {
-      if (!FF){ JUICE.confetti(90, 'burst'); JUICE.bokeh(18); }
-      $('stgSay').textContent = T('stg_strong');
+    bgBar((i + 1) * 33 + (i === 2 ? 1 : 0));
+    $('stgSay').innerHTML = C.BG_LINES.cheer[i].replace('{name}', name || 'friend');
+    stgTick(C.BG_LINES.done[i]);
+    JUICE.setAmbient('idle');
+    if (!FF){
+      JUICE.confetti([30, 60, 100][i], 'burst');
+      if (i === 2) JUICE.bokeh(18);
     }
-    await wait(FF ? 0 : (i === 2 ? 2100 : 1400));
+    await wait(FF ? 0 : (i === 2 ? 2300 : 1800));
   }
 
   hideScreen('stageScreen');
@@ -1827,7 +1844,8 @@ async function frameworkSequence(key, level, name){
   /* the reading state reuses the teleprompter stage, single line mode */
   reach('readstate');
   showScreen('stageScreen');
-  document.querySelector('#stageScreen .stg-steps').style.display = 'none';
+  $('stageScreen').classList.remove('win', 'amber');
+  $('bgBar').style.display = 'none';
   $('stgSay').textContent = 'Try reading this out loud. I will listen.';
   $('stgLine').classList.remove('win', 'live');
   stgRenderPhrase(sc.parts.join(' '), []);
@@ -1837,11 +1855,12 @@ async function frameworkSequence(key, level, name){
     await stageTurn();
   }
   $('stgLine').classList.add('win');
+  $('stageScreen').classList.add('win');
   stgTick('That is the shape of it');
   if (!FF){ JUICE.confetti(40, 'burst'); }
   await wait(FF ? 0 : 1800);
   hideScreen('stageScreen');
-  document.querySelector('#stageScreen .stg-steps').style.display = '';
+  $('bgBar').style.display = '';
   await wait(550);
 }
 
@@ -1850,10 +1869,10 @@ async function frameworkSequence(key, level, name){
    pronunciation drill answers three questions on the way through.
    ============================================================ */
 const LDR_STEPS = [
-  'Analyzing your answers',
-  'Setting your level from your speaking',
-  'Weighing your pronunciation practice',
-  'Building your daily plan',
+  'Reading your answers',
+  'Matching content to your goal',
+  'Weighing your speaking',
+  'Shaping your roadmap',
 ];
 const LDR_QS = [
   { q: null, opts: ['Too easy', 'Just right', 'Still tricky'] },   /* q filled with the drill words */
@@ -1891,7 +1910,20 @@ function ldrAsk(idx, q){
 }
 const SURVEY = [];
 
-async function planLoader(didPron){
+function ldrQuote(q, idx){
+  const star = '<svg width="15" height="15" viewBox="0 0 24 24"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5-5.9-3.2-5.9 3.2 1.2-6.5L2.5 9.4l6.6-.9z" fill="#D9A24A"/></svg>';
+  const card = $('ldrCard');
+  card.innerHTML = `
+    <div class="ldr-stars">${star.repeat(5)}</div>
+    <span class="ldr-quote">\u201C${q.q}\u201D</span>
+    <span class="ldr-who">${q.n} \u00B7 ${q.r}</span>`;
+  card.hidden = false;
+  [...$('ldrDots').children].forEach((d, i) => d.classList.toggle('on', i === idx));
+  $('ldrDots').hidden = false;
+  requestAnimationFrame(() => requestAnimationFrame(() => card.classList.add('in')));
+}
+
+async function planLoader(didPron, goal){
   reach('survey');
   $('ldrSteps').innerHTML = LDR_STEPS.map(t => `
     <div class="ldr-step">
@@ -1926,11 +1958,20 @@ async function planLoader(didPron){
     $('ldrCard').hidden = true;
     $('ldrDots').hidden = true;
   } else {
-    await wait(FF ? 40 : 1300);
+    /* no drill to ask about — testimonials ride in the card slot */
+    const T3 = (C.TESTIMONIALS[goal] || C.TESTIMONIALS.personal || []).slice(0, 3);
+    if (T3[0]) ldrQuote(T3[0], 0);
+    await wait(FF ? 40 : 1600);
     ldrStepState(['done', 'done', 'on', '']);
     ldrRing(62);
-    await wait(FF ? 40 : 1300);
+    if (T3[1]){ $('ldrCard').classList.remove('in'); await wait(FF ? 0 : 350); ldrQuote(T3[1], 1); }
+    await wait(FF ? 40 : 1600);
     ldrRing(84);
+    if (T3[2]){ $('ldrCard').classList.remove('in'); await wait(FF ? 0 : 350); ldrQuote(T3[2], 2); }
+    await wait(FF ? 40 : 1400);
+    $('ldrCard').classList.remove('in');
+    $('ldrCard').hidden = true;
+    $('ldrDots').hidden = true;
   }
 
   ldrStepState(['done', 'done', 'done', 'on']);
@@ -2378,9 +2419,13 @@ async function flow(){
      4-part model, one read, and the self-report meter + drill.     */
   let didPron = false;
   if (level === 'beginner'){
-    const outcome = await stageLadder(goal, level, name);
-    await hintSequence(level, outcome);
-    didPron = outcome !== 'strong';
+    const outcome = await stageLadder(goal, level, name, famFirst, exam);
+    /* the meter only appears on the way into practice. A clean run and
+       a last-sentence slip both walk straight on. */
+    if (outcome === 'weak' || outcome === 'mid'){
+      await hintSequence(level, outcome);
+      didPron = true;
+    }
   } else {
     const key = C.practiceKey(goal, situation, exam);
     const path = await actSequence(key, level, askNoun);
@@ -2400,7 +2445,7 @@ async function flow(){
   }
 
   /* ---------- 9.4 · the plan builds; drill users answer for it ---------- */
-  await planLoader(didPron);
+  await planLoader(didPron, goal);
 
   /* ---------- 9.5 – 9.7 · money ---------- */
   await paywallSequence(goal === 'exam' && exam === 'ielts' ? 'ielts' : goal);

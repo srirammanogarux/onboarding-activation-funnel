@@ -4250,7 +4250,7 @@ body{
   display:flex;
   justify-content:center;
   gap:6px;
-  padding:16px 0 30px;
+  padding:16px 0 84px;   /* the card rides higher, per the approved frame */
   flex-shrink:0;
 }
 .ldr-dots i{
@@ -4258,3 +4258,105 @@ body{
   transition:width .3s ease, background .3s ease;
 }
 .ldr-dots i.on{width:18px;background:var(--accent);}
+
+/* ============================================================
+   BEGINNER READING — Sarah's bubble, one unified bar, the card
+   (rebuilt to the approved Paper frames)
+   ============================================================ */
+.bg-sarah{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  padding-top:10px;
+}
+.bg-sarah .dp{width:38px;height:38px;flex-shrink:0;border-radius:50%;overflow:hidden;}
+.bg-sarah .dp img{width:100%;height:100%;object-fit:cover;}
+.bg-say{
+  background:var(--bubble-fill);
+  border-radius:22px;
+  border-top-left-radius:6px;
+  padding:13px 16px;
+  font-family:var(--font-body);
+  font-size:15px;
+  line-height:21px;
+  color:var(--text-mid);
+}
+.bg-say b{font-weight:600;color:var(--text-hi);}
+.bg-bar{
+  height:6px;
+  border-radius:999px;
+  background:var(--track);
+  overflow:clip;
+  margin-top:20px;
+}
+.bg-bar i{
+  display:block;
+  height:100%;
+  width:0%;
+  border-radius:999px;
+  background:var(--accent);
+  transition:width .7s var(--ease-out), background .5s ease;
+}
+#stageScreen.win .bg-bar i{background:var(--succ-300);}
+#stageScreen.amber .bg-bar i{background:var(--highlight);}
+
+/* the card grows tall, the sentence sits centred inside it */
+#stgCard{
+  width:100%;
+  min-height:230px;
+  display:flex;
+  align-items:center;
+  padding:44px 24px;
+  transition:background .5s ease, border-color .5s ease;
+}
+#stageScreen .stg-line{padding-bottom:70px;}
+.stg-text .w{font-weight:500;}
+.stg-text .w.em{font-weight:700;}
+#stageScreen.win #stgCard{
+  background:color-mix(in srgb, var(--succ-300) 7%, #17141F);
+  border-color:color-mix(in srgb, var(--succ-300) 45%, transparent);
+}
+#stageScreen.amber #stgCard{
+  border-color:color-mix(in srgb, var(--highlight) 45%, transparent);
+}
+#stageScreen.amber .stg-text .w{color:#AFAAC4;}
+#stageScreen.amber .stg-text .w.miss{color:var(--highlight);font-weight:700;}
+#stageScreen.amber .stg-glow{
+  background:radial-gradient(circle at 50% 50%, rgba(231,180,85,.13) 0%, rgba(231,180,85,0) 66%);
+}
+/* the amber "go to practice" state of the mic */
+.convmic.go{
+  background:var(--highlight);
+  box-shadow:0 16px 44px -12px color-mix(in srgb, var(--highlight) 60%, transparent);
+}
+.convmic.go .cm-mic,
+.convmic.go .cm-cancel,
+.convmic.go .cm-wave,
+.convmic.go .cm-confirm{opacity:0;}
+.convmic.go .cm-tick{opacity:1;color:#1A1206;}
+
+/* ---------- plan screen fixes ---------- */
+/* the card floats in the vertical centre; CTA stays at the bottom */
+.pb-sheet{margin-top:auto;margin-bottom:auto;}
+.pb-first{
+  margin:14px 14px 16px;
+  border-radius:16px;
+  border:1px solid rgba(157,150,255,.28);
+  background:#221E38;
+}
+.pb-note{display:none;}
+.pb-cta svg{display:none;}
+
+/* testimonial riding the loader card slot */
+.ldr-stars{display:flex;gap:3px;}
+.ldr-quote{
+  font-family:var(--font-body);
+  font-size:15.5px;
+  line-height:23px;
+  color:var(--text-mid);
+}
+.ldr-who{
+  font-family:var(--font-body);
+  font-size:13px;
+  color:var(--text-faint);
+}

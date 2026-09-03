@@ -818,10 +818,223 @@ function practiceKey(goal, situation, exam){
   return PRACTICE[g] ? g : 'other';
 }
 
+
+/* ============================================================
+   BEGINNER READING — three escalating affirmations per branch
+   (goal + first-picked family), per the approved content sheet.
+   Identity first, simple words, each sentence longer and harder
+   than the last. *Starred* words are emphasised on screen and are
+   that sentence's pronunciation-drill pair on a slip.
+   ============================================================ */
+const AFFIRM3 = {
+  'career|interview': [
+    { t:'I am {name}, and I am *ready* for this *interview*.',
+      w:[{w:'ready',pre:'rea',hot:'dy',post:'',ph:'reh.dee',tip:'Two quick beats: reh then dee',start:55},
+         {w:'interview',pre:'in',hot:'ter',post:'view',ph:'in.tur.vyoo',tip:'Stress the first beat: in',start:50}] },
+    { t:'I answer hard *questions* slowly, *clearly*, and without fear.',
+      w:[{w:'questions',pre:'ques',hot:'tio',post:'ns',ph:'kwes.chunz',tip:'The tio says chun',start:49},
+         {w:'clearly',pre:'cl',hot:'ear',post:'ly',ph:'kleer.lee',tip:'Two beats, the ear is eer',start:50}] },
+    { t:'I am *prepared* for every interview, and I speak about my work with *confidence*.',
+      w:[{w:'prepared',pre:'pre',hot:'pa',post:'red',ph:'prih.paird',tip:'Two beats, ends on aird',start:48},
+         {w:'confidence',pre:'con',hot:'fi',post:'dence',ph:'kon.fi.dens',tip:'Stress the first beat: kon',start:50}] },
+  ],
+  'career|meetings': [
+    { t:'I am {name}, and my *voice* counts at *work*.',
+      w:[{w:'voice',pre:'v',hot:'oi',post:'ce',ph:'voys',tip:'One beat, oy glides into s',start:56},
+         {w:'work',pre:'w',hot:'or',post:'k',ph:'wurk',tip:'The or says ur, not or',start:52}] },
+    { t:'In every *meeting*, I say my *ideas* out loud.',
+      w:[{w:'meeting',pre:'mee',hot:'ting',post:'',ph:'mee.ting',tip:'The t stays soft, ends on ng',start:51},
+         {w:'ideas',pre:'i',hot:'de',post:'as',ph:'eye.dee.uhz',tip:'Three beats, starts on eye',start:49}] },
+    { t:'I *disagree* politely when I must, and my team *respects* what I say.',
+      w:[{w:'disagree',pre:'dis',hot:'a',post:'gree',ph:'dis.uh.gree',tip:'Stress the last beat: gree',start:47},
+         {w:'respects',pre:'re',hot:'spec',post:'ts',ph:'rih.spekts',tip:'Keep the ts crisp at the end',start:48}] },
+  ],
+  'career|fastspeech': [
+    { t:'I am {name}, and I *listen* with *care*.',
+      w:[{w:'listen',pre:'li',hot:'st',post:'en',ph:'li.sun',tip:'The t is silent: li.sun',start:53},
+         {w:'care',pre:'c',hot:'are',post:'',ph:'kair',tip:'One beat, ends open on air',start:55}] },
+    { t:'When people speak fast, I stay *calm* and ask *again*.',
+      w:[{w:'calm',pre:'c',hot:'al',post:'m',ph:'kahm',tip:'The l is silent: kahm',start:50},
+         {w:'again',pre:'a',hot:'gai',post:'n',ph:'uh.gen',tip:'Two beats, the gai says gen',start:52}] },
+    { t:'I *understand* more every day, and fast talkers no longer *frighten* me.',
+      w:[{w:'understand',pre:'under',hot:'sta',post:'nd',ph:'un.dur.stand',tip:'Stress the last beat: stand',start:49},
+         {w:'frighten',pre:'fri',hot:'ght',post:'en',ph:'fry.tun',tip:'The ght is just a t',start:46}] },
+  ],
+  'career|customer': [
+    { t:'I am {name}, and I *help* people every *day*.',
+      w:[{w:'help',pre:'he',hot:'l',post:'p',ph:'help',tip:'Keep the l before the p',start:56},
+         {w:'day',pre:'d',hot:'ay',post:'',ph:'day',tip:'One clean beat',start:58}] },
+    { t:'I hear every *customer* out, and I answer with *patience*.',
+      w:[{w:'customer',pre:'cus',hot:'to',post:'mer',ph:'kus.tuh.mur',tip:'Stress the first beat: kus',start:53},
+         {w:'patience',pre:'pa',hot:'tien',post:'ce',ph:'pay.shuns',tip:'The tien says shun',start:48}] },
+    { t:'I can handle a *difficult* customer, and I turn problems into *solutions*.',
+      w:[{w:'difficult',pre:'di',hot:'ffi',post:'cult',ph:'di.fi.kult',tip:'Stress the first beat: di',start:50},
+         {w:'solutions',pre:'so',hot:'lu',post:'tions',ph:'suh.loo.shunz',tip:'Stress the middle: loo',start:47}] },
+  ],
+  'career|pitch': [
+    { t:'I am {name}, and my *work* has real *value*.',
+      w:[{w:'work',pre:'w',hot:'or',post:'k',ph:'wurk',tip:'The or says ur, not or',start:52},
+         {w:'value',pre:'val',hot:'ue',post:'',ph:'val.yoo',tip:'Two beats, ends on yoo',start:51}] },
+    { t:'I name my *price* out loud, and I do not *shrink*.',
+      w:[{w:'price',pre:'pr',hot:'i',post:'ce',ph:'prys',tip:'One beat, ends on a soft s',start:54},
+         {w:'shrink',pre:'shr',hot:'in',post:'k',ph:'shrink',tip:'Start with shr, one beat',start:47}] },
+    { t:'I *defend* my price with a steady voice, because my work *deserves* it.',
+      w:[{w:'defend',pre:'de',hot:'fen',post:'d',ph:'dih.fend',tip:'Stress the second beat: fend',start:49},
+         {w:'deserves',pre:'de',hot:'ser',post:'ves',ph:'dih.zurvz',tip:'The s is a z, twice',start:46}] },
+  ],
+  'career|smalltalk': [
+    { t:'I am {name}, and I am easy to *talk* to.',
+      w:[{w:'talk',pre:'t',hot:'al',post:'k',ph:'tawk',tip:'The l is silent: tawk',start:54},
+         {w:'easy',pre:'ea',hot:'sy',post:'',ph:'ee.zee',tip:'The s is a z: ee.zee',start:55}] },
+    { t:'I start small *conversations*, and I *enjoy* them.',
+      w:[{w:'conversations',pre:'conver',hot:'sa',post:'tions',ph:'kon.vur.say.shunz',tip:'Four beats, stress on say',start:47},
+         {w:'enjoy',pre:'en',hot:'joy',post:'',ph:'in.joy',tip:'Starts on in, not en',start:55}] },
+    { t:'I walk up to new *colleagues* first, and small talk feels *natural* to me.',
+      w:[{w:'colleagues',pre:'co',hot:'llea',post:'gues',ph:'ko.leegz',tip:'Two beats, ends on eegz',start:46},
+         {w:'natural',pre:'na',hot:'tu',post:'ral',ph:'na.chruhl',tip:'The tu says chruh',start:48}] },
+  ],
+  'personal|smalltalk': [
+    { t:'I am {name}, and I like *meeting* people.',
+      w:[{w:'meeting',pre:'mee',hot:'ting',post:'',ph:'mee.ting',tip:'The t stays soft, ends on ng',start:51},
+         {w:'people',pre:'peo',hot:'p',post:'le',ph:'pee.pul',tip:'Two beats: pee.pul',start:49}] },
+    { t:'I can start a *conversation* with someone *new*.',
+      w:[{w:'conversation',pre:'conver',hot:'sa',post:'tion',ph:'kon.vur.say.shun',tip:'Four beats, stress on say',start:47},
+         {w:'new',pre:'n',hot:'ew',post:'',ph:'noo',tip:'One clean beat: noo',start:57}] },
+    { t:'I keep a conversation going with *anyone*, and silence does not *scare* me.',
+      w:[{w:'anyone',pre:'a',hot:'ny',post:'one',ph:'en.ee.wun',tip:'Three beats, starts on en',start:50},
+         {w:'scare',pre:'sc',hot:'are',post:'',ph:'skair',tip:'One beat, ends open on air',start:52}] },
+  ],
+  'personal|services': [
+    { t:'I am {name}, and I handle my own *life* in *English*.',
+      w:[{w:'life',pre:'l',hot:'i',post:'fe',ph:'lyf',tip:'One beat, long i',start:56},
+         {w:'English',pre:'Eng',hot:'li',post:'sh',ph:'ing.glish',tip:'It starts with ing',start:47}] },
+    { t:'I book my own *appointments*, and I ask my own *questions*.',
+      w:[{w:'appointments',pre:'a',hot:'ppoint',post:'ments',ph:'uh.poynt.munts',tip:'Stress the middle: poynt',start:46},
+         {w:'questions',pre:'ques',hot:'tio',post:'ns',ph:'kwes.chunz',tip:'The tio says chun',start:49}] },
+    { t:'I walk into any office, explain my *problem*, and get it *solved* in English.',
+      w:[{w:'problem',pre:'pro',hot:'ble',post:'m',ph:'prob.lum',tip:'Two beats: prob.lum',start:51},
+         {w:'solved',pre:'sol',hot:'ve',post:'d',ph:'solvd',tip:'One beat, keep the vd',start:48}] },
+  ],
+  'personal|family': [
+    { t:'I am {name}, and my family is *proud* of me.',
+      w:[{w:'proud',pre:'pr',hot:'ou',post:'d',ph:'prowd',tip:'The ou says ow',start:55},
+         {w:'family',pre:'fa',hot:'mi',post:'ly',ph:'fam.uh.lee',tip:'Three beats, not two',start:49}] },
+    { t:'I speak English at home, and my kids *hear* me *try*.',
+      w:[{w:'hear',pre:'h',hot:'ear',post:'',ph:'heer',tip:'One beat: heer',start:56},
+         {w:'try',pre:'tr',hot:'y',post:'',ph:'try',tip:'One beat, long i',start:57}] },
+    { t:'I sit with my partner\u2019s family and join the conversation with *warmth* and *confidence*.',
+      w:[{w:'warmth',pre:'war',hot:'m',post:'th',ph:'wormth',tip:'End on a soft th',start:45},
+         {w:'confidence',pre:'con',hot:'fi',post:'dence',ph:'kon.fi.dens',tip:'Stress the first beat: kon',start:50}] },
+  ],
+  'school|exam': [
+    { t:'I am {name}, and I am *ready* for my *exam*.',
+      w:[{w:'ready',pre:'rea',hot:'dy',post:'',ph:'reh.dee',tip:'Two quick beats: reh then dee',start:55},
+         {w:'exam',pre:'e',hot:'xam',post:'',ph:'ig.zam',tip:'Stress the second beat: zam',start:50}] },
+    { t:'I answer exam *questions* with a clear, steady *voice*.',
+      w:[{w:'questions',pre:'ques',hot:'tio',post:'ns',ph:'kwes.chunz',tip:'The tio says chun',start:49},
+         {w:'voice',pre:'v',hot:'oi',post:'ce',ph:'voys',tip:'One beat, oy glides into s',start:56}] },
+    { t:'On exam day I will speak for two *minutes* without *stopping*, and I will pass.',
+      w:[{w:'minutes',pre:'mi',hot:'nu',post:'tes',ph:'mi.nits',tip:'Two beats only: mi.nits',start:49},
+         {w:'stopping',pre:'sto',hot:'pp',post:'ing',ph:'stop.ing',tip:'Two beats, ends on ng',start:52}] },
+  ],
+  'school|fastspeech': [
+    { t:'I am {name}, and I *follow* my *classes*.',
+      w:[{w:'follow',pre:'fo',hot:'llo',post:'w',ph:'fo.loh',tip:'Two beats, ends on oh',start:53},
+         {w:'classes',pre:'cla',hot:'ss',post:'es',ph:'klas.iz',tip:'Two beats: klas.iz',start:51}] },
+    { t:'Fast *lectures* do not lose me *anymore*.',
+      w:[{w:'lectures',pre:'lec',hot:'tu',post:'res',ph:'lek.churz',tip:'The tu says chur',start:47},
+         {w:'anymore',pre:'any',hot:'mo',post:'re',ph:'en.ee.mor',tip:'Three beats, ends on mor',start:50}] },
+    { t:'I take notes while the teacher speaks *quickly*, and I keep up with *everything*.',
+      w:[{w:'quickly',pre:'qui',hot:'ck',post:'ly',ph:'kwik.lee',tip:'Two beats: kwik.lee',start:51},
+         {w:'everything',pre:'eve',hot:'ry',post:'thing',ph:'ev.ree.thing',tip:'Three beats, soft th at the end',start:48}] },
+  ],
+  'school|meetings': [
+    { t:'I am {name}, and I *speak* up in *class*.',
+      w:[{w:'speak',pre:'sp',hot:'ea',post:'k',ph:'speek',tip:'The ea is a long ee',start:54},
+         {w:'class',pre:'cl',hot:'a',post:'ss',ph:'klas',tip:'Two sounds at the front: k then l',start:53}] },
+    { t:'I raise my hand and share my *answer* with the *class*.',
+      w:[{w:'answer',pre:'an',hot:'sw',post:'er',ph:'an.sur',tip:'The w is silent: an.sur',start:50},
+         {w:'class',pre:'cl',hot:'a',post:'ss',ph:'klas',tip:'Two sounds at the front: k then l',start:53}] },
+    { t:'I present my *project* to the whole class, and my voice stays *steady*.',
+      w:[{w:'project',pre:'pro',hot:'jec',post:'t',ph:'pro.jekt',tip:'The j is sharp',start:52},
+         {w:'steady',pre:'stea',hot:'dy',post:'',ph:'steh.dee',tip:'Two beats: steh.dee',start:51}] },
+  ],
+  'school|smalltalk': [
+    { t:'I am {name}, and I make *friends* at *school*.',
+      w:[{w:'friends',pre:'frien',hot:'d',post:'s',ph:'frendz',tip:'One beat, ends on dz',start:52},
+         {w:'school',pre:'sch',hot:'oo',post:'l',ph:'skool',tip:'The sch is just sk',start:54}] },
+    { t:'I talk to my *classmates* in English every *day*.',
+      w:[{w:'classmates',pre:'class',hot:'ma',post:'tes',ph:'klas.mayts',tip:'Two beats, ends on ayts',start:49},
+         {w:'day',pre:'d',hot:'ay',post:'',ph:'day',tip:'One clean beat',start:58}] },
+    { t:'I am the one who says hello *first*, and people *remember* me.',
+      w:[{w:'first',pre:'f',hot:'ir',post:'st',ph:'furst',tip:'The ir says ur',start:53},
+         {w:'remember',pre:'re',hot:'mem',post:'ber',ph:'rih.mem.bur',tip:'Stress the middle: mem',start:48}] },
+  ],
+  'travel|services': [
+    { t:'I am {name}, and I *travel* with *confidence*.',
+      w:[{w:'travel',pre:'tra',hot:'ve',post:'l',ph:'tra.vul',tip:'Two beats: tra.vul',start:52},
+         {w:'confidence',pre:'con',hot:'fi',post:'dence',ph:'kon.fi.dens',tip:'Stress the first beat: kon',start:50}] },
+    { t:'I check in, order food, and ask for *directions* in *English*.',
+      w:[{w:'directions',pre:'di',hot:'rec',post:'tions',ph:'duh.rek.shunz',tip:'Stress the middle: rek',start:47},
+         {w:'English',pre:'Eng',hot:'li',post:'sh',ph:'ing.glish',tip:'It starts with ing',start:47}] },
+    { t:'When a booking goes *wrong*, I sort it out myself, *calmly*.',
+      w:[{w:'wrong',pre:'wr',hot:'o',post:'ng',ph:'rong',tip:'The w is silent: rong',start:51},
+         {w:'calmly',pre:'cal',hot:'m',post:'ly',ph:'kahm.lee',tip:'The l in cal is silent',start:46}] },
+  ],
+  'travel|smalltalk': [
+    { t:'I am {name}, and I meet people *everywhere* I *go*.',
+      w:[{w:'everywhere',pre:'every',hot:'whe',post:'re',ph:'ev.ree.wair',tip:'Three beats, ends on air',start:48},
+         {w:'go',pre:'g',hot:'o',post:'',ph:'goh',tip:'One clean beat',start:58}] },
+    { t:'On every trip, I make one new *friend* in *English*.',
+      w:[{w:'friend',pre:'frien',hot:'d',post:'',ph:'frend',tip:'One beat: frend',start:53},
+         {w:'English',pre:'Eng',hot:'li',post:'sh',ph:'ing.glish',tip:'It starts with ing',start:47}] },
+    { t:'I share stories with *strangers* on the road, and English opens *doors* for me.',
+      w:[{w:'strangers',pre:'stran',hot:'ger',post:'s',ph:'strayn.jurz',tip:'The g is a j',start:46},
+         {w:'doors',pre:'d',hot:'oor',post:'s',ph:'dorz',tip:'One beat, ends on z',start:54}] },
+  ],
+  exam: [
+    { t:'I am {name}, and I am *ready* for my {EXAM} *exam*.',
+      w:[{w:'ready',pre:'rea',hot:'dy',post:'',ph:'reh.dee',tip:'Two quick beats: reh then dee',start:55},
+         {w:'exam',pre:'e',hot:'xam',post:'',ph:'ig.zam',tip:'Stress the second beat: zam',start:50}] },
+    { t:'For my {EXAM}, I speak in full *sentences*, with a calm, clear *voice*.',
+      w:[{w:'sentences',pre:'sen',hot:'ten',post:'ces',ph:'sen.tun.siz',tip:'Stress the first beat: sen',start:48},
+         {w:'voice',pre:'v',hot:'oi',post:'ce',ph:'voys',tip:'One beat, oy glides into s',start:56}] },
+    { t:'On test day I will speak for two *minutes* without stopping, with real *confidence*.',
+      w:[{w:'minutes',pre:'mi',hot:'nu',post:'tes',ph:'mi.nits',tip:'Two beats only: mi.nits',start:49},
+         {w:'confidence',pre:'con',hot:'fi',post:'dence',ph:'kon.fi.dens',tip:'Stress the first beat: kon',start:50}] },
+  ],
+};
+
+/* which affirmation set a beginner reads: goal + first-picked family,
+   with per-goal fallbacks for families that have no set of their own */
+function affirmKey(goal, fam, exam){
+  if (goal === 'exam') return 'exam';
+  const k = `${goal}|${fam}`;
+  if (AFFIRM3[k]) return k;
+  return { career:'career|interview', personal:'personal|smalltalk',
+           school:'school|smalltalk', travel:'travel|services' }[goal] || 'personal|smalltalk';
+}
+
+/* Sarah on the beginner run — instruction, celebration, slip. The
+   <b> words are the ones she leans on. */
+const BG_LINES = {
+  inst: ['Read this <b>out loud</b>. Take your time.',
+         'One more. A <b>little longer</b> this time.',
+         'Last one. It is <b>harder</b>. I hope you are <b>ready</b>.'],
+  cheer:['You said it. That was <b>real English</b>, {name}.',
+         'That was <b>not beginner</b> English. That was <b>good</b>.',
+         '<b>Three for three</b>. You are <b>past beginner</b> now.'],
+  done: ['1 of 3 done', '2 of 3 done', 'That is all three'],
+  slip: 'Two words slipped. Let us <b>fix them together</b>.',
+  slipTip: "Let's practice them",
+  slip3: 'So close. I added two small words to <b>your practice</b>.',
+};
+
 window.CONTENT = {
   LANGUAGES, APPLANG_DESC, GOALS, EXAMS, IELTS_TYPES, examDateOptions,
   bandNote, GOAL_FX, PROOF, OUTCOME, TESTIMONIALS, AWARD, PLAN, PLAN_BUILD, SCENARIOS, scenarioSet, WORKMODE, MODE_LABEL, branches,
   SITUATIONS, SIT_FX, ACTIVATION, PW_TITLE,
   PRACTICE, WORD, PRONWORDS, PRACTICE_ASK, practiceKey,
+  AFFIRM3, affirmKey, BG_LINES,
   PRICING, COHORTS,
 };
