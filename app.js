@@ -684,7 +684,7 @@ const ICONS = {
 
 /* ---------- name input ---------- */
 function nameInput(){
-  if (FF){ userChip('Aarav'); return Promise.resolve('Aarav'); }
+  if (FF){ userChip(DBG.name || 'Lena'); return Promise.resolve(DBG.name || 'Lena'); }
   return new Promise(resolve => {
     const wrap = el(`
       <div class="input-block">
@@ -2822,7 +2822,7 @@ async function autoPilot(){
     /* text fields */
     const nf = q('.name-field');
     if (nf){
-      await typeInto(nf, DBG.name || 'Aarav');
+      await typeInto(nf, DBG.name || 'Lena');
       const btn = nf.closest('.input-block')?.querySelector('.btn-continue');
       if (btn) await press(btn);
       continue;
