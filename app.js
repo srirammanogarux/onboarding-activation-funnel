@@ -19,7 +19,7 @@ const muteBtn      = $('muteBtn');
 const micArea      = $('micArea');
 const convMic      = $('convMic');
 
-const SARAH = 'assets/sarah-avatar.png';
+const SARAH = 'assets/sarah/sarah-avatar.png';
 
 /* ---------- fit device mockup to viewport ---------- */
 function fitPhone(){
@@ -215,7 +215,7 @@ async function sticker(kind){
       <i class="spark s3">${SPARK}</i>
       <i class="spark s4">${SPARK}</i>
       <i class="spark s5">${SPARK}</i>
-      <img src="assets/sarah-hi.png" alt="Sarah">
+      <img src="assets/sarah/sarah-hi.png" alt="Sarah">
     </div>`);
   chatStream.appendChild(row);
   scrollToEnd();
@@ -308,7 +308,7 @@ function options(items, { head = null, link = null, linkValue = null, wide = fal
   });
 }
 
-const flag = (name) => `<img src="assets/flag-${name}.svg" alt="">`;
+const flag = (name) => `<img src="assets/flags/flag-${name}.svg" alt="">`;
 
 /* static takeover copy baked into index.html — retranslated the moment
    the learner switches the app language (CL falls back to English) */
@@ -524,7 +524,7 @@ function phoneInput(flagName, cc){
     const wrap = el(`
       <div class="input-block">
         <div class="phone-field-wrap">
-          <img class="flag" src="assets/flag-${flagName}.svg" alt="">
+          <img class="flag" src="assets/flags/flag-${flagName}.svg" alt="">
           <span class="cc">${cc}</span>
           <input type="tel" inputmode="numeric" placeholder="Phone Number" maxlength="12" aria-label="Phone number">
         </div>

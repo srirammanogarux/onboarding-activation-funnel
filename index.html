@@ -19,8 +19,8 @@
     <main class="screen chat-screen" id="chatScreen">
       <header class="topbar" id="topbar">
         <div class="statusbar">
-          <img src="assets/status-time.svg" alt="9:41" width="54" height="21">
-          <img src="assets/status-right.svg" alt="" width="67" height="12">
+          <img src="assets/ui/status-time.svg" alt="9:41" width="54" height="21">
+          <img src="assets/ui/status-right.svg" alt="" width="67" height="12">
         </div>
         <div class="progress-block">
           <div class="progress-top">
@@ -36,10 +36,10 @@
 
       <footer class="bottombar" id="bottomBar">
         <button class="pill pill-mute" id="muteBtn">
-          <img src="assets/mic-mute.svg" alt=""> Mute
+          <img src="assets/ui/mic-mute.svg" alt=""> Mute
         </button>
         <button class="pill pill-skip" id="skipBtn">
-          Skip <img src="assets/chevron-dbl.svg" alt="">
+          Skip <img src="assets/ui/chevron-dbl.svg" alt="">
         </button>
       </footer>
 
@@ -81,12 +81,12 @@
     <!-- ============ PLAN BUILD · the chat's exit ============ -->
     <section class="screen takeover is-hidden" id="planBuildScreen" hidden>
       <div class="statusbar">
-        <img src="assets/status-time.svg" alt="9:41" width="54" height="21">
-        <img src="assets/status-right.svg" alt="" width="67" height="12">
+        <img src="assets/ui/status-time.svg" alt="9:41" width="54" height="21">
+        <img src="assets/ui/status-right.svg" alt="" width="67" height="12">
       </div>
       <div class="pb-wrap">
         <div class="hs-coach pb-rise" id="pbCoach">
-          <div class="dp" id="pbAvatar"><img src="assets/sarah-avatar.png" alt="Sarah"></div>
+          <div class="dp" id="pbAvatar"><img src="assets/sarah/sarah-avatar.png" alt="Sarah"></div>
           <p class="hs-say" id="pbSay"></p>
         </div>
         <!-- the chat card, taken full screen: same anatomy, room to breathe -->
@@ -108,12 +108,12 @@
     <!-- ============ SPEAKING STAGE · the ladder (R1 read → R2 read → R3 echo) ============ -->
     <section class="screen takeover is-hidden" id="stageScreen" hidden>
       <div class="statusbar">
-        <img src="assets/status-time.svg" alt="9:41" width="54" height="21">
-        <img src="assets/status-right.svg" alt="" width="67" height="12">
+        <img src="assets/ui/status-time.svg" alt="9:41" width="54" height="21">
+        <img src="assets/ui/status-right.svg" alt="" width="67" height="12">
       </div>
       <div class="stage-wrap">
         <div class="bg-sarah">
-          <div class="dp"><img src="assets/sarah-avatar.png" alt="Sarah"></div>
+          <div class="dp"><img src="assets/sarah/sarah-avatar.png" alt="Sarah"></div>
           <p class="bg-say" id="stgSay"></p>
         </div>
         <div class="bg-bar" id="bgBar"><i id="bgFill"></i></div>
@@ -143,13 +143,13 @@
     <!-- ============ ACT: one real question (intermediate / advanced) ============ -->
     <section class="screen takeover is-hidden" id="actScreen" hidden>
       <div class="statusbar">
-        <img src="assets/status-time.svg" alt="9:41" width="54" height="21">
-        <img src="assets/status-right.svg" alt="" width="67" height="12">
+        <img src="assets/ui/status-time.svg" alt="9:41" width="54" height="21">
+        <img src="assets/ui/status-right.svg" alt="" width="67" height="12">
       </div>
       <div class="stage-wrap act-wrap">
         <p class="act-eyebrow act-top">YOUR FIRST PRACTICE</p>
         <div class="act-coach">
-          <div class="dp"><img src="assets/sarah-avatar.png" alt="Sarah"></div>
+          <div class="dp"><img src="assets/sarah/sarah-avatar.png" alt="Sarah"></div>
           <div class="act-cn"><b>Sarah</b><span>your speaking coach</span></div>
         </div>
         <div class="act-bub"><p class="act-q" id="actQ"></p></div>
@@ -177,11 +177,11 @@
     <!-- ============ ANALYSING (impromptu path) ============ -->
     <section class="screen takeover is-hidden" id="anaScreen" hidden>
       <div class="statusbar">
-        <img src="assets/status-time.svg" alt="9:41" width="54" height="21">
-        <img src="assets/status-right.svg" alt="" width="67" height="12">
+        <img src="assets/ui/status-time.svg" alt="9:41" width="54" height="21">
+        <img src="assets/ui/status-right.svg" alt="" width="67" height="12">
       </div>
       <div class="ana-wrap">
-        <div class="ana-dp"><img src="assets/sarah-avatar.png" alt="Sarah"></div>
+        <div class="ana-dp"><img src="assets/sarah/sarah-avatar.png" alt="Sarah"></div>
         <p class="ana-line" id="anaLine">Analysing your speech.</p>
         <div class="ana-bar"><i id="anaBar"></i></div>
       </div>
@@ -191,8 +191,8 @@
     <!-- ============ SCORE REPORT (impromptu path) ============ -->
     <section class="screen takeover is-hidden" id="scoreScreen" hidden>
       <div class="statusbar">
-        <img src="assets/status-time.svg" alt="9:41" width="54" height="21">
-        <img src="assets/status-right.svg" alt="" width="67" height="12">
+        <img src="assets/ui/status-time.svg" alt="9:41" width="54" height="21">
+        <img src="assets/ui/status-right.svg" alt="" width="67" height="12">
       </div>
       <div class="sc-wrap">
         <p class="act-eyebrow sc-eyebrow" id="scEyebrow">YOUR FIRST SCORE</p>
@@ -214,8 +214,8 @@
     <!-- ============ FRAMEWORK: the 4-part model answer (hint path) ============ -->
     <section class="screen takeover is-hidden" id="fwScreen" hidden>
       <div class="statusbar">
-        <img src="assets/status-time.svg" alt="9:41" width="54" height="21">
-        <img src="assets/status-right.svg" alt="" width="67" height="12">
+        <img src="assets/ui/status-time.svg" alt="9:41" width="54" height="21">
+        <img src="assets/ui/status-right.svg" alt="" width="67" height="12">
       </div>
       <div class="stage-wrap">
         <div class="fw-head">
@@ -246,8 +246,8 @@
     <!-- ============ PLAN LOADER (+ pronunciation survey) ============ -->
     <section class="screen takeover is-hidden" id="ldrScreen" hidden>
       <div class="statusbar">
-        <img src="assets/status-time.svg" alt="9:41" width="54" height="21">
-        <img src="assets/status-right.svg" alt="" width="67" height="12">
+        <img src="assets/ui/status-time.svg" alt="9:41" width="54" height="21">
+        <img src="assets/ui/status-right.svg" alt="" width="67" height="12">
       </div>
       <div class="ldr-build">
         <div class="ldr-ring">
@@ -271,15 +271,15 @@
     <!-- ============ HINT FLOW: level meter → fix pronunciation → practice ============ -->
     <section class="screen takeover is-hidden" id="hintScreen" hidden>
       <div class="statusbar">
-        <img src="assets/status-time.svg" alt="9:41" width="54" height="21">
-        <img src="assets/status-right.svg" alt="" width="67" height="12">
+        <img src="assets/ui/status-time.svg" alt="9:41" width="54" height="21">
+        <img src="assets/ui/status-right.svg" alt="" width="67" height="12">
       </div>
       <div class="hs-wrap">
 
         <!-- 1 · level meter -->
         <div class="hs-view" id="hsMeterView">
           <div class="hs-coach">
-            <div class="dp"><img src="assets/sarah-avatar.png" alt="Sarah"></div>
+            <div class="dp"><img src="assets/sarah/sarah-avatar.png" alt="Sarah"></div>
             <p class="hs-say" id="hsSay">I listened to how you read. Here is where you stand.</p>
           </div>
           <div class="hs-stage">
@@ -339,8 +339,8 @@
       <div class="pw-scroll" id="pwScroll">
         <header class="pw-hero" id="pwHero">
           <div class="statusbar">
-            <img src="assets/status-time.svg" alt="9:41" width="54" height="21">
-            <img src="assets/status-right.svg" alt="" width="67" height="12">
+            <img src="assets/ui/status-time.svg" alt="9:41" width="54" height="21">
+            <img src="assets/ui/status-right.svg" alt="" width="67" height="12">
           </div>
           <div class="pw-topbar" id="pwTopbar">
             <img class="pw-close" src="assets/paywall/close.svg" alt="Close">
@@ -403,8 +403,8 @@
     <!-- ============ GIFT TRANSITION (golden) ============ -->
     <section class="screen takeover is-hidden" id="giftScreen" hidden>
       <div class="statusbar gift-status">
-        <img src="assets/status-time.svg" alt="9:41" width="54" height="21">
-        <img src="assets/status-right.svg" alt="" width="67" height="12">
+        <img src="assets/ui/status-time.svg" alt="9:41" width="54" height="21">
+        <img src="assets/ui/status-right.svg" alt="" width="67" height="12">
       </div>
       <div class="gift-stage" id="giftStage">
         <img class="g-ray gr-big" src="assets/paywall/gift/ray-big.svg" alt="">
@@ -440,8 +440,8 @@
       <div class="pw-scroll offer-scroll" id="offerScroll">
         <header class="offer-hero">
           <div class="statusbar">
-            <img src="assets/status-time.svg" alt="9:41" width="54" height="21">
-            <img src="assets/status-right.svg" alt="" width="67" height="12">
+            <img src="assets/ui/status-time.svg" alt="9:41" width="54" height="21">
+            <img src="assets/ui/status-right.svg" alt="" width="67" height="12">
           </div>
           <div class="pw-topbar offer-topbar">
             <img class="pw-close" src="assets/paywall/close.svg" alt="Close">
