@@ -136,6 +136,8 @@ function buildDevPanel(){
   ], 'perf', { clear: 'Follow level' });
 
   fill('dpLvls',  DP_LVLS,  'lvl');
+  fill('dpPath', [['impromptu', 'Answers impromptu'], ['hint', 'Uses the hint']], 'path',
+       { clear: 'Let it play out' });
   fill('dpLangs', DP_LANGS, 'lang');
 
   /* branch auto-runs: one play per branch. It reloads at the very
@@ -195,7 +197,7 @@ buildDevPanel();
 
 /* ---------- tiny helpers ---------- */
 /* AUTO paces the fast-forward so a reviewer can watch it play */
-const wait = (ms) => new Promise(r => setTimeout(r, AUTO ? Math.max(340, Math.min(ms, 900)) : (FF || rushing) ? 0 : ms));
+const wait = (ms) => new Promise(r => setTimeout(r, AUTO ? Math.max(700, Math.min(ms, 2400)) : (FF || rushing) ? 0 : ms));
 
 /* Skip fast-forwards Sarah's talking to the next question.
    It never answers a question — while an input/option set is waiting the
@@ -251,10 +253,10 @@ function el(html){
 /* voice state: typing dots → full text appears → gradient sheen
    sweeps the fill + bubble pulses for the duration of the "voice" */
 async function sarah(text, { typingMs = 650, holdMs = 350, perWord = 130, quick = false } = {}){
-  if (!FF) JUICE.setAmbient('thinking');
+  if (!FF || AUTO) JUICE.setAmbient('thinking');
   if (quick){ perWord = 85; typingMs = Math.min(typingMs, 450); holdMs = 220; }
   dimPreviousSarah();
-  if (FF || rushing){
+  if ((FF && !AUTO) || rushing){
     const fast = el(`
       <div class="msg dim">
         <div class="dp"><img src="${SARAH}" alt="Sarah"></div>
@@ -329,7 +331,9 @@ function options(items, { head = null, link = null, linkValue = null, wide = fal
   if (FF){
     const item = items.find(i => i.value === forced)
       || items.find(i => i.defaultOnSkip) || items[0];
-    userChip(item.label, chipIcons ? (item.icon || '') : '');
+    const land = () => userChip(item.label, chipIcons ? (item.icon || '') : '');
+    if (AUTO) return wait(900).then(() => { land(); return item.value; });
+    land();
     return Promise.resolve(item.value);
   }
   return new Promise(resolve => {
@@ -417,7 +421,9 @@ const TICK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
 function multiSelect(items, { head = 'Select all that apply', cta = 'Continue', forced = null, icons = [] } = {}){
   if (FF){
     const picked = forced && forced.length ? forced : [items[0]];
-    userChip(picked.length > 1 ? `${picked[0]} +${picked.length - 1}` : picked[0]);
+    const land = () => userChip(picked.length > 1 ? `${picked[0]} +${picked.length - 1}` : picked[0]);
+    if (AUTO) return wait(1100).then(() => { land(); return picked; });
+    land();
     return Promise.resolve(picked);
   }
   return new Promise(resolve => {
@@ -1183,7 +1189,7 @@ async function planBuildSequence(answers, goal, name, firstLine){
   JUICE.setAmbient('reward');   /* the room resolves as the plan lands */
   showScreen('planBuildScreen');
   setTimeout(() => $('chatScreen').classList.add('is-hidden'), FF ? 0 : 500);
-  if (!FF) JUICE.sweep();                      /* THE one ambient pass */
+  if (!FF || AUTO) JUICE.sweep();                      /* THE one ambient pass */
 
   /* Five beats, in reading order, each one opening the card a little
      further: the label, the headline, all four answers together, the
@@ -1435,7 +1441,7 @@ async function stageLadder(goal, level, name, famFirst, exam){
       bgBar(100);
       $('stgSay').innerHTML = C.BG_LINES.slip3;
       stgTick(C.BG_LINES.done[2]);
-      if (!FF) JUICE.confetti(60, 'burst');
+      if (!FF || AUTO) JUICE.confetti(60, 'burst');
       JUICE.setAmbient('idle');
       await wait(FF ? 0 : 2400);
       break;
@@ -1448,7 +1454,7 @@ async function stageLadder(goal, level, name, famFirst, exam){
     $('stgSay').innerHTML = C.BG_LINES.cheer[i].replace('{name}', name || 'friend');
     stgTick(C.BG_LINES.done[i]);
     JUICE.setAmbient('idle');
-    if (!FF){
+    if (!FF || AUTO){
       JUICE.confetti([30, 60, 100][i], 'burst');
       if (i === 2) JUICE.bokeh(18);
     }
@@ -1848,7 +1854,7 @@ async function scoreSequence(goal, famLabel){
     };
     requestAnimationFrame(step);
   });
-  if (!FF) JUICE.confetti(40, 'burst');
+  if (!FF || AUTO) JUICE.confetti(40, 'burst');
   if (!FF) await new Promise(r => $('scGo').addEventListener('click', r, { once: true }));
   hideScreen('scoreScreen');
   await wait(550);
@@ -1946,7 +1952,7 @@ async function frameworkSequence(key, level, name){
   $('fwScreen').classList.add('done');
   $('fwMic').className = 'convmic tick';
   $('fwTip').textContent = 'That is the shape of it';
-  if (!FF) JUICE.confetti(40, 'burst');
+  if (!FF || AUTO) JUICE.confetti(40, 'burst');
   await wait(FF ? 0 : 1600);
   hideScreen('fwScreen');
   await wait(550);
@@ -2067,7 +2073,7 @@ async function planLoader(didPron, goal){
   ldrStepState(['done', 'done', 'done', 'done']);
   $('ldrArc').style.stroke = 'var(--succ-300)';
   ldrRing(100);
-  if (!FF) JUICE.confetti(30, 'burst');
+  if (!FF || AUTO) JUICE.confetti(30, 'burst');
   await wait(FF ? 60 : 1400);
   hideScreen('ldrScreen');
   await wait(550);
@@ -2187,7 +2193,7 @@ async function giftSequence(){
     await new Promise(r => $('giftScreen').addEventListener('click', r, { once: true }));
   }
   $('giftScreen').classList.add('open');
-  if (!FF) JUICE.fireworks();
+  if (!FF || AUTO) JUICE.fireworks();
   await wait(2600);
 }
 
@@ -2228,7 +2234,7 @@ async function offerSequence(){
   }));
 
   showScreen('offerScreen');
-  if (!FF) JUICE.confetti(70, 'rain');
+  if (!FF || AUTO) JUICE.confetti(70, 'rain');
   setTimeout(() => $('giftScreen').classList.add('is-hidden'), 600);
 }
 

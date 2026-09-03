@@ -4452,23 +4452,26 @@ body{
 .fw-microw.gone{display:none;}
 
 /* auto-run rows in the panel */
-.dp-runs{display:flex;flex-direction:column;gap:6px;}
+.dp-runs{display:flex;flex-direction:column;gap:5px;}
 .dp-runs button{
   display:flex;
   align-items:center;
   gap:8px;
   text-align:left;
-  padding:8px 10px;
+  padding:7px 10px;
   border-radius:10px;
-  background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.1);
-  color:var(--text-mid);
-  font-family:var(--font-body);
-  font-size:12.5px;
+  background:#F4F2F8;
+  border:1px solid #E8E4F0;
+  color:#3A3444;
+  font-family:var(--font-display);
+  font-weight:500;
+  font-size:12px;
+  line-height:16px;
   cursor:pointer;
+  transition:all .15s ease;
 }
-.dp-runs button:hover{background:rgba(108,99,255,.18);}
-.dp-runs button::before{content:"\25B6";font-size:9px;color:var(--succ-300);}
+.dp-runs button:hover{border-color:#6C63FF;color:#17121F;background:#EEECFB;}
+.dp-runs button::before{content:"\25B6";font-size:9px;color:#6C63FF;}
 .auto-pill{
   position:fixed;
   top:12px;
