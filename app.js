@@ -1429,7 +1429,7 @@ const OUTCOME_METER = {
 function buildMeter(){
   const track = $('hsTrack'), labels = $('hsLabels');
   if (track.children.length) return;
-  let t = '<svg class="lv-cup" viewBox="0 0 24 24" fill="currentColor"><path d="M6 3h12v2h3v3c0 2.4-1.9 4.3-4.3 4.5A6 6 0 0 1 13 16v2.5h3.5V21h-9v-2.5H11V16a6 6 0 0 1-3.7-3.5C4.9 12.3 3 10.4 3 8V5h3V3zm-1 4v1c0 1.2.8 2.3 2 2.7V7H5zm14 0h-2v3.7c1.2-.4 2-1.5 2-2.7V7z"/></svg>';
+  let t = '<i class="hs-fillbar" id="hsFillBar"></i><svg class="lv-cup" viewBox="0 0 24 24" fill="currentColor"><path d="M6 3h12v2h3v3c0 2.4-1.9 4.3-4.3 4.5A6 6 0 0 1 13 16v2.5h3.5V21h-9v-2.5H11V16a6 6 0 0 1-3.7-3.5C4.9 12.3 3 10.4 3 8V5h3V3zm-1 4v1c0 1.2.8 2.3 2 2.7V7H5zm14 0h-2v3.7c1.2-.4 2-1.5 2-2.7V7z"/></svg>';
   let l = '';
   HS_POS.forEach((pos, i) => {
     if (i > 0) t += `<i class="lv-dot" style="top:${pos}%"></i>`;
@@ -1459,7 +1459,10 @@ function hsAnimateScore(from, to, dur){
       const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3);
       const sc = from + (to - from) * e;
       pct.textContent = `${Math.round(sc)}%`;
-      bub.style.top = `${hsPosForScore(sc)}%`;
+      const pos = hsPosForScore(sc);
+      bub.style.top = `${pos}%`;
+      const fb = $('hsFillBar');
+      if (fb) fb.style.height = `${Math.max(0, 97.5 - pos)}%`;
       if (k < 1) requestAnimationFrame(step);
       else resolve();
     };
@@ -1560,11 +1563,14 @@ async function hintSequence(level, outcome = 'weak', adv = false){
   buildMeter();
   $('hsPct').textContent = '0%';
   $('hsBub').style.top = '95.5%';
+  const fb0 = $('hsFillBar');
+  if (fb0) fb0.style.height = '0%';
+  document.querySelectorAll('#hsLabels span').forEach(n => n.classList.remove('now', 'tgt'));
   /* localize the static hint-screen strings */
   $('hsSay').textContent = adv
     ? CL('You used the hint, so I scored your reading on pronunciation first. Here is where you stand.')
     : (outcome === 'strong' ? T('hs_say_strong') : T('hs_say1'));
-  $('hsHead').innerHTML = T('hs_title');
+  $('hsHead').innerHTML = T('hs_title').replace(/<br\s*\/?>/g, ' ');
   $('hsNext').textContent = T('continue');
   document.querySelector('#hsErrorsView .hs-fq').innerHTML = T('fix_title');
   document.querySelector('#hsErrorsView .hs-sub').textContent = T('fix_sub');
@@ -1582,12 +1588,14 @@ async function hintSequence(level, outcome = 'weak', adv = false){
   $('hsSay').textContent = adv
     ? `You placed yourself at ${cfg.name}. Under pressure you came in just below it. That gap is the whole game.`
     : T('hs_say2', cfg.name, cfg.cefr);
+  const nl = document.querySelector(`#hsLabels span[data-lv="${cfg.name}"]`);
+  if (nl) nl.classList.add('now');
   await wait(1900);
 
   /* beat 2 — where we take you (gold) */
   $('hsMeterView').classList.add('gold');
   $('hsSay').textContent = T('hs_say3', cfg.tgt);
-  $('hsHead').innerHTML = T('hs_take', cfg.tgt);
+  $('hsHead').innerHTML = T('hs_take', cfg.tgt).replace(/<br\s*\/?>/g, ' ');
   const tl = document.querySelector(`#hsLabels span[data-lv="${cfg.tgt}"]`);
   if (tl) tl.classList.add('tgt');
   await hsAnimateScore(cfg.score, cfg.tgtScore, FF ? 60 : 1500);
@@ -1606,6 +1614,8 @@ async function hintSequence(level, outcome = 'weak', adv = false){
   reach('fix');
   $('hsMeterView').hidden = true;
   $('hsPassage').innerHTML = hsPassageHTML();
+  $('hsWordChips').innerHTML = PRON_WORDS.map(w =>
+    `<span class="hs-chip"><b>${w.w}</b><i>${w.ph}</i></span>`).join('');
   $('hsErrorsView').hidden = false;
   if (!FF) await new Promise(r => $('hsFix').addEventListener('click', r, { once: true }));
 
