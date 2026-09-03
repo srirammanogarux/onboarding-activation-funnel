@@ -17,26 +17,31 @@
 
 'use strict';
 
-/* ---------- 1 · languages (global, Indonesia first) ---------- */
+/* ---------- 1 · languages ----------
+   This build ships everywhere EXCEPT India, Indonesia, LatAm and the
+   USA (each has its own funnel) — so the list leads with Europe and
+   covers the rest-of-world markets, not Bahasa/Hindi/LatAm Spanish. */
 const LANGUAGES = [
-  { value: 'id', label: 'Bahasa Indonesia', flag: 'id', cc: '+62' },
-  { value: 'es', label: 'Español',          flag: 'es', cc: '+52' },
-  { value: 'pt', label: 'Português',        flag: 'pt', cc: '+55' },
-  { value: 'hi', label: 'हिन्दी',            flag: 'in', cc: '+91' },
-  { value: 'vi', label: 'Tiếng Việt',       flag: 'vn', cc: '+84' },
-  { value: 'ar', label: 'العربية',           flag: 'sa', cc: '+966' },
-  { value: 'fr', label: 'Français',         flag: 'fr', cc: '+33' },
+  { value: 'fr', label: 'Français',    flag: 'fr', cc: '+33'  },
+  { value: 'de', label: 'Deutsch',     flag: 'de', cc: '+49'  },
+  { value: 'es', label: 'Español',     flag: 'es', cc: '+34'  },
+  { value: 'it', label: 'Italiano',    flag: 'it', cc: '+39'  },
+  { value: 'pt', label: 'Português',   flag: 'pt', cc: '+351' },
+  { value: 'tr', label: 'Türkçe',      flag: 'tr', cc: '+90'  },
+  { value: 'vi', label: 'Tiếng Việt',  flag: 'vn', cc: '+84'  },
+  { value: 'ar', label: 'العربية',      flag: 'sa', cc: '+966' },
 ];
 
 /* the "change app language" description, in-language */
 const APPLANG_DESC = {
-  id: 'Kamu akan belajar dalam bahasamu sendiri.',
+  fr: 'Vous apprendrez dans votre langue.',
+  de: 'Du lernst in deiner eigenen Sprache.',
   es: 'Aprenderás en tu propio idioma.',
-  pt: 'Você vai aprender no seu próprio idioma.',
-  hi: 'Aap apni bhasha mein seekhenge.',
+  it: 'Imparerai nella tua lingua.',
+  pt: 'Vai aprender na sua própria língua.',
+  tr: 'Kendi dilinde öğreneceksin.',
   vi: 'Bạn sẽ học bằng ngôn ngữ của mình.',
   ar: 'ستتعلم بلغتك الأم.',
-  fr: 'Vous apprendrez dans votre langue.',
 };
 
 /* ---------- juice: emoji per goal ----------
@@ -61,17 +66,17 @@ const GOALS = [
 
 /* ---------- 3 · exams — only IELTS branches further ---------- */
 const EXAMS = [
-  { value: 'ielts', label: 'IELTS',  branches: true },
-  { value: 'toefl', label: 'TOEFL' },
-  { value: 'toeic', label: 'TOEIC' },
-  { value: 'pte',   label: 'PTE' },
-  { value: 'other', label: "Others, I'll type it", freeText: true },
+  { value: 'ielts', label: 'IELTS',  icon: '📘', branches: true },
+  { value: 'toefl', label: 'TOEFL',  icon: '🎓' },
+  { value: 'toeic', label: 'TOEIC',  icon: '💼' },
+  { value: 'pte',   label: 'PTE',    icon: '💻' },
+  { value: 'other', label: "Others, I'll type it", icon: '✍️', freeText: true },
 ];
 
 const IELTS_TYPES = [
-  { value: 'academic', label: 'Academic',         desc: 'For university admission abroad.' },
-  { value: 'general',  label: 'General Training', desc: 'For work, migration or PR.' },
-  { value: 'unsure',   label: "I'm not sure yet", desc: "We'll assume Academic for now." },
+  { value: 'academic', label: 'Academic',         icon: '🎓', desc: 'For university admission abroad.' },
+  { value: 'general',  label: 'General Training', icon: '🌏', desc: 'For work, migration or PR.' },
+  { value: 'unsure',   label: "I'm not sure yet", icon: '🤔', desc: "We'll assume Academic for now." },
 ];
 
 /* real month names, computed from today */
@@ -83,21 +88,21 @@ function examDateOptions(){
   const m2 = M[(now.getMonth() + 2) % 12];
   const m3 = M[(now.getMonth() + 3) % 12];
   return [
-    { value: '1m',     label: '1 month from now',  note: m1 },
-    { value: '2m',     label: '2 months from now', note: m2 },
-    { value: '2plus',  label: 'After 2 months',    note: `${m3} onwards` },
-    { value: 'none',   label: "I haven't booked it yet" },
+    { value: '1m',     label: '1 month from now',  icon: '⚡', note: m1 },
+    { value: '2m',     label: '2 months from now', icon: '📅', note: m2 },
+    { value: '2plus',  label: 'After 2 months',    icon: '🗓️', note: `${m3} onwards` },
+    { value: 'none',   label: "I haven't booked it yet", icon: '⏳' },
   ];
 }
 
 /* what a band unlocks — shown under the slider */
 function bandNote(band){
-  if (band < 5)   return 'Below most entry requirements';
-  if (band < 6)   return 'Entry level for some colleges';
+  if (band < 5)   return 'A clear starting point to build from';
+  if (band < 6)   return 'Opens the door to some colleges';
   if (band < 6.5) return 'Accepted by many universities';
-  if (band < 7.5) return 'Competitive, most top universities';
-  if (band < 8.5) return 'Strong, competitive programmes and PR';
-  return 'Near-native. A very high bar.';
+  if (band < 7.5) return 'Competitive at most top universities';
+  if (band < 8.5) return 'Strong — top programmes and PR';
+  return 'Near-native. Aim high, we like it.';
 }
 
 /* ---------- 4 · work modes + scenarios ----------
@@ -440,7 +445,7 @@ const PROOF = {
    Only career carries an external citation (Azam et al. is a real study on
    English proficiency and wages). The rest are our own learner data. */
 const OUTCOME = {
-  exam:     { claim: 'Speaking is where most candidates lose the band.', hi: 'lose the band',
+  exam:     { claim: 'Stimuler speakers reach their dream band faster.', hi: 'dream band faster',
               who: 'exam takers' },
   career:   { claim: 'Professionals with fluent English earn up to 34% more.', hi: '34% more',
               who: 'working professionals' },
@@ -452,33 +457,37 @@ const OUTCOME = {
               who: 'travellers' },
 };
 
-/* ---------- testimonials, keyed to GOAL (Beside model: photo + outcome quote) ---------- */
+/* ---------- testimonials, keyed to GOAL (Beside model: photo + outcome quote) ----------
+   Worldwide cast (this build excludes India / Indonesia / LatAm / USA):
+   names and cities mix Asia and Europe, men and women, and every quote
+   states a concrete outcome the goal's learner actually wants. Photos are
+   candid solo portraits — one person, face visible, role-plausible. */
 const TESTIMONIALS = {
   career: [
-    { img:'career-1', q:'I asked for a raise in English. It came back 20% higher than I planned to ask for.', n:'Rizky', r:'Account manager, Jakarta' },
-    { img:'career-2', q:'Foreign buyers stopped going through a middleman. I keep that margin now.',        n:'Adi',   r:'Export sales, Solo' },
-    { img:'career-3', q:'I used to email instead of speak. Now I run the Monday call.',                     n:'Nadia', r:'Ops lead, Tangerang' },
-    { img:'career-4', q:'Two interviews in English, two offers. I took the better one.',                    n:'Putri', r:'Analyst, Bandung' },
+    { img:'career-1', q:'I asked for a raise in English. It came back 20% higher than I planned to ask for.', n:'Jonas',  r:'Sales engineer, Munich' },
+    { img:'career-2', q:'Foreign buyers stopped going through a middleman. I keep that margin now.',          n:'Emre',   r:'Export sales, Izmir' },
+    { img:'career-3', q:'I used to email instead of speak. Now I run the Monday call.',                       n:'Kasia',  r:'Ops lead, Kraków' },
+    { img:'career-4', q:'Two interviews in English, two offers. I took the better one.',                      n:'Linh',   r:'Analyst, Hanoi' },
   ],
   exam: [
-    { img:'exam-1', q:'Band 6.0 to 7.5 in ten weeks. My visa cleared first try.',            n:'Ayu',   r:'Nurse, Surabaya' },
-    { img:'exam-2', q:'Speaking was my worst section. It ended up my highest.',              n:'Intan', r:'IELTS 7.5, Jakarta' },
-    { img:'exam-3', q:'I stopped freezing in part two. Two minutes, no panic.',              n:'Salsa', r:'Scholarship applicant, Depok' },
+    { img:'exam-1', q:'Band 6.0 to 7.5 in ten weeks. My visa cleared first try.',            n:'Grace',  r:'Nurse, Cebu' },
+    { img:'exam-2', q:'Speaking was my worst section. It ended up my highest.',              n:'Mehmet', r:'IELTS 7.5, Ankara' },
+    { img:'exam-3', q:'I stopped freezing in part two. Two minutes, no panic.',              n:'Elena',  r:'Scholarship applicant, Milan' },
   ],
   personal: [
-    { img:'personal-1', q:'I stopped switching back to Bahasa halfway through my own sentences.', n:'Bagus',  r:'Musician, Yogyakarta' },
-    { img:'personal-2', q:'My niece studies abroad. We talk properly now, not in fragments.',      n:'Ratna',  r:'Clinic admin, Semarang' },
-    { img:'personal-3', q:'I answer the tourists on my street instead of pointing.',               n:'Melati', r:'Cafe owner, Bali' },
+    { img:'personal-1', q:'I stopped translating in my head halfway through my own sentences.', n:'Julien', r:'Graphic designer, Lyon' },
+    { img:'personal-2', q:'My niece studies abroad. We talk properly now, not in fragments.',   n:'Keiko',  r:'Pharmacist, Osaka' },
+    { img:'personal-3', q:'I answer the tourists on my street instead of pointing.',            n:'Álvaro', r:'Cafe owner, Seville' },
   ],
   school: [
-    { img:'school-1', q:'I went from silent in seminars to running them.',                  n:'Rina',   r:'Final year, Bandung' },
-    { img:'school-2', q:'Top marks in the oral. I had practised the exact questions.',      n:'Zahra',  r:'Grade 12, Makassar' },
-    { img:'school-3', q:'Group projects used to be the others talking. Now I present.',     n:'Kirana', r:'Undergrad, Malang' },
+    { img:'school-1', q:'I went from silent in seminars to running them.',                  n:'Thu',    r:'Final year, Ho Chi Minh City' },
+    { img:'school-2', q:'Top marks in the oral. I had practised the exact questions.',      n:'Lukas',  r:'Grade 12, Hamburg' },
+    { img:'school-3', q:'Group projects used to be the others talking. Now I present.',     n:'Zeynep', r:'Undergrad, Istanbul' },
   ],
   travel: [
-    { img:'travel-1', q:'Missed my connection in Doha and sorted the whole thing myself.', n:'Sinta', r:'Logistics, Medan' },
-    { img:'travel-2', q:'I argued a wrong hotel charge down to zero. In English.',         n:'Gita',  r:'Solo traveller, Bali' },
-    { img:'travel-3', q:'Umrah with my mother. I handled every counter for us.',           n:'Fitri', r:'Teacher, Bekasi' },
+    { img:'travel-1', q:'Missed my connection in Doha and sorted the whole thing myself.', n:'Minho',   r:'Engineer, Busan' },
+    { img:'travel-2', q:'I argued a wrong hotel charge down to zero. In English.',         n:'Camille', r:'Solo traveller, Paris' },
+    { img:'travel-3', q:'Umrah with my mother. I handled every counter for us.',           n:'Amira',   r:'Teacher, Casablanca' },
   ],
 };
 

@@ -1,22 +1,42 @@
 Testimonial photography — Pexels License (free, commercial use, no attribution required).
-Placeholder casting for the Indonesia launch cohort; replace with licensed/shot talent before release.
+Placeholder casting; replace with licensed/shot talent before release.
 
-Recast 2026-09-02. The previous set was cast badly: group shots standing in for a
-single quoted person, subjects of the wrong ethnicity for Indonesian names, backs
-turned with no face, and occupations that contradicted the quote (a motorcycle
-courier captioned as an account manager, two shoppers as an ops lead). Every slot
-below is now one person, face visible, Southeast Asian, in a context that does not
-fight the quote. Where no honest photo existed for a role, the ROLE was changed
-rather than the photo forced — Adi is now export sales, Ratna a clinic admin.
+Recast 2026-09-03. The product now ships worldwide EXCEPT India/Indonesia/LatAm/USA,
+and the personas in content.js changed with it. The previous set was cast for the
+Indonesia launch (all Southeast Asian subjects), so every slot was re-sourced to
+match its new persona — an Asia+Europe mix: European, Turkish/Mediterranean,
+East-Asian, SE-Asian and North-African subjects. Same rules as before: one person,
+face visible, candid/environmental (mid-task, natural light, no posed-to-camera
+studio work), context that does not fight the quote. Only exam-1 (Grace, nurse,
+Cebu) survived the recast unchanged. All files 900x690 center-crops of w=1200
+downloads (https://images.pexels.com/photos/<ID>/pexels-photo-<ID>.jpeg).
 
-career-1  7644145   career-2  5668870   career-3  8154160   career-4  8154167
-exam-1    7578810   exam-2   36619715   exam-3   15170792
-personal-1 29204802 personal-2 8154164  personal-3 5206263
-school-1 30736650   school-2  5815067   school-3 18109423
-travel-1 31112238   travel-2 10740491   travel-3 37583497
+career-1   8348971   Jonas, sales engineer, Munich — man typing at a laptop in hard window light, badge lanyard
+career-2  36697940   Emre, export sales, Izmir — man with clipboard checking stock in a warehouse
+career-3   7222273   Kasia, ops lead, Krakow — woman on a phone call at a laptop in a meeting room
+career-4   5709603   Linh, analyst, Hanoi — woman working on a laptop in a garden cafe
+exam-1     7578810   Grace, nurse, Cebu — KEPT from previous set (SE-Asian nurse, stethoscope, candid profile)
+exam-2    13450802   Mehmet, IELTS 7.5, Ankara — young man in a t-shirt at a laptop over a stack of papers
+exam-3     5177787   Elena, scholarship applicant, Milan — woman writing in a notebook at a cafe table
+personal-1 5195557   Julien, graphic designer, Lyon — man drawing on a graphics tablet in a home studio
+personal-2 19471014  Keiko, pharmacist, Osaka — East-Asian pharmacist in a white coat writing notes at the counter
+personal-3 17987088  Alvaro, cafe owner, Seville — man frothing milk behind an espresso machine
+school-1   7972274   Thu, final year student, Ho Chi Minh City — young woman writing notes on campus
+school-2   6958548   Lukas, grade 12, Hamburg — teenage boy in a hoodie doing homework
+school-3  36485087   Zeynep, undergrad, Istanbul — young woman in hijab reading in a Turkish bookstore
+travel-1  30423784   Minho, engineer, Busan — young East-Asian man looking over his shoulder on a rail platform
+travel-2   4323829   Camille, solo traveller, Paris — woman in a cap and teddy coat on a Paris street
+travel-3   7582420   Amira, teacher, Casablanca — woman in hijab reading a notebook by a window
 
-Candid pass 2026-09-02. Three slots were still posed-to-camera stock
-(career-3 standing at a desk, career-4 smiling in a white blazer,
-travel-1 holding a clipboard). Replaced with candid environmental work:
-someone at their desk mid-task in window light, and a stock aisle for
-the logistics quote. The brief is documentary, not studio.
+Notes / compromises:
+- travel-2 and exam-1 have small blurred background figures at a distance; the
+  quoted subject is unmistakable in both. (travel-2's alternative wide shots had
+  no readable face at all.)
+- travel-3 is an everyday reading context rather than a travel scene; every
+  travel-context candidate with a clear single Arab/North-African subject was
+  posed to camera.
+- school-3 uses a top-biased crop (sips --cropOffset 100 0) so the face clears
+  the 900x690 window; all other slots are plain center crops.
+- 2026-09-03: added <slot>-face.jpg 300x300 avatar variants for every slot — square
+  face-centered crops (head/upper shoulders) taken from fresh w=1600 downloads of the
+  same Pexels IDs, for the 34px circular chat-bubble avatars.

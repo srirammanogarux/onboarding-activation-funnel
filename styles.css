@@ -1010,13 +1010,13 @@ body{
   animation:orb-pulse 2.4s ease-out infinite;
 }
 .convmic.expanded{
-  width:300px;
-  height:62px;
-  background:linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.015));
-  border:1.6px solid color-mix(in srgb, var(--accent) 55%, transparent);
-  box-shadow:0 12px 36px rgba(108,99,255,.22);
+  width:min(374px, calc(100vw - 56px));
+  height:76px;
+  background:#17152B;
+  border:1px solid rgba(108,99,255,.30);
+  box-shadow:0 14px 40px -14px rgba(108,99,255,.20);
 }
-.convmic.submitting{height:62px;}
+.convmic.submitting{height:76px;}
 .convmic .cm-mic svg{width:32px;height:32px;}
 .convmic .cm-mic,
 .convmic .cm-cancel,
@@ -1036,18 +1036,18 @@ body{
 .convmic.expanded .cm-mic,
 .convmic.submitting .cm-mic{opacity:0;}
 .convmic .cm-cancel{
-  left:7px;
+  left:12px;
   top:50%;
-  width:40px;height:40px;
+  width:52px;height:52px;
   border-radius:50%;
-  background:var(--glass-08);
+  background:rgba(255,255,255,.08);
   color:#fff;
   display:flex;align-items:center;justify-content:center;
   transform:translateY(-50%) translateX(-14px) scale(.6);
   opacity:0;
   pointer-events:none;
 }
-.convmic .cm-cancel svg{width:16px;height:16px;}
+.convmic .cm-cancel svg{width:18px;height:18px;}
 .convmic.expanded .cm-cancel{
   opacity:1;
   pointer-events:auto;
@@ -1055,9 +1055,9 @@ body{
   transition:opacity .32s ease .16s, transform .32s cubic-bezier(.4,1.5,.4,1) .16s;
 }
 .convmic .cm-confirm{
-  right:7px;
+  right:12px;
   top:50%;
-  width:46px;height:46px;
+  width:52px;height:52px;
   border-radius:50%;
   background:var(--accent);
   color:#fff;
@@ -1067,7 +1067,7 @@ body{
   pointer-events:none;
   box-shadow:0 4px 14px rgba(108,99,255,.4);
 }
-.convmic .cm-confirm svg{width:20px;height:20px;}
+.convmic .cm-confirm svg{width:22px;height:22px;}
 .convmic.expanded .cm-confirm{
   opacity:1;
   pointer-events:auto;
@@ -1075,29 +1075,32 @@ body{
   transition:opacity .32s ease .18s, transform .32s cubic-bezier(.4,1.5,.4,1) .18s;
 }
 .convmic .cm-wave{
-  left:58px;
-  right:56px;
+  left:76px;
+  right:76px;
   top:50%;
   transform:translateY(-50%);
-  height:36px;
+  height:40px;
   display:flex;
   align-items:center;
   justify-content:center;
-  gap:3px;
+  gap:4px;
   opacity:0;
 }
 .convmic.expanded .cm-wave{opacity:1;transition:opacity .28s ease .22s;}
 .convmic .cm-wave i{
-  width:3px;
+  width:4px;
   height:4px;
   border-radius:2px;
-  background:var(--mic-orb-2);
+  background:#6C63FF;
   transition:height 90ms ease-out;
 }
+.convmic .cm-wave i:nth-child(4n+1){background:#3D3A5C;}
+.convmic .cm-wave i:nth-child(4n+2){background:#8982FF;}
+.convmic .cm-wave i:nth-child(4n+3){background:#9D96FF;}
 .convmic.submitting{
-  width:62px;
+  width:76px;
   background:var(--accent);
-  border:1.6px solid transparent;
+  border:1px solid transparent;
 }
 .convmic.submitting .cm-cancel,
 .convmic.submitting .cm-wave{opacity:0;pointer-events:none;}
@@ -3419,7 +3422,7 @@ body{
 .gp-faces{display:flex;align-items:center;gap:10px;margin-top:12px;}
 .gp-av{display:flex;flex:none;}
 .gp-av img{
-  width:32px;height:32px;border-radius:50%;object-fit:cover;
+  width:34px;height:34px;border-radius:50%;object-fit:cover;
   border:2px solid var(--bubble-fill);
 }
 .gp-av img + img{margin-left:-11px;}
@@ -3895,7 +3898,8 @@ body{
   animation:bulb-glow 2.2s ease-in-out infinite;
 }
 .hint-bulb svg{width:26px;height:26px;}
-.hint-bulb.show{opacity:1;transform:scale(1);}
+.hint-bulb{pointer-events:none;visibility:hidden;}
+.hint-bulb.show{opacity:1;transform:scale(1);pointer-events:auto;visibility:visible;}
 @keyframes bulb-glow{
   0%,100%{box-shadow:0 0 0 rgba(217,162,74,0);}
   50%{box-shadow:0 0 22px rgba(217,162,74,.45);}
@@ -3928,8 +3932,8 @@ body{
   padding:0 44px;
 }
 .ana-dp{
-  width:86px;
-  height:86px;
+  width:104px;
+  height:104px;
   border-radius:999px;
   overflow:hidden;
   animation:ana-pulse 1.6s ease-in-out infinite;
@@ -4023,7 +4027,7 @@ body{
   font-size:13.5px;
 }
 .sc-strong .sc-ring{border:3px solid var(--succ-300);color:var(--succ-300);}
-.sc-mid    .sc-ring{border:3px solid var(--highlight);color:var(--highlight);}
+.sc-mid    .sc-ring{border:3px solid #E7B455;color:#E7B455;}
 .sc-weak   .sc-ring{border:3px solid var(--warn-300);color:var(--warn-300);}
 .sc-txt b{
   display:block;
@@ -4047,7 +4051,7 @@ body{
   padding-top:2px;
 }
 .sc-line b{color:var(--text-mid);}
-.sc-cta{margin-top:auto;visibility:visible;}
+.sc-cta{margin-top:auto;visibility:visible;align-self:stretch;}
 
 /* ============================================================
    FRAMEWORK — the 4-part model answer (hint path)
@@ -4365,7 +4369,7 @@ body{
    ACT — usa-onboarding's anatomy exactly: eyebrow, coach header,
    the question bubble, then the mic with the bulb beside it
    ============================================================ */
-.act-wrap{padding-top:2px;}
+.act-wrap{padding-top:2px;align-self:stretch;}
 .act-top{padding-top:16px;}
 .act-coach{
   display:flex;
@@ -4404,14 +4408,13 @@ body{
 }
 .act-space{flex:1;}
 .act-microw{position:relative;}
-/* mic rides a little left so the bulb gets its own column */
-.act-microw .convmic{transform:translateX(-30px);}
-.act-microw .mic-tip{transform:translateX(calc(-50% - 30px));animation:none;}
+/* mic dead centre; the bulb keeps to its own column on the right */
+.act-microw .mic-tip{animation:none;}
 /* the bulb sits beside the mic, its tooltip is indigo and always on */
 .act-microw .hint-bulb{
   position:absolute;
-  right:38px;
-  bottom:52px;
+  right:54px;
+  bottom:57px;
   width:56px;
   height:56px;
   background:var(--bubble-fill);
@@ -4419,19 +4422,20 @@ body{
   color:var(--text-mid);
   animation:none;
 }
+.act-microw .hint-bulb svg{width:24px;height:24px;}
 .act-microw .hint-bulb .hb-tip{
   background:var(--accent);
   border:none;
   color:#fff;
   font-weight:600;
-  bottom:calc(100% + 58px);
-  right:-8px;
+  bottom:calc(100% + 26px);
+  right:-50px;
 }
 .act-microw .hint-bulb .hb-tip::after{
   content:"";
   position:absolute;
   top:100%;
-  right:26px;
+  right:72px;
   border:6px solid transparent;
   border-top-color:var(--accent);
 }
@@ -4472,6 +4476,15 @@ body{
 }
 .dp-runs button:hover{border-color:#6C63FF;color:#17121F;background:#EEECFB;}
 .dp-runs button::before{content:"\25B6";font-size:9px;color:#6C63FF;}
+.dp-runs button.manual::before{content:"\270B";font-size:11px;}
+.dp-runs button.active{
+  background:#6C63FF;
+  border-color:#6C63FF;
+  color:#fff;
+  font-weight:600;
+}
+.dp-runs button.active::before{color:#fff;}
+.dp-runs button.active:hover{background:#5A52E8;color:#fff;}
 .auto-pill{
   position:fixed;
   top:12px;

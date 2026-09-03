@@ -57,7 +57,17 @@ const DBG = {
 };
 const AUTO = DBG.auto;
 let FF = DBG.step !== 'intro';   // AUTO with a step target fast-forwards to it, then plays live
-function reach(key){ window.__curStep = key; if (DBG.step === key) FF = false; }
+function reach(key){
+  window.__curStep = key;
+  if (!FF) return;
+  if (DBG.step === key){ FF = false; return; }
+  /* the target step may not exist on this branch (beginner readings vs
+     the question path) — once the flow passes where the target would
+     have sat, drop to live playback instead of scrubbing to the end */
+  const KEYS = DP_STEPS.map(s => s[0]);
+  const want = KEYS.indexOf(DBG.step), here = KEYS.indexOf(key);
+  if (want !== -1 && here > want) FF = false;
+}
 
 /* The exam sub-tree is gone from this list: a career learner never
    reaches it, and leaving dead chips in a review panel wastes the
@@ -70,9 +80,9 @@ const DP_STEPS = [
   ['testimonials', 'Testimonials'], ['level', 'Level'], ['award', 'Award'],
   ['planbuild', 'Plan'], ['stage', 'Reading 1'], ['read2', 'Reading 2'], ['echo', 'Reading 3'],
   ['act', 'Question'], ['analysing', 'Analysing'], ['scorecard', 'Score report'],
-  ['framework', '4-part answer'], ['readstate', 'Read it aloud'], ['survey', 'Plan loader'],
-  ['meter', 'Speech meter'], ['fix', 'Fix pronunciation'],
-  ['practice', 'Practice'], ['paywall', 'Graph → Paywall'], ['gift', 'Gift'], ['offer', 'Offer paywall'],
+  ['framework', '4-part answer'], ['readstate', 'Read it aloud'],
+  ['meter', 'Speech meter'], ['fix', 'Fix pronunciation'], ['practice', 'Practice'],
+  ['survey', 'Plan loader'], ['paywall', 'Graph → Paywall'], ['gift', 'Gift'], ['offer', 'Offer paywall'],
 ];
 /* the workplace scenario list, which is what this cohort actually picks from */
 const DP_FOCUS = (((C.SCENARIOS.career || {}).byMode || {}).office || {}).items || [];
@@ -145,19 +155,29 @@ function buildDevPanel(){
      honouring whatever level / outcome / path is selected above. */
   const runBox = $('dpRuns');
   if (runBox){
-    const runs = [{ label: 'Current setup', patch: {} },
+    const runs = [{ label: 'Manual', patch: {}, manual: true },
                   { label: 'Exam · IELTS', patch: { goal: 'exam', exam: 'ielts' } }];
     C.branches().forEach(br => {
       if (br.skipped) return;
       runs.push({ label: br.label, patch: { goal: br.goal, sit: br.sit || null } });
     });
+    const QPnow = new URLSearchParams(location.search);
+    const isRun = (r) => {
+      if (r.manual) return !AUTO;
+      if (!AUTO) return false;
+      if ((QPnow.get('goal') || null) !== (r.patch.goal || null)) return false;
+      if ((QPnow.get('sit')  || null) !== (r.patch.sit  || null)) return false;
+      return (QPnow.get('exam') || null) === (r.patch.exam || null);
+    };
     runs.forEach(r => {
       const b = document.createElement('button');
       b.textContent = r.label;
+      if (r.manual) b.classList.add('manual');
+      if (isRun(r)) b.classList.add('active');
       b.addEventListener('click', () => {
         const p = new URLSearchParams(location.search);
-        ['step', 'cohort'].forEach(k => p.delete(k));
-        p.set('auto', '1');
+        ['step', 'cohort', 'exam'].forEach(k => p.delete(k));
+        r.manual ? p.delete('auto') : p.set('auto', '1');
         Object.entries(r.patch).forEach(([k, v]) => (v == null ? p.delete(k) : p.set(k, v)));
         if (!p.get('lang')) p.set('lang', 'en');
         location.search = p.toString();
@@ -169,7 +189,10 @@ function buildDevPanel(){
   if (AUTO){
     /* transport: replay · back · pause/play · forward, docked by the phone */
     const STEP_KEYS = DP_STEPS.map(([k]) => k);
+    let navving = false;                  /* one reload at a time — double taps double-reloaded */
     const jump = (delta) => {
+      if (navving) return;
+      navving = true;
       const cur = window.__curStep || 'intro';
       const i = Math.max(0, STEP_KEYS.indexOf(cur));
       const next = STEP_KEYS[Math.min(STEP_KEYS.length - 1, Math.max(0, i + delta))];
@@ -209,6 +232,8 @@ function buildDevPanel(){
       }
     };
     requestAnimationFrame(dock);
+    setTimeout(dock, 600);                 /* fonts and the panel shift the mockup after first paint */
+    setTimeout(dock, 1600);
     window.addEventListener('resize', dock);
     ctrls.addEventListener('click', (ev) => {
       const b = ev.target.closest('button');
@@ -222,6 +247,8 @@ function buildDevPanel(){
         return;
       }
       if (a === 'replay'){
+        if (navving) return;
+        navving = true;
         const p = new URLSearchParams(location.search);
         p.set('auto', '1');
         p.delete('step');
@@ -261,7 +288,19 @@ function buildDevPanel(){
 buildDevPanel();
 
 /* ---------- tiny helpers ---------- */
-const wait = (ms) => new Promise(r => setTimeout(r, (FF || rushing) ? 0 : ms));
+/* pause-aware: while the transport's pause is down (__autoPaused), the
+   clock stops accruing, so timed sequences genuinely hold instead of
+   marching on underneath the frozen ghost */
+const wait = (ms) => new Promise(r => {
+  if (FF || rushing) return setTimeout(r, 0);
+  let remaining = ms, last = Date.now();
+  const iv = setInterval(() => {
+    const now = Date.now();
+    if (!window.__autoPaused) remaining -= now - last;
+    last = now;
+    if (remaining <= 0){ clearInterval(iv); r(); }
+  }, 50);
+});
 
 /* Skip fast-forwards Sarah's talking to the next question.
    It never answers a question — while an input/option set is waiting the
@@ -472,6 +511,27 @@ function options(items, { head = null, link = null, linkValue = null, wide = fal
 
 const flag = (name) => `<img src="assets/flag-${name}.svg" alt="">`;
 
+/* static takeover copy baked into index.html — retranslated the moment
+   the learner switches the app language (CL falls back to English) */
+function l10nStatics(){
+  $('micTip').textContent = T('tap_speak');
+  $('stgSkip').textContent = CL('I can’t speak right now');
+  document.querySelectorAll('#actScreen .act-eyebrow').forEach(n => n.textContent = CL('YOUR FIRST PRACTICE'));
+  const coach = document.querySelector('#actScreen .act-cn span');
+  if (coach) coach.textContent = CL('your speaking coach');
+  $('scEyebrow').textContent = CL('YOUR FIRST SCORE');
+  const note = document.querySelector('#scoreScreen .sc-note');
+  if (note) note.textContent = CL('Your starting point, before any practice.');
+  $('scGo').textContent = CL('Build my plan');
+  const lh = document.querySelector('#ldrScreen .ldr-head');
+  if (lh) lh.textContent = CL('Personalising your roadmap');
+  /* the chat footer pills are static HTML too */
+  const mute = document.querySelector('.pill-mute, #muteBtn');
+  if (mute) mute.childNodes.forEach(n => { if (n.nodeType === 3 && n.textContent.trim()) n.textContent = ` ${T('mute')}`; });
+  const skipPill = $('skipBtn');
+  if (skipPill) skipPill.childNodes.forEach(n => { if (n.nodeType === 3 && n.textContent.trim()) n.textContent = `${T('skip')} `; });
+}
+
 /*
   multiSelect(items, opts) → Promise<string[]>
   Minimum one, no upper cap, no ordering — so plain ticks, not
@@ -480,7 +540,7 @@ const flag = (name) => `<img src="assets/flag-${name}.svg" alt="">`;
 */
 const TICK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
 
-function multiSelect(items, { head = 'Select all that apply', cta = 'Continue', forced = null, icons = [] } = {}){
+function multiSelect(items, { head = CL('Select all that apply'), cta = CL('Continue'), forced = null, icons = [] } = {}){
   if (FF){
     const picked = forced && forced.length ? forced : [items[0]];
     userChip(picked.length > 1 ? `${picked[0]} +${picked.length - 1}` : picked[0]);
@@ -998,13 +1058,17 @@ function readingInteraction(card){
   return new Promise(resolve => {
     buildWave();
     micArea.classList.remove('gone');
+    $('micTip').textContent = 'Tap to speak';
+    $('micTip').classList.remove('hidden');
     convMic.className = 'convmic idle';
 
-    const onOrbTap = () => {
+    const onOrbTap = (e) => {
+      /* ✕/✓ live inside the pill — their clicks must not re-arm the orb */
+      if (e && e.target.closest('.cm-cancel,.cm-confirm')) return;
       if (!convMic.classList.contains('idle')) return;
       JUICE.setAmbient('listening');
       setProgress(84, '84% completed');
-      $('micTip').classList.add('hidden');
+      $('micTip').textContent = T('mic_tip_live');
       convMic.className = 'convmic expanded';
       startWave();
       const signal = { cancelled: false };
@@ -1016,7 +1080,7 @@ function readingInteraction(card){
         stopWave();
         confirm.removeEventListener('click', onConfirm);
         resetReadCard(card);
-        $('micTip').classList.remove('hidden');
+        $('micTip').textContent = 'Tap to speak';
         convMic.className = 'convmic idle';       // back to orb, listen again
       };
       const onConfirm = async () => {
@@ -1140,8 +1204,10 @@ async function goalProofCard(goal){
   const o = C.OUTCOME[goal], p = C.PROOF.byGoal[goal];
   if (!o || !p) return;
   const claim = o.claim.replace(o.hi, `<em>${o.hi}</em>`);
-  const faces = ['avatar-syahrier.png','avatar-t2.png','avatar-t3.png']
-    .map(f => `<img src="assets/${f}" alt="">`).join('');
+  /* the three faces are the goal's own testimonial people, so the same
+     personas carry through from this bubble to the loader cards */
+  const faces = (C.TESTIMONIALS[goal] || C.TESTIMONIALS.personal).slice(0, 3)
+    .map(t => `<img src="assets/people/${t.img}-face.jpg" alt="">`).join('');
   dimPreviousSarah();
   const row = el(`
     <div class="msg">
@@ -1233,9 +1299,9 @@ async function planBuildSequence(answers, goal, name, firstLine){
 
   $('pbSay').textContent      = T('pb_coach', name || '');
   $('pbKicker').textContent   = T('pb_kicker');
-  $('pbTitle').innerHTML      = P.title;
+  $('pbTitle').innerHTML      = CL(P.title);
   $('pbFirstLbl').textContent = T('pb_first');
-  $('pbFirstVal').textContent = firstLine || P.first;
+  $('pbFirstVal').textContent = firstLine || CL(P.first);
   $('pbCta').innerHTML        = T('pb_cta');
   $('pbNote').textContent     = '';
 
@@ -1355,7 +1421,8 @@ function stageTurn(){
     $('stgTip').classList.remove('hidden');
     $('stgTip').textContent = T('mic_tip_idle');
 
-    const onOrbTap = () => {
+    const onOrbTap = (e) => {
+      if (e && e.target.closest('.cm-cancel,.cm-confirm')) return;
       if (!mic.classList.contains('idle')) return;
       clearTimeout(stgHintT);
       JUICE.setAmbient('listening');
@@ -1461,7 +1528,7 @@ async function stageLadder(goal, level, name, famFirst, exam){
     const sen = SET[i];
     screen.classList.remove('win', 'amber');
     $('stgLine').classList.remove('win', 'live');
-    $('stgSay').innerHTML = C.BG_LINES.inst[i];
+    $('stgSay').innerHTML = CL(C.BG_LINES.inst[i]);
     bgBar(i * 33 + 4);
     stgRenderPhrase(fill(sen.t), []);
 
@@ -1483,12 +1550,12 @@ async function stageLadder(goal, level, name, famFirst, exam){
         screen.classList.add('amber');
         $('stgLine').classList.remove('live');
         stgFlagWords(sen.w);
-        $('stgSay').innerHTML = C.BG_LINES.slip;
+        $('stgSay').innerHTML = CL(C.BG_LINES.slip);
         const mic = $('stgMic'), row = $('stgMicRow');
         row.classList.remove('gone', 'stg-listen-glow');
         mic.className = 'convmic go';
         const tip = $('stgTip');
-        tip.textContent = C.BG_LINES.slipTip;
+        tip.textContent = CL(C.BG_LINES.slipTip);
         tip.classList.remove('hidden');
         JUICE.setAmbient('idle');
         await wait(FF ? 0 : 2400);
@@ -1499,8 +1566,8 @@ async function stageLadder(goal, level, name, famFirst, exam){
       screen.classList.add('win');
       $('stgLine').classList.add('win');
       bgBar(100);
-      $('stgSay').innerHTML = C.BG_LINES.slip3;
-      stgTick(C.BG_LINES.done[2]);
+      $('stgSay').innerHTML = CL(C.BG_LINES.slip3);
+      stgTick(CL(C.BG_LINES.done[2]));
       if (!FF) JUICE.confetti(60, 'burst');
       JUICE.setAmbient('idle');
       await wait(FF ? 0 : 2400);
@@ -1511,8 +1578,8 @@ async function stageLadder(goal, level, name, famFirst, exam){
     screen.classList.add('win');
     $('stgLine').classList.add('win');
     bgBar((i + 1) * 33 + (i === 2 ? 1 : 0));
-    $('stgSay').innerHTML = C.BG_LINES.cheer[i].replace('{name}', name || 'friend');
-    stgTick(C.BG_LINES.done[i]);
+    $('stgSay').innerHTML = CL(C.BG_LINES.cheer[i]).replace('{name}', name || 'friend');
+    stgTick(CL(C.BG_LINES.done[i]));
     JUICE.setAmbient('idle');
     if (!FF){
       JUICE.confetti([30, 60, 100][i], 'burst');
@@ -1568,7 +1635,7 @@ function buildMeter(){
   HS_POS.forEach((pos, i) => {
     if (i > 0) t += `<i class="lv-dot" style="top:${pos}%"></i>`;
     if (i < 5) t += `<i class="lv-tick" style="top:${pos + 5.5}%"></i><i class="lv-tick" style="top:${pos + 11}%"></i>`;
-    l += `<span style="top:${pos}%" data-lv="${HS_LEVELS[i]}">${HS_LEVELS[i]}<i>${HS_CEFR[HS_LEVELS[i]]}</i></span>`;
+    l += `<span style="top:${pos}%" data-lv="${HS_LEVELS[i]}">${CL(HS_LEVELS[i])}<i>${HS_CEFR[HS_LEVELS[i]]}</i></span>`;
   });
   track.innerHTML = t;
   labels.innerHTML = l;
@@ -1696,7 +1763,7 @@ async function hintSequence(level, outcome = 'weak', adv = false){
   $('hsBub').style.top = '95.5%';
   /* localize the static hint-screen strings */
   $('hsSay').textContent = adv
-    ? 'You used the hint, so I scored your reading on pronunciation first. Here is where you stand.'
+    ? CL('You used the hint, so I scored your reading on pronunciation first. Here is where you stand.')
     : (outcome === 'strong' ? T('hs_say_strong') : T('hs_say1'));
   $('hsHead').innerHTML = T('hs_title');
   $('hsNext').textContent = T('continue');
@@ -1779,11 +1846,13 @@ function actTurn(){
     const mic = $('actMic');
     mic.className = 'convmic idle';
     let autoT = null;
-    const onTap = () => {
+    const onTap = (e) => {
+      if (e && e.target.closest('.cm-cancel,.cm-confirm')) return;
       if (!mic.classList.contains('idle')) return;
       JUICE.setAmbient('listening');
       $('actMicRow').classList.add('stg-listen-glow');
-      $('actTip').textContent = "I'll stop on my own when you finish";
+      $('actTip').textContent = T('mic_tip_live');
+      $('actTip').classList.remove('hidden');
       $('actBulb').classList.remove('show');
       mic.className = 'convmic expanded';
       const wave = $('actWave');
@@ -1804,7 +1873,7 @@ function actTurn(){
         $('actMicRow').classList.remove('stg-listen-glow');
         JUICE.setAmbient('idle');
         mic.className = 'convmic tick';
-        $('actTip').textContent = 'Heard you';
+        $('actTip').textContent = CL('Heard you');
         setTimeout(() => resolve('spoke'), 900);
       };
       autoT = setTimeout(finish, FF ? 100 : 5200);   /* auto-stop: the sim "hears" them finish */
@@ -1813,7 +1882,15 @@ function actTurn(){
         clearInterval(wt); clearTimeout(autoT);
         bars.forEach(b => b.style.height = '4px');
         $('actMicRow').classList.remove('stg-listen-glow');
-        $('actTip').textContent = 'Answer in your own words';
+        /* back to rest: if the bulb had already earned its place, it returns
+           and the mic tip stays away — the two never share the floor */
+        if ($('actBulb').dataset.armed){
+          $('actBulb').classList.add('show');
+          $('actTip').classList.add('hidden');
+        } else {
+          $('actTip').textContent = CL('Answer in your own words');
+          $('actTip').classList.remove('hidden');
+        }
         mic.className = 'convmic idle';
         JUICE.setAmbient('idle');
       }, { once: true });
@@ -1834,15 +1911,24 @@ async function actSequence(key, level, ask){
   const sc = C.PRACTICE[key] || C.PRACTICE['career|other'];
   reach('act');
   $('actQ').textContent = `\u201C${sc.q}\u201D`;
-  $('actTip').textContent = 'Answer in your own words';
+  $('actTip').textContent = CL('Answer in your own words');
+  $('actTip').classList.remove('hidden');
   $('actBulb').hidden = false;
   $('actBulb').classList.remove('show');
-  $('actBulbTip').textContent = level === 'advanced' ? 'See a model answer' : "Can't find words? Try this";
-  $('actBulb').classList.remove('show');
+  $('actBulb').dataset.armed = '';
+  $('actBulbTip').textContent = level === 'advanced' ? CL('See a model answer') : CL("Can't find words? Try this");
   showScreen('actScreen');
   setTimeout(() => $('chatScreen').classList.add('is-hidden'), FF ? 0 : 500);
-  /* the bulb only appears once they have sat with the question */
-  const bulbT = setTimeout(() => $('actBulb').classList.add('show'), FF ? 100 : 5000);
+  /* the bulb only appears once they have sat with the question —
+     and when it does, the mic tip steps aside for it */
+  const bulbT = setTimeout(() => {
+    $('actBulb').dataset.armed = '1';
+    /* never surface the bulb over a live mic — it waits for the cancel */
+    if ($('actMic').classList.contains('idle')){
+      $('actBulb').classList.add('show');
+      $('actTip').classList.add('hidden');
+    }
+  }, FF ? 100 : 5000);
   if (DBG.path === 'hint'){ clearTimeout(bulbT); await wait(FF ? 0 : 1200); hideScreen('actScreen'); await wait(550); return 'hint'; }
   if (FF){ clearTimeout(bulbT); hideScreen('actScreen'); return DBG.path === 'hint' ? 'hint' : 'impromptu'; }
   const turn = await actTurn();
@@ -1874,7 +1960,7 @@ async function analysingSequence(){
   showScreen('anaScreen');
   $('anaBar').style.width = '4%';
   for (let i = 0; i < ANALYSING.length; i++){
-    $('anaLine').textContent = ANALYSING[i][0];
+    $('anaLine').textContent = CL(ANALYSING[i][0]);
     $('anaBar').style.width = `${8 + (i + 1) / ANALYSING.length * 88}%`;
     await wait(FF ? 40 : ANALYSING[i][1]);
   }
@@ -1894,12 +1980,12 @@ async function scoreSequence(goal, famLabel){
     const band = scoreBand(out[k]);
     return `<div class="sc-card sc-${band}">
       <span class="sc-ring">${out[k]}</span>
-      <span class="sc-txt"><b>${k.charAt(0).toUpperCase() + k.slice(1)}</b><span>${SCORE_MSG[k][band]}</span></span>
+      <span class="sc-txt"><b>${CL(k.charAt(0).toUpperCase() + k.slice(1))}</b><span>${CL(SCORE_MSG[k][band])}</span></span>
     </div>`;
   }).join('');
   $('scLine').innerHTML = famLabel
-    ? `That was a real rep of <b>${famLabel}</b>. Imagine week three.`
-    : 'That was a real rep. Imagine week three.';
+    ? CL('That was a real rep of {fam}. Imagine week three.').replace('{fam}', `<b>${CL(famLabel)}</b>`)
+    : CL('That was a real rep. Imagine week three.');
   showScreen('scoreScreen');
   /* the gauge sweeps to the overall — 240° arc is ~419px long */
   await wait(FF ? 40 : 700);
@@ -1925,13 +2011,13 @@ async function frameworkSequence(key, level, name){
   const sc = C.PRACTICE[key] || C.PRACTICE['career|other'];
   reach('framework');
   $('fwScreen').classList.remove('done');
-  $('fwEye').textContent = 'HOW TO ANSWER';
-  $('fwTitle').textContent = 'A simple 4-part answer.';
+  $('fwEye').textContent = CL('HOW TO ANSWER');
+  $('fwTitle').textContent = CL('A simple 4-part answer.');
   $('fwCard').classList.remove('readmode');
   $('fwCard').innerHTML = sc.steps.map((st, i) =>
-    `<div class="fw-seg${i === 0 ? ' cur' : ' dim'}"><span class="st">${st}</span><p>${sc.parts[i]}</p></div>`).join('');
+    `<div class="fw-seg${i === 0 ? ' cur' : ' dim'}"><span class="st">${CL(st)}</span><p>${sc.parts[i]}</p></div>`).join('');
   $('fwFill').style.width = '6%';
-  $('fwNext').textContent = 'Next';
+  $('fwNext').textContent = CL('Next');
   $('fwNext').parentElement.style.display = '';
   $('fwMicRow').classList.add('gone');
   showScreen('fwScreen');
@@ -1941,8 +2027,8 @@ async function frameworkSequence(key, level, name){
       el.classList.toggle('cur', k === i);
       el.classList.toggle('dim', k > i);
     });
-    $('fwFill').style.width = `${Math.max(6, i / 8 * 100)}%`;
-    $('fwNext').textContent = i === 3 ? 'Read it aloud' : 'Next';
+    $('fwFill').style.width = `${[6, 16, 26, 37][i]}%`;
+    $('fwNext').textContent = i === 3 ? CL('Read it aloud') : CL('Next');
     if (FF) continue;
     await new Promise(r => $('fwNext').addEventListener('click', r, { once: true }));
   }
@@ -1951,7 +2037,7 @@ async function frameworkSequence(key, level, name){
      eyebrow flips, the question becomes the title, the four parts
      collapse into one paragraph, and the mic appears */
   reach('readstate');
-  $('fwEye').textContent = 'TRY READING THIS';
+  $('fwEye').textContent = CL('TRY READING THIS');
   $('fwTitle').textContent = `\u201C${sc.q}\u201D`;
   $('fwFill').style.width = '50%';
   $('fwNext').parentElement.style.display = 'none';
@@ -1960,7 +2046,7 @@ async function frameworkSequence(key, level, name){
     .map(w => `<span class="w">${w}</span>`).join(' ')}</p>`;
   $('fwMicRow').classList.remove('gone');
   $('fwMic').className = 'convmic idle';
-  $('fwTip').textContent = 'Tap the mic and read';
+  $('fwTip').textContent = CL('Tap the mic and read');
   $('fwTip').classList.remove('hidden');
 
   if (!FF){
@@ -1968,10 +2054,11 @@ async function frameworkSequence(key, level, name){
       const mic = $('fwMic');
       const words = [...$('fwCard').querySelectorAll('.w')];
       let iv = null, wv = null;
-      const onTap = () => {
+      const onTap = (e) => {
+        if (e && e.target.closest('.cm-cancel,.cm-confirm')) return;
         if (!mic.classList.contains('idle')) return;
         mic.className = 'convmic expanded';
-        $('fwTip').textContent = "I'll stop on my own when you finish";
+        $('fwTip').textContent = T('mic_tip_live');
         const wave = $('fwWave');
         if (!wave.children.length){
           for (let i = 0; i < STG_BARS; i++) wave.appendChild(document.createElement('i'));
@@ -1998,7 +2085,7 @@ async function frameworkSequence(key, level, name){
           clearInterval(iv); clearInterval(wv);
           words.forEach(w => w.classList.remove('g'));
           $('fwFill').style.width = '50%';
-          $('fwTip').textContent = 'Tap the mic and read';
+          $('fwTip').textContent = CL('Tap the mic and read');
           mic.className = 'convmic idle';
         }, { once: true });
       };
@@ -2011,7 +2098,7 @@ async function frameworkSequence(key, level, name){
 
   $('fwScreen').classList.add('done');
   $('fwMic').className = 'convmic tick';
-  $('fwTip').textContent = 'That is the shape of it';
+  $('fwTip').textContent = CL('That is the shape of it');
   if (!FF) JUICE.confetti(40, 'burst');
   await wait(FF ? 0 : 1600);
   hideScreen('fwScreen');
@@ -2047,9 +2134,9 @@ function ldrAsk(idx, q){
   return new Promise(resolve => {
     const card = $('ldrCard');
     card.innerHTML = `
-      <span class="ldr-kicker">QUICK CHECK · ${idx + 1} OF 3</span>
-      <span class="ldr-q">${q.q}</span>
-      <div class="ldr-opts">${q.opts.map(o => `<button class="ldr-opt">${o}</button>`).join('')}</div>`;
+      <span class="ldr-kicker">${CL('QUICK CHECK')} · ${idx + 1} ${CL('OF')} 3</span>
+      <span class="ldr-q">${CL(q.q)}</span>
+      <div class="ldr-opts">${q.opts.map(o => `<button class="ldr-opt">${CL(o)}</button>`).join('')}</div>`;
     card.hidden = false;
     [...$('ldrDots').children].forEach((d, i) => d.classList.toggle('on', i === idx));
     $('ldrDots').hidden = false;
@@ -2079,7 +2166,7 @@ function ldrQuote(q, idx){
 
 async function planLoader(didPron, goal){
   reach('survey');
-  $('ldrSteps').innerHTML = LDR_STEPS.map(t => `
+  $('ldrSteps').innerHTML = LDR_STEPS.map(t0 => CL(t0)).map(t => `
     <div class="ldr-step">
       <span class="ldr-ic"><i class="ic-pend"></i><i class="ic-arc"></i><i class="ic-done">
         <svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5" fill="none" stroke="#0D0B14" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -2100,7 +2187,8 @@ async function planLoader(didPron, goal){
 
   if (didPron){
     /* Q1 names their own drill words */
-    LDR_QS[0].q = `How did practicing \u201C${PRON_WORDS[0].w}\u201D and \u201C${PRON_WORDS[1].w}\u201D feel?`;
+    LDR_QS[0].q = CL('How did practicing \u201C{a}\u201D and \u201C{b}\u201D feel?')
+      .replace('{a}', PRON_WORDS[0].w).replace('{b}', PRON_WORDS[1].w);
     await wait(FF ? 40 : 900);
     ldrStepState(['done', 'done', 'on', '']);
     ldrRing(45);
@@ -2311,17 +2399,17 @@ async function flow(){
   await sticker('scooter');
   await wait(400);
 
-  /* ---------- 1 · native language (global, Indonesia first) ---------- */
+  /* ---------- 1 · native language (worldwide build, Europe first) ---------- */
   reach('language');
   await sarah(T('lang_q'));
   setProgress(0, '0% completed');
   const lang = await options([
     ...C.LANGUAGES.map(l => ({
       value: l.value, label: l.label, icon: flag(l.flag),
-      defaultOnSkip: l.value === 'id', e: '🌐', anim: 'oa-wave',
+      defaultOnSkip: l.value === 'fr', e: '🌐', anim: 'oa-wave',
     })),
     { value: 'more', label: T('other_langs'), icon: '🌎', inert: true },
-  ], { chipIcons: true, forced: DBG.lang === 'en' ? 'id' : DBG.lang });
+  ], { chipIcons: true, forced: DBG.lang === 'en' ? 'fr' : DBG.lang });
   const L = C.LANGUAGES.find(l => l.value === lang) || C.LANGUAGES[0];
   setProgress(2, T('lbl_great'));
   await wait(300);
@@ -2336,6 +2424,7 @@ async function flow(){
       desc: T('keep_desc'), defaultOnSkip: true },
   ], { wide: true, link: T('other_lang_link'), forced: DBG.lang === 'en' ? 'english' : 'native' });
   if (applang === 'native' && STR[lang]) L10N = lang;
+  l10nStatics();
   setProgress(7, '7% completed');
   await wait(300);
 
@@ -2357,14 +2446,14 @@ async function flow(){
   await sarah(phone ? T('source_thanks') : T('source_noproblem'));
   earn(30, '30% completed');
   await options([
-    { value: 'play',      label: 'Just searched on Play Store', icon: ICONS.play },
+    { value: 'play',      label: CL('Just searched on Play Store'), icon: ICONS.play },
     { value: 'tiktok',    label: 'Tiktok',                icon: ICONS.tiktok },
-    { value: 'instagram', label: 'Instagram Reel',        icon: ICONS.instagram },
-    { value: 'google',    label: 'Google Ads',            icon: ICONS.google },
+    { value: 'instagram', label: CL('Instagram Reel'),        icon: ICONS.instagram },
+    { value: 'google',    label: CL('Google Ads'),            icon: ICONS.google },
     { value: 'facebook',  label: 'Facebook',              icon: ICONS.facebook },
     { value: 'x',         label: 'Twitter/X',             icon: ICONS.x },
-    { value: 'referral',  label: 'Have a Referral Code?', icon: ICONS.referral },
-    { value: 'friends',   label: 'Friends',               icon: ICONS.friends, defaultOnSkip: true },
+    { value: 'referral',  label: CL('Have a Referral Code?'), icon: ICONS.referral },
+    { value: 'friends',   label: CL('Friends'),               icon: ICONS.friends, defaultOnSkip: true },
     { value: 'youtube',   label: 'Youtube',               icon: ICONS.youtube },
   ], { wide: true, chipIcons: true });
   await sarah(T('glad'), { typingMs: 700 });
@@ -2375,20 +2464,20 @@ async function flow(){
   reach('age');
   await sarah(T('age_q'));
   await options([
-    { value: 'u18',   label: 'Under 18',     icon: '🎒', e: '🎒', anim: 'oa-bounce' },
+    { value: 'u18',   label: CL('Under 18'),     icon: '🎒', e: '🎒', anim: 'oa-bounce' },
     { value: '18_24', label: '18 – 24',      icon: '🎓', e: '🎓', anim: 'oa-tilt' },
     { value: '25_34', label: '25 – 34',      icon: '💼', e: '💼', anim: 'oa-bounce', defaultOnSkip: true },
     { value: '35_44', label: '35 – 44',      icon: '🏡', e: '🏡', anim: 'oa-wave' },
-    { value: '45p',   label: '45 and above', icon: '🧭', e: '🧭', anim: 'oa-spin' },
+    { value: '45p',   label: CL('45 and above'), icon: '🧭', e: '🧭', anim: 'oa-spin' },
   ], { link: T('rather_not_say'), linkValue: 'na' });
   setProgress(42, '42% completed');
 
   reach('gender');
   await sarah(T('gender_q'));
   await options([
-    { value: 'woman',  label: 'Woman',      icon: '🙋‍♀️', e: '🙋‍♀️', anim: 'oa-wave' },
-    { value: 'man',    label: 'Man',        icon: '🙋‍♂️', e: '🙋‍♂️', anim: 'oa-wave', defaultOnSkip: true },
-    { value: 'nonbin', label: 'Non-binary', icon: '🌈',   e: '🌈',   anim: 'oa-pulse' },
+    { value: 'woman',  label: CL('Woman'),      icon: '🙋‍♀️', e: '🙋‍♀️', anim: 'oa-wave' },
+    { value: 'man',    label: CL('Man'),        icon: '🙋‍♂️', e: '🙋‍♂️', anim: 'oa-wave', defaultOnSkip: true },
+    { value: 'nonbin', label: CL('Non-binary'), icon: '🌈',   e: '🌈',   anim: 'oa-pulse' },
   ], { link: T('rather_not_say'), linkValue: 'na' });
   setProgress(46, T('lbl_plan'));
   await wait(300);
@@ -2398,7 +2487,7 @@ async function flow(){
   await sarah(T('goal_q'));
   const goal = await options(
     C.GOALS.map(g => ({
-      value: g.value, label: g.label,
+      value: g.value, label: CL(g.label),
       icon: (C.GOAL_FX[g.value] || {}).e,
       defaultOnSkip: g.value === 'career',
       e: (C.GOAL_FX[g.value] || {}).e,
@@ -2408,7 +2497,7 @@ async function flow(){
     { forced: DBG.goal });
   setActivation(goal);
   JUICE.tint(goal);          /* the room takes their colour */
-  const goalLabel = (C.GOALS.find(g => g.value === goal) || {}).label;
+  const goalLabel = CL((C.GOALS.find(g => g.value === goal) || {}).label);
 
   /* ---------- 5.2 – 5.5 · exam sub-tree (IELTS branches; the rest are noted) ---------- */
   let exam = null, examType = null, examDate = null, band = null;
@@ -2417,9 +2506,10 @@ async function flow(){
     await sarah(T('exam_q'));
     earn(50, '50% completed');
     exam = await options(
-      C.EXAMS.map(e => ({ value: e.value, label: e.label,
+      C.EXAMS.map(e => ({ value: e.value, label: e.label, icon: e.icon,
+                          e: e.icon, anim: 'oa-bounce',
                           defaultOnSkip: e.value === 'ielts' })),
-      { forced: DBG.exam });
+      { chipIcons: true, forced: DBG.exam });
 
     if (exam === 'other'){
       await sarah(T('exam_other_q'));
@@ -2431,15 +2521,17 @@ async function flow(){
       await sarah(T('ielts_type_q'));
       earn(53, '53% completed');
       examType = await options(
-        C.IELTS_TYPES.map(t => ({ value: t.value, label: t.label, desc: t.desc,
+        C.IELTS_TYPES.map(t => ({ value: t.value, label: CL(t.label), desc: CL(t.desc),
+                                  icon: t.icon, e: t.icon, anim: 'oa-bounce',
                                   defaultOnSkip: t.value === 'academic' })),
-        { wide: true });
+        { wide: true, chipIcons: true });
 
       reach('examdate');
       await sarah(T('exam_date_q'));
       earn(57, '57% completed');
       examDate = await options(
-        C.examDateOptions().map(d => ({ value: d.value, label: d.label, note: d.note,
+        C.examDateOptions().map(d => ({ value: d.value, label: CL(d.label), note: CL(d.note),
+                                        icon: d.icon, e: d.icon, anim: 'oa-bounce',
                                         defaultOnSkip: d.value === '2m' })));
 
       reach('band');
@@ -2463,7 +2555,7 @@ async function flow(){
   await sarah(T('situation_q'));
   earn(69, '69% completed');
   const situation = await options(
-    C.SITUATIONS.map(s => ({ value: s, label: s,
+    C.SITUATIONS.map(s => ({ value: s, label: CL(s),
       icon: C.SIT_FX[s], e: C.SIT_FX[s], anim: 'oa-bounce',
       defaultOnSkip: s === DBG.sit })),
     { chipIcons: true, forced: DBG.sit });
@@ -2479,9 +2571,9 @@ async function flow(){
   let famFirst = goal === 'exam' ? 'exam' : 'smalltalk';
   if (sc){
     reach('scenarios');
-    await sarah(sc.prompt);
+    await sarah(CL(sc.prompt));
     earn(76, '76% completed');
-    const labels = sc.items.map(i => i.label);
+    const labels = sc.items.map(i => CL(i.label));
     /* ?focus= puts a specific scenario first, so a reviewer can see the
        plan card and the first-session line for any of them. */
     const fi = Number.isInteger(+DBG.focus) && DBG.focus !== '' && labels[+DBG.focus] ? +DBG.focus : 0;
@@ -2489,7 +2581,7 @@ async function flow(){
     picked = await multiSelect(labels, { icons: sc.items.map(i => i.e || '🎯'), forced });
     /* THE FIRST TICK IS THE BRANCHING KEY — its family phrases the
        practice ask and the plan copy (usa-onboarding's rule) */
-    famFirst = (sc.items.find(i => i.label === picked[0]) || {}).fam || famFirst;
+    famFirst = (sc.items.find(i => CL(i.label) === picked[0]) || {}).fam || famFirst;
     await sarah(T('scenarios_ack'), { typingMs: 900, quick: true });
     /* their own words, replayed — personalization proof for free */
     await recapBubble([
@@ -2514,11 +2606,11 @@ async function flow(){
   reach('level');
   await sarah(T('level_q'));
   const level = await options([
-    { value: 'beginner',     label: 'Beginner',     icon: '🌱',
+    { value: 'beginner',     label: CL('Beginner'),     icon: '🌱',
       desc: T('lvl_beg_d'), defaultOnSkip: true, e: '🌱', anim: 'oa-bounce' },
-    { value: 'intermediate', label: 'Intermediate', icon: '🌿',
+    { value: 'intermediate', label: CL('Intermediate'), icon: '🌿',
       desc: T('lvl_int_d'), e: '🌿', anim: 'oa-wave' },
-    { value: 'advanced',     label: 'Advanced',     icon: '🌳',
+    { value: 'advanced',     label: CL('Advanced'),     icon: '🌳',
       desc: T('lvl_adv_d'), e: '🌳', anim: 'oa-bounce' },
   ], { wide: true, chipIcons: true, forced: DBG.lvl });
   JUICE.deepen();            /* and deepens now that we know them */
@@ -2560,11 +2652,11 @@ async function flow(){
 
   /* ---------- 9.2 · plan build — the chat's exit ---------- */
   await planBuildSequence([
-    ['GOAL',     goalLabel],
-    ['FOCUS',    picked[0] || null],
-    ['LEVEL',    level.charAt(0).toUpperCase() + level.slice(1)],
-    ['LANGUAGE', L.label],
-  ], goal, name, picked[0] ? `${picked[0]}, out loud` : null);
+    [CL('GOAL'),     goalLabel],
+    [CL('FOCUS'),    picked[0] || null],
+    [CL('LEVEL'),    CL(level.charAt(0).toUpperCase() + level.slice(1))],
+    [CL('LANGUAGE'), L.label],
+  ], goal, name, picked[0] ? CL('{focus}, out loud').replace('{focus}', picked[0]) : null);
 
   /* ---------- 9.3 · the speaking task, forked by level ----------
      Beginners read the affirmation ladder; the run decides their
@@ -2701,10 +2793,12 @@ async function autoPilot(){
     if (grp){
       const btns = [...grp.querySelectorAll('.opt')];
       const link = grp.querySelector('.opt-link');
-      /* "Keep it in English" lives under the list as a link, not a row */
+      /* rows first — the under-list link can be a prototype dead-end
+         ("Select some other language"), and a dead link taps forever */
       const pick = btns.find(b => desired.has(b.dataset.val))
+        || btns.find(b => b.dataset.def)
         || (link && desired.has('en') ? link : null)
-        || btns.find(b => b.dataset.def) || btns[0];
+        || btns[0];
       grp.dataset.ad = '1';
       await sleep(650);                       /* read the options first */
       await press(pick);
