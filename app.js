@@ -56,7 +56,7 @@ const DBG = {
   focus:  QP.get('focus') || '',
 };
 const AUTO = DBG.auto;
-let FF = AUTO || DBG.step !== 'intro';   // fast-forward until the target step (AUTO: forever)
+let FF = AUTO ? false : DBG.step !== 'intro';   // AUTO plays live from the top
 function reach(key){ if (!AUTO && DBG.step === key) FF = false; }
 
 /* The exam sub-tree is gone from this list: a career learner never
@@ -170,6 +170,7 @@ function buildDevPanel(){
     const pill = el(`<div class="auto-pill">AUTO-RUNNING · tap to stop</div>`);
     document.body.appendChild(pill);
     pill.addEventListener('click', () => {
+      if (window.__autoStop) window.__autoStop();
       const p = new URLSearchParams(location.search);
       p.delete('auto');
       location.search = p.toString();
@@ -196,8 +197,7 @@ function buildDevPanel(){
 buildDevPanel();
 
 /* ---------- tiny helpers ---------- */
-/* AUTO paces the fast-forward so a reviewer can watch it play */
-const wait = (ms) => new Promise(r => setTimeout(r, AUTO ? Math.max(700, Math.min(ms, 2400)) : (FF || rushing) ? 0 : ms));
+const wait = (ms) => new Promise(r => setTimeout(r, (FF || rushing) ? 0 : ms));
 
 /* Skip fast-forwards Sarah's talking to the next question.
    It never answers a question — while an input/option set is waiting the
@@ -253,10 +253,10 @@ function el(html){
 /* voice state: typing dots → full text appears → gradient sheen
    sweeps the fill + bubble pulses for the duration of the "voice" */
 async function sarah(text, { typingMs = 650, holdMs = 350, perWord = 130, quick = false } = {}){
-  if (!FF || AUTO) JUICE.setAmbient('thinking');
+  if (!FF) JUICE.setAmbient('thinking');
   if (quick){ perWord = 85; typingMs = Math.min(typingMs, 450); holdMs = 220; }
   dimPreviousSarah();
-  if ((FF && !AUTO) || rushing){
+  if (FF || rushing){
     const fast = el(`
       <div class="msg dim">
         <div class="dp"><img src="${SARAH}" alt="Sarah"></div>
@@ -331,9 +331,7 @@ function options(items, { head = null, link = null, linkValue = null, wide = fal
   if (FF){
     const item = items.find(i => i.value === forced)
       || items.find(i => i.defaultOnSkip) || items[0];
-    const land = () => userChip(item.label, chipIcons ? (item.icon || '') : '');
-    if (AUTO) return wait(900).then(() => { land(); return item.value; });
-    land();
+    userChip(item.label, chipIcons ? (item.icon || '') : '');
     return Promise.resolve(item.value);
   }
   return new Promise(resolve => {
@@ -357,11 +355,11 @@ function options(items, { head = null, link = null, linkValue = null, wide = fal
          follow-up is a menu idiom and reads as a mis-set expectation. */
       const note = item.note ? `<span class="opt-note">${item.note}</span>` : '';
       const btn = el(item.desc
-        ? `<button class="opt stacked">
+        ? `<button class="opt stacked" data-val="${item.value}"${item.defaultOnSkip ? ' data-def="1"' : ''}>
              <span class="opt-top">${item.icon ? `<span class="ico">${item.icon}</span>` : ''}<span class="opt-label">${item.label}</span></span>
              <span class="opt-desc">${item.desc}</span>
            </button>`
-        : `<button class="opt">
+        : `<button class="opt" data-val="${item.value}"${item.defaultOnSkip ? ' data-def="1"' : ''}>
              ${item.icon ? `<span class="ico">${item.icon}</span>` : ''}<span class="opt-label">${item.label}</span>${note}
            </button>`);
       btn.addEventListener('click', () => {
@@ -421,9 +419,7 @@ const TICK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
 function multiSelect(items, { head = 'Select all that apply', cta = 'Continue', forced = null, icons = [] } = {}){
   if (FF){
     const picked = forced && forced.length ? forced : [items[0]];
-    const land = () => userChip(picked.length > 1 ? `${picked[0]} +${picked.length - 1}` : picked[0]);
-    if (AUTO) return wait(1100).then(() => { land(); return picked; });
-    land();
+    userChip(picked.length > 1 ? `${picked[0]} +${picked.length - 1}` : picked[0]);
     return Promise.resolve(picked);
   }
   return new Promise(resolve => {
@@ -1189,7 +1185,7 @@ async function planBuildSequence(answers, goal, name, firstLine){
   JUICE.setAmbient('reward');   /* the room resolves as the plan lands */
   showScreen('planBuildScreen');
   setTimeout(() => $('chatScreen').classList.add('is-hidden'), FF ? 0 : 500);
-  if (!FF || AUTO) JUICE.sweep();                      /* THE one ambient pass */
+  if (!FF) JUICE.sweep();                      /* THE one ambient pass */
 
   /* Five beats, in reading order, each one opening the card a little
      further: the label, the headline, all four answers together, the
@@ -1441,7 +1437,7 @@ async function stageLadder(goal, level, name, famFirst, exam){
       bgBar(100);
       $('stgSay').innerHTML = C.BG_LINES.slip3;
       stgTick(C.BG_LINES.done[2]);
-      if (!FF || AUTO) JUICE.confetti(60, 'burst');
+      if (!FF) JUICE.confetti(60, 'burst');
       JUICE.setAmbient('idle');
       await wait(FF ? 0 : 2400);
       break;
@@ -1454,7 +1450,7 @@ async function stageLadder(goal, level, name, famFirst, exam){
     $('stgSay').innerHTML = C.BG_LINES.cheer[i].replace('{name}', name || 'friend');
     stgTick(C.BG_LINES.done[i]);
     JUICE.setAmbient('idle');
-    if (!FF || AUTO){
+    if (!FF){
       JUICE.confetti([30, 60, 100][i], 'burst');
       if (i === 2) JUICE.bokeh(18);
     }
@@ -1854,7 +1850,7 @@ async function scoreSequence(goal, famLabel){
     };
     requestAnimationFrame(step);
   });
-  if (!FF || AUTO) JUICE.confetti(40, 'burst');
+  if (!FF) JUICE.confetti(40, 'burst');
   if (!FF) await new Promise(r => $('scGo').addEventListener('click', r, { once: true }));
   hideScreen('scoreScreen');
   await wait(550);
@@ -1952,7 +1948,7 @@ async function frameworkSequence(key, level, name){
   $('fwScreen').classList.add('done');
   $('fwMic').className = 'convmic tick';
   $('fwTip').textContent = 'That is the shape of it';
-  if (!FF || AUTO) JUICE.confetti(40, 'burst');
+  if (!FF) JUICE.confetti(40, 'burst');
   await wait(FF ? 0 : 1600);
   hideScreen('fwScreen');
   await wait(550);
@@ -2073,7 +2069,7 @@ async function planLoader(didPron, goal){
   ldrStepState(['done', 'done', 'done', 'done']);
   $('ldrArc').style.stroke = 'var(--succ-300)';
   ldrRing(100);
-  if (!FF || AUTO) JUICE.confetti(30, 'burst');
+  if (!FF) JUICE.confetti(30, 'burst');
   await wait(FF ? 60 : 1400);
   hideScreen('ldrScreen');
   await wait(550);
@@ -2193,7 +2189,7 @@ async function giftSequence(){
     await new Promise(r => $('giftScreen').addEventListener('click', r, { once: true }));
   }
   $('giftScreen').classList.add('open');
-  if (!FF || AUTO) JUICE.fireworks();
+  if (!FF) JUICE.fireworks();
   await wait(2600);
 }
 
@@ -2234,7 +2230,7 @@ async function offerSequence(){
   }));
 
   showScreen('offerScreen');
-  if (!FF || AUTO) JUICE.confetti(70, 'rain');
+  if (!FF) JUICE.confetti(70, 'rain');
   setTimeout(() => $('giftScreen').classList.add('is-hidden'), 600);
 }
 
@@ -2547,4 +2543,203 @@ async function flow(){
   await offerSequence();
 }
 
+/* ============================================================
+   AUTO-PILOT — a ghost user for branch review. The funnel runs in
+   its normal, fully interactive mode; this drives it: finds
+   whatever is waiting for a tap, floats the tap signifier over to
+   it, presses, and lets the real animations play.
+   ============================================================ */
+async function autoPilot(){
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  await sleep(1200);
+  const tap = el('<div class="auto-tap" hidden><i></i></div>');
+  document.body.appendChild(tap);
+  let stopped = false;
+  window.__autoStop = () => { stopped = true; tap.remove(); };
+
+  const vis = n => n && n.offsetParent !== null &&
+    getComputedStyle(n).visibility !== 'hidden' &&
+    !n.closest('.is-hidden') &&
+    n.getBoundingClientRect().height > 0;
+  const moveTo = async (n) => {
+    const r = n.getBoundingClientRect();
+    tap.hidden = false;
+    tap.style.left = `${r.left + r.width / 2}px`;
+    tap.style.top  = `${r.top + Math.min(r.height - 16, Math.max(18, r.height / 2))}px`;
+    await sleep(640);
+  };
+  const lastPress = new Map();
+  const press = async (n, mark = true) => {
+    if (mark) n.dataset.ad = '1';
+    await moveTo(n);
+    tap.classList.add('press');
+    await sleep(240);
+    n.click();
+    tap.classList.remove('press');
+    await sleep(320);
+  };
+  /* one-shot CTAs attach their listeners late (after their reveal
+     animation), so a single press can land before anyone is
+     listening. These are pressed with a cooldown and retried until
+     their screen actually moves on. */
+  const pressRetry = async (n, cdKey) => {
+    const now = Date.now();
+    if (now - (lastPress.get(cdKey) || 0) < 2800) return false;
+    lastPress.set(cdKey, now);
+    await press(n, false);
+    return true;
+  };
+  const typeInto = async (input, text) => {
+    input.dataset.ad = '1';
+    await moveTo(input);
+    tap.classList.add('press');
+    await sleep(200);
+    tap.classList.remove('press');
+    input.focus();
+    for (const ch of String(text)){
+      input.value += ch;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      await sleep(90);
+    }
+    await sleep(350);
+  };
+  const q = (sel) => [...document.querySelectorAll(sel)].find(n => vis(n) && !n.dataset.ad);
+  const desired = new Set([DBG.goal, DBG.lvl, DBG.lang, DBG.exam, DBG.sit,
+                           DBG.exam === 'ielts' ? 'academic' : null]
+                          .filter(Boolean).map(String));
+  const mics = [['stgMic', 'stgConfirm'], ['actMic', 'actConfirm'], ['fwMic', 'fwOk']];
+  const armed = {};
+
+  while (!stopped){
+    await sleep(430);
+    const offer = $('offerScreen');
+    if (offer && !offer.hidden && !offer.classList.contains('is-hidden')){ tap.hidden = true; break; }
+
+    /* single-choice option groups — aim at the branch's own values */
+    const grp = [...document.querySelectorAll('.options:not(.multi)')]
+      .find(g => g.offsetParent && !g.dataset.ad && g.querySelector('.opt'));
+    if (grp){
+      const btns = [...grp.querySelectorAll('.opt')];
+      const pick = btns.find(b => desired.has(b.dataset.val))
+        || btns.find(b => b.dataset.def) || btns[0];
+      grp.dataset.ad = '1';
+      await sleep(650);                       /* read the options first */
+      await press(pick);
+      continue;
+    }
+
+    /* multi-select: two ticks, then continue */
+    const mgrp = [...document.querySelectorAll('.options.multi')]
+      .find(g => g.offsetParent && !g.dataset.ad && g.querySelector('.ms-opt'));
+    if (mgrp){
+      mgrp.dataset.ad = '1';
+      const opts = [...mgrp.querySelectorAll('.ms-opt')];
+      await sleep(650);
+      await press(opts[0]);
+      if (opts[1]){ await sleep(160); await press(opts[1]); }
+      const cta = mgrp.querySelector('.btn-continue');
+      if (cta){ await sleep(320); await press(cta); }
+      continue;
+    }
+
+    /* text fields */
+    const nf = q('.name-field');
+    if (nf){
+      await typeInto(nf, DBG.name || 'Aarav');
+      const btn = nf.closest('.input-block')?.querySelector('.btn-continue');
+      if (btn) await press(btn);
+      continue;
+    }
+    const pf = q('.phone-field-wrap input');
+    if (pf){
+      await typeInto(pf, '8123456789');
+      const btn = pf.closest('.input-block')?.querySelector('.btn-continue');
+      if (btn) await press(btn);
+      continue;
+    }
+
+    /* the band slider ships with a ready continue */
+    const bs = q('.band-block .btn-continue');
+    if (bs){ await sleep(700); await press(bs); continue; }
+
+    /* iOS notification alert */
+    const allow = q('.ia-btn.bold');
+    if (allow){ await press(allow); continue; }
+
+    /* the hint bulb, when this run is a hint run */
+    const bulb = $('actBulb');
+    if (DBG.path === 'hint' && bulb && vis(bulb) && bulb.classList.contains('show') && !bulb.dataset.ad){
+      await press(bulb);
+      continue;
+    }
+
+    /* mics: tap to start, then stop once it has "heard enough" */
+    let didMic = false;
+    for (const [micId, okId] of mics){
+      const mic = $(micId);
+      if (!mic || !vis(mic)) continue;
+      if (micId === 'actMic' && DBG.path === 'hint') continue;  /* waiting on the bulb */
+      if (mic.classList.contains('idle')){
+        await press(mic, false);
+        armed[micId] = Date.now();
+        didMic = true;
+        break;
+      }
+      if (mic.classList.contains('expanded') && Date.now() - (armed[micId] || 0) > 3400){
+        const ok = $(okId);
+        if (ok && vis(ok)){ await press(ok, false); didMic = true; break; }
+      }
+    }
+    if (didMic) continue;
+
+    /* the word drill: tap to speak when the card is idle */
+    const pc = $('pcBtn');
+    if (pc && vis(pc) && !pc.classList.contains('listening') && !pc.classList.contains('done')){
+      await press(pc, false);
+      await sleep(2600);
+      continue;
+    }
+
+    /* the survey cards in the loader — take the middle answer */
+    const lo = document.querySelector('#ldrCard.in .ldr-opt:nth-child(2):not([data-ad])')
+            || document.querySelector('#ldrCard.in .ldr-opt:not([data-ad])');
+    if (lo && vis(lo)){ await sleep(500); await press(lo); continue; }
+
+    /* the gift box wants a tap */
+    const gift = $('giftScreen');
+    if (gift && !gift.hidden && !gift.classList.contains('is-hidden')
+        && !gift.classList.contains('open') && !gift.dataset.ad){
+      await press($('giftClosed') || gift, false);
+      gift.dataset.ad = '1';
+      continue;
+    }
+
+    /* the 4-part framework's Next is pressed repeatedly */
+    const fwNext = $('fwNext');
+    if (fwNext && vis(fwNext) && fwNext.parentElement.style.display !== 'none'){
+      await sleep(900);                       /* read the step */
+      await press(fwNext, false);
+      continue;
+    }
+
+    /* one-shot CTAs — retried on a cooldown because their listeners
+       attach after reveal animations */
+    let pressed = false;
+    for (const sel of ['.btn-report', '#pbCta', '#hsNext', '#hsFix', '#scGo', '#hsGo']){
+      const n = document.querySelector(sel);
+      if (n && vis(n) && await pressRetry(n, sel)){ pressed = true; break; }
+    }
+    if (pressed) continue;
+
+    /* the paywall close only listens once the graph has merged */
+    const pw = $('paywallScreen');
+    if (pw && !pw.hidden && !pw.classList.contains('is-hidden') && pw.classList.contains('merged')){
+      const x = pw.querySelector('.pw-close');
+      if (x && vis(x)) await pressRetry(x, 'pwclose');
+      continue;
+    }
+  }
+}
+
 flow();
+if (AUTO) autoPilot();

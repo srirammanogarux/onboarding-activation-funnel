@@ -4490,3 +4490,36 @@ body{
   font-size:12px;
   cursor:pointer;
 }
+
+/* the ghost user's finger */
+.auto-tap{
+  position:fixed;
+  z-index:600;
+  width:44px;
+  height:44px;
+  margin:-22px 0 0 -22px;
+  border-radius:50%;
+  pointer-events:none;
+  background:radial-gradient(circle, rgba(108,99,255,.5) 0%, rgba(108,99,255,.18) 55%, transparent 72%);
+  border:2px solid rgba(255,255,255,.8);
+  box-shadow:0 4px 18px rgba(0,0,0,.4);
+  transition:left .62s cubic-bezier(.3,.75,.35,1), top .62s cubic-bezier(.3,.75,.35,1);
+}
+.auto-tap.press{animation:tap-press .3s ease;}
+@keyframes tap-press{
+  0%{transform:scale(1);}
+  45%{transform:scale(.68);}
+  100%{transform:scale(1);}
+}
+.auto-tap i{
+  position:absolute;
+  inset:-2px;
+  border-radius:50%;
+  border:2px solid rgba(255,255,255,.7);
+  opacity:0;
+}
+.auto-tap.press i{animation:tap-ripple .45s ease-out;}
+@keyframes tap-ripple{
+  0%{opacity:.8;transform:scale(1);}
+  100%{opacity:0;transform:scale(2.1);}
+}
