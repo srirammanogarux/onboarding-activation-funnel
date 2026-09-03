@@ -2616,7 +2616,10 @@ async function flow(){
 async function autoPilot(){
   const sleep = ms => new Promise(r => setTimeout(r, ms));
   await sleep(1200);
-  const tap = el('<div class="auto-tap" hidden><i></i></div>');
+  const tap = el(`<div class="auto-tap" hidden><i></i>
+    <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 7c0-2.2 1.8-4 4-4s4 1.8 4 4v13.4l6.4 1.7c2.7.7 4.6 3.1 4.6 5.9 0 .7-.1 1.4-.3 2l-2.4 7.2c-.8 2.4-3 4-5.5 4h-8.6c-1.9 0-3.7-.9-4.8-2.5l-6.6-9.4c-1-1.4-.8-3.4.5-4.6 1.2-1.1 3.1-1.2 4.4-.1l4.3 3.4V7Z" fill="#FFFFFF" stroke="#14121A" stroke-width="2.6" stroke-linejoin="round"/>
+    </svg></div>`);
   document.body.appendChild(tap);
   let stopped = false;
   window.__autoStop = () => { stopped = true; tap.remove(); };
