@@ -43,10 +43,11 @@ const DBG = {
   step:   QP.get('step') || 'intro',
   lang:   QP.get('lang') || 'en',
   lvl:    QP.get('lvl')  || 'beginner',
+  auto:   QP.get('auto') === '1',       /* auto-play the whole funnel */
   path:   QP.get('path') || '',            /* hint|impromptu — forces the int/adv branch */
   goal:   QP.get('goal') || (COHORT ? COHORT.goal : 'career'),
   exam:   QP.get('exam') || (COHORT ? COHORT.exam : 'ielts'),
-  sit:    QP.get('sit')  || (COHORT && COHORT.sit ? COHORT.sit : 'Working a job'),
+  sit:    QP.get('sit')  || (COHORT && COHORT.sit ? COHORT.sit : 'Working professional'),
   cohort: COHORT ? COHORT.id : '',
   perf:   QP.get('perf') || '',
   /* which of the work scenarios they pick. It decides the plan card's
@@ -54,8 +55,9 @@ const DBG = {
      switchable when reviewing the cohort. */
   focus:  QP.get('focus') || '',
 };
-let FF = DBG.step !== 'intro';   // fast-forward until the target step
-function reach(key){ if (DBG.step === key) FF = false; }
+const AUTO = DBG.auto;
+let FF = AUTO || DBG.step !== 'intro';   // fast-forward until the target step (AUTO: forever)
+function reach(key){ if (!AUTO && DBG.step === key) FF = false; }
 
 /* The exam sub-tree is gone from this list: a career learner never
    reaches it, and leaving dead chips in a review panel wastes the
@@ -91,7 +93,7 @@ function buildDevPanel(){
     /* This cohort is the default, not a cage: set it when nothing is
        set, but never drag a reviewer back off another goal mid-review. */
     if (!p.get('goal')) p.set('goal', 'career');
-    if (!p.get('sit'))  p.set('sit', 'Working a job');
+    if (!p.get('sit'))  p.set('sit', 'Working professional');
     p.delete('cohort');
     location.search = p.toString();
   };
@@ -136,6 +138,42 @@ function buildDevPanel(){
   fill('dpLvls',  DP_LVLS,  'lvl');
   fill('dpLangs', DP_LANGS, 'lang');
 
+  /* branch auto-runs: one play per branch. It reloads at the very
+     start with auto=1 and plays itself through to the offer paywall,
+     honouring whatever level / outcome / path is selected above. */
+  const runBox = $('dpRuns');
+  if (runBox){
+    const runs = [{ label: 'Current setup', patch: {} },
+                  { label: 'Exam · IELTS', patch: { goal: 'exam', exam: 'ielts' } }];
+    C.branches().forEach(br => {
+      if (br.skipped) return;
+      runs.push({ label: br.label, patch: { goal: br.goal, sit: br.sit || null } });
+    });
+    runs.forEach(r => {
+      const b = document.createElement('button');
+      b.textContent = r.label;
+      b.addEventListener('click', () => {
+        const p = new URLSearchParams(location.search);
+        ['step', 'cohort'].forEach(k => p.delete(k));
+        p.set('auto', '1');
+        Object.entries(r.patch).forEach(([k, v]) => (v == null ? p.delete(k) : p.set(k, v)));
+        if (!p.get('lang')) p.set('lang', 'en');
+        location.search = p.toString();
+      });
+      runBox.appendChild(b);
+    });
+  }
+
+  if (AUTO){
+    const pill = el(`<div class="auto-pill">AUTO-RUNNING · tap to stop</div>`);
+    document.body.appendChild(pill);
+    pill.addEventListener('click', () => {
+      const p = new URLSearchParams(location.search);
+      p.delete('auto');
+      location.search = p.toString();
+    });
+  }
+
   /* The other goals still run, they are just not tuned. Kept reachable
      so nothing is lost, and marked so nobody reviews them by accident. */
   const oBox = $('dpOther');
@@ -147,7 +185,7 @@ function buildDevPanel(){
       b.addEventListener('click', () => {
         const p = new URLSearchParams(location.search);
         p.set('goal', goal); p.delete('cohort'); p.delete('focus');
-        if (goal !== 'career') p.set('sit', 'Studying');
+        if (goal !== 'career') p.set('sit', 'Student');
         location.search = p.toString();
       });
       oBox.appendChild(b);
@@ -156,7 +194,8 @@ function buildDevPanel(){
 buildDevPanel();
 
 /* ---------- tiny helpers ---------- */
-const wait = (ms) => new Promise(r => setTimeout(r, (FF || rushing) ? 0 : ms));
+/* AUTO paces the fast-forward so a reviewer can watch it play */
+const wait = (ms) => new Promise(r => setTimeout(r, AUTO ? Math.max(340, Math.min(ms, 900)) : (FF || rushing) ? 0 : ms));
 
 /* Skip fast-forwards Sarah's talking to the next question.
    It never answers a question — while an input/option set is waiting the
@@ -1728,12 +1767,12 @@ function actTurn(){
 async function actSequence(key, level, ask){
   const sc = C.PRACTICE[key] || C.PRACTICE['career|other'];
   reach('act');
-  $('actSay').textContent = `One real ${ask}. Answer out loud, in your own words. There is no wrong answer.`;
   $('actQ').textContent = `\u201C${sc.q}\u201D`;
   $('actTip').textContent = 'Answer in your own words';
   $('actBulb').hidden = false;
   $('actBulb').classList.remove('show');
   $('actBulbTip').textContent = level === 'advanced' ? 'See a model answer' : "Can't find words? Try this";
+  $('actBulb').classList.remove('show');
   showScreen('actScreen');
   setTimeout(() => $('chatScreen').classList.add('is-hidden'), FF ? 0 : 500);
   /* the bulb only appears once they have sat with the question */
@@ -1819,13 +1858,16 @@ async function scoreSequence(goal, famLabel){
 async function frameworkSequence(key, level, name){
   const sc = C.PRACTICE[key] || C.PRACTICE['career|other'];
   reach('framework');
-  $('fwSay').textContent = level === 'advanced'
-    ? 'Here is a model answer. Read it once, and it is yours.'
-    : "Can't find the words? Borrow mine.";
+  $('fwScreen').classList.remove('done');
+  $('fwEye').textContent = 'HOW TO ANSWER';
+  $('fwTitle').textContent = 'A simple 4-part answer.';
+  $('fwCard').classList.remove('readmode');
   $('fwCard').innerHTML = sc.steps.map((st, i) =>
     `<div class="fw-seg${i === 0 ? ' cur' : ' dim'}"><span class="st">${st}</span><p>${sc.parts[i]}</p></div>`).join('');
   $('fwFill').style.width = '6%';
   $('fwNext').textContent = 'Next';
+  $('fwNext').parentElement.style.display = '';
+  $('fwMicRow').classList.add('gone');
   showScreen('fwScreen');
   const segs = [...$('fwCard').children];
   for (let i = 0; i < 4; i++){
@@ -1838,29 +1880,75 @@ async function frameworkSequence(key, level, name){
     if (FF) continue;
     await new Promise(r => $('fwNext').addEventListener('click', r, { once: true }));
   }
-  hideScreen('fwScreen');
-  await wait(550);
 
-  /* the reading state reuses the teleprompter stage, single line mode */
+  /* the reading state — same screen, usa-onboarding's read mode:
+     eyebrow flips, the question becomes the title, the four parts
+     collapse into one paragraph, and the mic appears */
   reach('readstate');
-  showScreen('stageScreen');
-  $('stageScreen').classList.remove('win', 'amber');
-  $('bgBar').style.display = 'none';
-  $('stgSay').textContent = 'Try reading this out loud. I will listen.';
-  $('stgLine').classList.remove('win', 'live');
-  stgRenderPhrase(sc.parts.join(' '), []);
-  if (FF){
-    stgWords().forEach(w => w.classList.add('said'));
+  $('fwEye').textContent = 'TRY READING THIS';
+  $('fwTitle').textContent = `\u201C${sc.q}\u201D`;
+  $('fwFill').style.width = '50%';
+  $('fwNext').parentElement.style.display = 'none';
+  $('fwCard').classList.add('readmode');
+  $('fwCard').innerHTML = `<p class="fw-para">${sc.parts.join(' ').split(' ')
+    .map(w => `<span class="w">${w}</span>`).join(' ')}</p>`;
+  $('fwMicRow').classList.remove('gone');
+  $('fwMic').className = 'convmic idle';
+  $('fwTip').textContent = 'Tap the mic and read';
+  $('fwTip').classList.remove('hidden');
+
+  if (!FF){
+    await new Promise(resolve => {
+      const mic = $('fwMic');
+      const words = [...$('fwCard').querySelectorAll('.w')];
+      let iv = null, wv = null;
+      const onTap = () => {
+        if (!mic.classList.contains('idle')) return;
+        mic.className = 'convmic expanded';
+        $('fwTip').textContent = "I'll stop on my own when you finish";
+        const wave = $('fwWave');
+        if (!wave.children.length){
+          for (let i = 0; i < STG_BARS; i++) wave.appendChild(document.createElement('i'));
+        }
+        const bars = [...wave.children], mid = (STG_BARS - 1) / 2;
+        wv = setInterval(() => bars.forEach((b, i) => {
+          const env = Math.exp(-Math.pow((i - mid) / (STG_BARS * 0.4), 2));
+          b.style.height = `${4 + Math.random() * 28 * env}px`;
+        }), 90);
+        let n = 0;
+        const done = () => {
+          clearInterval(iv); clearInterval(wv);
+          words.forEach(w => w.classList.add('g'));
+          $('fwFill').style.width = '100%';
+          resolve();
+        };
+        iv = setInterval(() => {
+          if (n >= words.length) return done();
+          words[n++].classList.add('g');
+          $('fwFill').style.width = `${50 + n / words.length * 50}%`;
+        }, 240);
+        $('fwOk').addEventListener('click', done, { once: true });
+        $('fwX').addEventListener('click', () => {
+          clearInterval(iv); clearInterval(wv);
+          words.forEach(w => w.classList.remove('g'));
+          $('fwFill').style.width = '50%';
+          $('fwTip').textContent = 'Tap the mic and read';
+          mic.className = 'convmic idle';
+        }, { once: true });
+      };
+      mic.addEventListener('click', onTap);
+    });
   } else {
-    await stageTurn();
+    [...$('fwCard').querySelectorAll('.w')].forEach(w => w.classList.add('g'));
+    $('fwFill').style.width = '100%';
   }
-  $('stgLine').classList.add('win');
-  $('stageScreen').classList.add('win');
-  stgTick('That is the shape of it');
-  if (!FF){ JUICE.confetti(40, 'burst'); }
-  await wait(FF ? 0 : 1800);
-  hideScreen('stageScreen');
-  $('bgBar').style.display = '';
+
+  $('fwScreen').classList.add('done');
+  $('fwMic').className = 'convmic tick';
+  $('fwTip').textContent = 'That is the shape of it';
+  if (!FF) JUICE.confetti(40, 'burst');
+  await wait(FF ? 0 : 1600);
+  hideScreen('fwScreen');
   await wait(550);
 }
 

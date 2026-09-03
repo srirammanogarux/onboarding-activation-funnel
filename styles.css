@@ -4360,3 +4360,130 @@ body{
   font-size:13px;
   color:var(--text-faint);
 }
+
+/* ============================================================
+   ACT — usa-onboarding's anatomy exactly: eyebrow, coach header,
+   the question bubble, then the mic with the bulb beside it
+   ============================================================ */
+.act-wrap{padding-top:2px;}
+.act-top{padding-top:16px;}
+.act-coach{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-top:18px;
+}
+.act-coach .dp{width:46px;height:46px;border-radius:50%;overflow:hidden;flex-shrink:0;border:1px solid rgba(157,150,255,.4);}
+.act-coach .dp img{width:100%;height:100%;object-fit:cover;}
+.act-cn b{
+  display:block;
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:17px;
+  color:var(--text-hi);
+}
+.act-cn span{
+  font-family:var(--font-body);
+  font-size:13.5px;
+  color:var(--text-low);
+}
+.act-bub{
+  margin-top:14px;
+  background:var(--bubble-fill);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:22px;
+  padding:20px 20px;
+}
+.act-q{
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:21px;
+  line-height:30px;
+  letter-spacing:-.01em;
+  color:var(--text-hi);
+}
+.act-space{flex:1;}
+.act-microw{position:relative;}
+/* mic rides a little left so the bulb gets its own column */
+.act-microw .convmic{transform:translateX(-30px);}
+.act-microw .mic-tip{transform:translateX(calc(-50% - 30px));animation:none;}
+/* the bulb sits beside the mic, its tooltip is indigo and always on */
+.act-microw .hint-bulb{
+  position:absolute;
+  right:38px;
+  bottom:52px;
+  width:56px;
+  height:56px;
+  background:var(--bubble-fill);
+  border:1.5px solid rgba(255,255,255,.16);
+  color:var(--text-mid);
+  animation:none;
+}
+.act-microw .hint-bulb .hb-tip{
+  background:var(--accent);
+  border:none;
+  color:#fff;
+  font-weight:600;
+  bottom:calc(100% + 58px);
+  right:-8px;
+}
+.act-microw .hint-bulb .hb-tip::after{
+  content:"";
+  position:absolute;
+  top:100%;
+  right:26px;
+  border:6px solid transparent;
+  border-top-color:var(--accent);
+}
+
+/* framework read-mode */
+.fw-card.readmode{padding:24px 20px;background:#1A1727;border-color:rgba(157,150,255,.22);}
+.fw-para{
+  font-family:var(--font-body);
+  font-weight:500;
+  font-size:19px;
+  line-height:31px;
+  color:var(--text-mid);
+}
+.fw-para .w{color:var(--text-mid);transition:color .25s var(--ease-out);}
+.fw-para .w.g{color:var(--succ-300);}
+#fwScreen.done .fw-card.readmode{border-color:color-mix(in srgb, var(--succ-300) 45%, transparent);}
+.fw-microw{padding-bottom:40px;}
+.fw-microw.gone{display:none;}
+
+/* auto-run rows in the panel */
+.dp-runs{display:flex;flex-direction:column;gap:6px;}
+.dp-runs button{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  text-align:left;
+  padding:8px 10px;
+  border-radius:10px;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.1);
+  color:var(--text-mid);
+  font-family:var(--font-body);
+  font-size:12.5px;
+  cursor:pointer;
+}
+.dp-runs button:hover{background:rgba(108,99,255,.18);}
+.dp-runs button::before{content:"\25B6";font-size:9px;color:var(--succ-300);}
+.auto-pill{
+  position:fixed;
+  top:12px;
+  left:12px;
+  z-index:400;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:7px 12px;
+  border-radius:999px;
+  background:rgba(50,225,141,.14);
+  border:1px solid rgba(50,225,141,.5);
+  color:var(--succ-300);
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:12px;
+  cursor:pointer;
+}
