@@ -891,8 +891,8 @@ body{
   margin-top:2px;
   padding:15px 24px;
   border-radius:var(--r-pill);
-  background:var(--succ-400);
-  color:#092517;
+  background:#FFFFFF;
+  color:var(--ink, #14121A);
   font-family:var(--font-display);
   font-weight:600;
   font-size:17px;
@@ -4056,6 +4056,9 @@ body{
 /* ============================================================
    FRAMEWORK — the 4-part model answer (hint path)
    ============================================================ */
+/* the takeover centres its children, which shrinks this wrap to its
+   content — the card and CTA must span the screen like the design */
+#fwScreen .stage-wrap{align-self:stretch;}
 .fw-head{
   display:flex;
   flex-direction:column;
