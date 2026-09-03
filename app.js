@@ -56,8 +56,8 @@ const DBG = {
   focus:  QP.get('focus') || '',
 };
 const AUTO = DBG.auto;
-let FF = AUTO ? false : DBG.step !== 'intro';   // AUTO plays live from the top
-function reach(key){ if (!AUTO && DBG.step === key) FF = false; }
+let FF = DBG.step !== 'intro';   // AUTO with a step target fast-forwards to it, then plays live
+function reach(key){ window.__curStep = key; if (DBG.step === key) FF = false; }
 
 /* The exam sub-tree is gone from this list: a career learner never
    reaches it, and leaving dead chips in a review panel wastes the
@@ -167,6 +167,46 @@ function buildDevPanel(){
   }
 
   if (AUTO){
+    /* transport: replay · back · pause/play · forward, docked by the phone */
+    const STEP_KEYS = DP_STEPS.map(([k]) => k);
+    const jump = (delta) => {
+      const cur = window.__curStep || 'intro';
+      const i = Math.max(0, STEP_KEYS.indexOf(cur));
+      const next = STEP_KEYS[Math.min(STEP_KEYS.length - 1, Math.max(0, i + delta))];
+      const p = new URLSearchParams(location.search);
+      p.set('auto', '1');
+      next === 'intro' ? p.delete('step') : p.set('step', next);
+      location.search = p.toString();
+    };
+    const ctrls = el(`
+      <div class="auto-ctrls">
+        <button data-a="replay" title="Replay from the start">\u27F2</button>
+        <button data-a="back" title="Back one step">\u25C0</button>
+        <button data-a="pause" title="Pause">\u275A\u275A</button>
+        <button data-a="fwd" title="Forward one step">\u25B6</button>
+      </div>`);
+    document.body.appendChild(ctrls);
+    ctrls.addEventListener('click', (ev) => {
+      const b = ev.target.closest('button');
+      if (!b) return;
+      const a = b.dataset.a;
+      if (a === 'pause'){
+        window.__autoPaused = !window.__autoPaused;
+        b.innerHTML = window.__autoPaused ? '\u25B6' : '\u275A\u275A';
+        b.title = window.__autoPaused ? 'Resume' : 'Pause';
+        ctrls.classList.toggle('paused', window.__autoPaused);
+        return;
+      }
+      if (a === 'replay'){
+        const p = new URLSearchParams(location.search);
+        p.set('auto', '1');
+        p.delete('step');
+        location.search = p.toString();
+        return;
+      }
+      jump(a === 'back' ? -1 : 1);
+    });
+
     const pill = el(`<div class="auto-pill">AUTO-RUNNING · tap to stop</div>`);
     document.body.appendChild(pill);
     pill.addEventListener('click', () => {
@@ -2624,6 +2664,7 @@ async function autoPilot(){
 
   while (!stopped){
     await sleep(430);
+    if (window.__autoPaused || FF) continue;   /* paused, or still scrubbing in */
     const offer = $('offerScreen');
     if (offer && !offer.hidden && !offer.classList.contains('is-hidden')){ tap.hidden = true; break; }
 
@@ -2632,7 +2673,10 @@ async function autoPilot(){
       .find(g => g.offsetParent && !g.dataset.ad && g.querySelector('.opt'));
     if (grp){
       const btns = [...grp.querySelectorAll('.opt')];
+      const link = grp.querySelector('.opt-link');
+      /* "Keep it in English" lives under the list as a link, not a row */
       const pick = btns.find(b => desired.has(b.dataset.val))
+        || (link && desired.has('en') ? link : null)
         || btns.find(b => b.dataset.def) || btns[0];
       grp.dataset.ad = '1';
       await sleep(650);                       /* read the options first */
