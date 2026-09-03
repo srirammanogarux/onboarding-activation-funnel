@@ -2564,6 +2564,15 @@ async function autoPilot(){
   const moveTo = async (n) => {
     const r = n.getBoundingClientRect();
     tap.hidden = false;
+    /* appear just below the target, then glide the last stretch */
+    if (!tap.classList.contains('show')){
+      tap.style.transition = 'none';
+      tap.style.left = `${r.left + r.width / 2}px`;
+      tap.style.top  = `${r.top + Math.min(r.height - 16, Math.max(18, r.height / 2)) + 70}px`;
+      void tap.offsetWidth;
+      tap.style.transition = '';
+    }
+    tap.classList.add('show');
     tap.style.left = `${r.left + r.width / 2}px`;
     tap.style.top  = `${r.top + Math.min(r.height - 16, Math.max(18, r.height / 2))}px`;
     await sleep(640);
@@ -2576,7 +2585,9 @@ async function autoPilot(){
     await sleep(240);
     n.click();
     tap.classList.remove('press');
-    await sleep(320);
+    await sleep(260);
+    tap.classList.remove('show');    /* the finger lifts away */
+    await sleep(160);
   };
   /* one-shot CTAs attach their listeners late (after their reveal
      animation), so a single press can land before anyone is
@@ -2595,6 +2606,7 @@ async function autoPilot(){
     tap.classList.add('press');
     await sleep(200);
     tap.classList.remove('press');
+    tap.classList.remove('show');
     input.focus();
     for (const ch of String(text)){
       input.value += ch;
