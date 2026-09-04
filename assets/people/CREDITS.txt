@@ -18,8 +18,8 @@ source; fw = head-and-shoulders box width as a fraction of source width). Use
 tests/cast-measure.mjs to see the crop box drawn over the source before
 re-cutting.
 
-  <slot>-face.jpg   400x400  — the avatar. This is what the app loads.
-  <slot>.jpg        640x800  — portrait, kept for a larger layout; unreferenced.
+  <slot>-face.jpg   400x400  — the avatar in Sarah's proof bubble.
+  <slot>.jpg        720x730  — the card photo, cut at the card window's own aspect.
 
 Sources are https://images.pexels.com/photos/<ID>/pexels-photo-<ID>.jpeg at
 w=1400. Note that some Pexels assets are already tightly cropped at that width

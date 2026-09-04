@@ -614,18 +614,43 @@ function railAutoSlide(rail, { interval = 3200, firstDelay = null, onActive = nu
 /* ---------- testimonials ----------
    Posts read in the user's language; each one carries the icon of the
    store/network it came from. */
+/* Real store / network marks, not monochrome glyphs: the badge is
+   doing credibility work, so it has to look like the thing it is.
+   Drawn as tiles because that is how these logos are recognised. */
 const SRC_ICONS = {
-  x: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 3h3l-6.6 7.55L21.8 21h-6.1l-4.8-6.3L5.4 21h-3l7.1-8.1L2.5 3h6.25l4.35 5.75L17.6 3Zm-1.05 16.2h1.7L7.85 4.7H6.05l10.5 14.5Z"/></svg>',
-  play: '<svg viewBox="0 0 24 24"><path fill="#34A853" d="M3 20.42V3.58c0-.6.34-1.12.85-1.37L13.6 12 3.85 21.79A1.53 1.53 0 0 1 3 20.42Z"/><path fill="#EA4335" d="M16.81 15.36 6.15 21.42l8.4-8.4 2.26 2.34Z"/><path fill="#FBBC04" d="M20.16 10.83c.5.3.84.85.84 1.17 0 .32-.3.87-.81 1.17l-2.22 1.28-2.5-2.45 2.5-2.45 2.19 1.28Z"/><path fill="#4285F4" d="M6.15 2.58l10.66 6.06-2.26 2.34-8.4-8.4Z"/></svg>',
-  app: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.36 12.5c.02-2.02 1.65-2.99 1.72-3.04-.94-1.37-2.4-1.56-2.92-1.58-1.24-.13-2.42.73-3.05.73-.63 0-1.6-.71-2.63-.69-1.35.02-2.6.79-3.29 2-1.4 2.43-.36 6.03 1.01 8 .67.96 1.47 2.04 2.51 2 1.01-.04 1.39-.65 2.61-.65s1.57.65 2.63.63c1.09-.02 1.78-.98 2.44-1.95.77-1.11 1.09-2.19 1.11-2.25-.02-.01-2.13-.82-2.15-3.25ZM14.4 6.6c.56-.68.93-1.62.83-2.56-.8.03-1.78.53-2.35 1.21-.51.6-.96 1.56-.84 2.48.89.07 1.8-.45 2.36-1.13Z"/></svg>',
-
-  tiktok: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.09v12.4a2.59 2.59 0 1 1-1.82-2.47v-3.1a5.68 5.68 0 1 0 4.91 5.62V9.01a7.35 7.35 0 0 0 4.3 1.38V7.3a4.29 4.29 0 0 1-3.24-1.48Z"/></svg>',
+  app: `<svg viewBox="0 0 32 32">
+      <defs><linearGradient id="asG" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#1FC8FC"/><stop offset="1" stop-color="#1273EE"/>
+      </linearGradient></defs>
+      <rect width="32" height="32" rx="7.4" fill="url(#asG)"/>
+      <g stroke="#fff" stroke-width="2.4" stroke-linecap="round" fill="none">
+        <path d="M9.2 22.6 16 10.2l6.8 12.4"/><path d="M11.9 18.4h8.2"/>
+      </g>
+    </svg>`,
+  play: `<svg viewBox="0 0 32 32">
+      <rect width="32" height="32" rx="7.4" fill="#fff"/>
+      <g transform="translate(7 6.4) scale(.805)">
+        <path fill="#34A853" d="M0 22.9V1.1c0-.78.44-1.45 1.1-1.77L13.7 12 1.1 24.67A1.98 1.98 0 0 1 0 22.9Z"/>
+        <path fill="#EA4335" d="M17.9 16.35 4.1 24.2 15 13.33l2.9 3.02Z"/>
+        <path fill="#FBBC04" d="M22.24 10.5c.65.38 1.09 1.1 1.09 1.5s-.39 1.13-1.05 1.51l-2.87 1.66-3.24-3.17 3.24-3.17 2.83 1.67Z"/>
+        <path fill="#4285F4" d="M4.1 -.2 17.9 7.65 15 10.67 4.1 -.2Z"/>
+      </g>
+    </svg>`,
+  x: `<svg viewBox="0 0 32 32">
+      <rect width="32" height="32" rx="7.4" fill="#000"/>
+      <path fill="#fff" d="M20.6 8h2.6l-5.7 6.5L24 24h-5.2l-4.1-5.4L9.9 24H7.3l6.1-7L7 8h5.4l3.7 4.9L20.6 8Zm-.9 14.5h1.45L12.4 9.4h-1.55l8.85 13.1Z"/>
+    </svg>`,
+  tiktok: `<svg viewBox="0 0 32 32">
+      <rect width="32" height="32" rx="7.4" fill="#000"/>
+      <g transform="translate(4 4)">
+        <path fill="#25F4EE" d="M15.7 4.82A4.28 4.28 0 0 1 14.64 2h-3.09v12.4a2.59 2.59 0 1 1-1.82-2.47v-3.1a5.68 5.68 0 1 0 4.91 5.62V8.01a7.35 7.35 0 0 0 4.3 1.38V6.3a4.29 4.29 0 0 1-3.24-1.48Z"/>
+        <path fill="#FE2C55" d="M17.5 6.82A4.28 4.28 0 0 1 16.44 4h-3.09v12.4a2.59 2.59 0 1 1-1.82-2.47v-3.1a5.68 5.68 0 1 0 4.91 5.62V10.01a7.35 7.35 0 0 0 4.3 1.38V8.3a4.29 4.29 0 0 1-3.24-1.48Z"/>
+        <path fill="#fff" d="M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.09v12.4a2.59 2.59 0 1 1-1.82-2.47v-3.1a5.68 5.68 0 1 0 4.91 5.62V9.01a7.35 7.35 0 0 0 4.3 1.38V7.3a4.29 4.29 0 0 1-3.24-1.48Z"/>
+      </g>
+    </svg>`,
 };
 /* how the quote is labelled — the store or network it came off */
 const SRC_LABEL = { app: 'App Store', play: 'Google Play', x: 'X', tiktok: 'TikTok' };
-const STAR5 = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.6l2.85 5.9 6.5.88-4.72 4.5 1.16 6.4L12 17.15 6.21 20.3l1.16-6.4-4.72-4.5 6.5-.89z"/></svg>'.repeat(5);
-const T_AVATARS = ['avatar-syahrier.png', 'avatar-t2.png', 'avatar-t3.png'];
-const T_SOURCES = ['x', 'play', 'app'];
 
 async function testimonialCarousel(goal){
   const list = (C.TESTIMONIALS[goal] || C.TESTIMONIALS.career);
@@ -633,13 +658,14 @@ async function testimonialCarousel(goal){
   const rail = wrap.querySelector('.testimonial-rail');
   list.forEach(t => rail.appendChild(el(`
     <div class="t-card">
-      <div class="tc-head">
-        <img class="tc-av" src="assets/people/${t.img}-face.jpg" alt="">
+      <img class="tc-photo" src="assets/people/${t.img}.jpg" alt="">
+      <div class="tc-scrim"></div>
+      <i class="tc-src" title="${SRC_LABEL[t.s] || ''}">${SRC_ICONS[t.s] || SRC_ICONS.app}</i>
+      <div class="tc-body">
+        <p class="tc-quote">\u201C${t.q}\u201D</p>
+        <i class="tc-rule"></i>
         <div class="tc-who"><b>${t.n}</b><span>${t.r}</span></div>
-        <i class="tc-src tcs-${t.s || 'app'}" title="${SRC_LABEL[t.s] || ''}">${SRC_ICONS[t.s] || SRC_ICONS.app}</i>
       </div>
-      <span class="tc-stars">${STAR5}</span>
-      <p class="tc-quote">\u201C${t.q}\u201D</p>
     </div>`)));
   chatStream.appendChild(wrap);
   scrollToEnd();
@@ -2129,9 +2155,11 @@ const LDR_STEPS = [
   'Shaping your roadmap',
 ];
 const LDR_QS = [
-  { q: null, opts: ['Too easy', 'Just right', 'Still tricky'] },   /* q filled with the drill words */
-  { q: 'Did your score match how you think you speak?', opts: ['Spot on', 'Close', 'Harsher than I expected'] },
-  { q: 'How do you feel about your starting score?', opts: ['Proud of it', "It's okay", 'I want it higher'] },
+  { q: null, opts: ['Easy', 'Just right', 'Hard'] },   /* q filled with the drill words */
+  { q: 'Did you get a pronunciation mistake while saying a name or place?',
+    opts: ['Yes', 'No', 'Not sure'] },
+  { q: 'Would you like to practice more words like these?',
+    opts: ['Yes, more', 'This is enough', 'Fewer'] },
 ];
 function ldrRing(pct){
   $('ldrArc').setAttribute('stroke-dasharray', `${440 * pct / 100} 440`);
@@ -2200,7 +2228,7 @@ async function planLoader(didPron, goal){
 
   if (didPron){
     /* Q1 names their own drill words */
-    LDR_QS[0].q = CL('How did practicing \u201C{a}\u201D and \u201C{b}\u201D feel?')
+    LDR_QS[0].q = CL('How was it to say \u201C{a} and {b}\u201D?')
       .replace('{a}', PRON_WORDS[0].w).replace('{b}', PRON_WORDS[1].w);
     await wait(FF ? 40 : 900);
     ldrStepState(['done', 'done', 'on', '']);

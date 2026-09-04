@@ -1,6 +1,8 @@
 /* Cut two crops from each source, both anchored on the head.
    fx/fy = head centre as a fraction of the source; fw = how wide the
-   head-and-shoulders box is, as a fraction of the source width. */
+   head-and-shoulders box is, as a fraction of the source width.
+   The portrait is cut at 720x730 — the card's own photo window — so the
+   card never has to crop it again and no forehead goes missing. */
 import { chromium } from 'playwright';
 import fs from 'fs';
 const PICKS = JSON.parse(fs.readFileSync('tests/cast.json', 'utf8'));
@@ -33,7 +35,7 @@ for (const k of PICKS){
       g.drawImage(img, sx, sy, cw, ch, 0, 0, w, h);
       return c.toDataURL('image/jpeg', 0.86).split(',')[1];
     };
-    return { face: cut(400, 400, fw, 0.45), portrait: cut(640, 800, fw * 2.1, 0.30) };
+    return { face: cut(400, 400, fw, 0.45), portrait: cut(720, 730, fw * 1.7, 0.34) };
   }, { ...k, src });
   fs.writeFileSync(`assets/people/${k.slot}.jpg`, Buffer.from(out.portrait, 'base64'));
   fs.writeFileSync(`assets/people/${k.slot}-face.jpg`, Buffer.from(out.face, 'base64'));
