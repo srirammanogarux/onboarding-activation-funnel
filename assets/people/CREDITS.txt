@@ -1,42 +1,43 @@
 Testimonial photography — Pexels License (free, commercial use, no attribution required).
 Placeholder casting; replace with licensed/shot talent before release.
 
-Recast 2026-09-03. The product now ships worldwide EXCEPT India/Indonesia/LatAm/USA,
-and the personas in content.js changed with it. The previous set was cast for the
-Indonesia launch (all Southeast Asian subjects), so every slot was re-sourced to
-match its new persona — an Asia+Europe mix: European, Turkish/Mediterranean,
-East-Asian, SE-Asian and North-African subjects. Same rules as before: one person,
-face visible, candid/environmental (mid-task, natural light, no posed-to-camera
-studio work), context that does not fight the quote. Only exam-1 (Grace, nurse,
-Cebu) survived the recast unchanged. All files 900x690 center-crops of w=1200
-downloads (https://images.pexels.com/photos/<ID>/pexels-photo-<ID>.jpeg).
+Recast 2026-09-04, second pass. The first worldwide set was environmental
+photography — subjects mid-task, turned away from the lens, often small in a
+busy frame. It read as a stock library rather than as people who had left a
+review. This pass changes the brief: ONE person, FRONT-FACING, face large and
+unobstructed, clean background, nothing in the frame competing with them. The
+card was rebuilt to match — the face is now a 42px avatar and the quote is the
+hero, with a store/network badge saying where the review came from.
 
-career-1   8348971   Jonas, sales engineer, Munich — man typing at a laptop in hard window light, badge lanyard
-career-2  36697940   Emre, export sales, Izmir — man with clipboard checking stock in a warehouse
-career-3   7222273   Kasia, ops lead, Krakow — woman on a phone call at a laptop in a meeting room
-career-4   5709603   Linh, analyst, Hanoi — woman working on a laptop in a garden cafe
-exam-1     7578810   Grace, nurse, Cebu — KEPT from previous set (SE-Asian nurse, stethoscope, candid profile)
-exam-2    13450802   Mehmet, IELTS 7.5, Ankara — young man in a t-shirt at a laptop over a stack of papers
-exam-3     5177787   Elena, scholarship applicant, Milan — woman writing in a notebook at a cafe table
-personal-1 5195557   Julien, graphic designer, Lyon — man drawing on a graphics tablet in a home studio
-personal-2 19471014  Keiko, pharmacist, Osaka — East-Asian pharmacist in a white coat writing notes at the counter
-personal-3 17987088  Alvaro, cafe owner, Seville — man frothing milk behind an espresso machine
-school-1   7972274   Thu, final year student, Ho Chi Minh City — young woman writing notes on campus
-school-2   6958548   Lukas, grade 12, Hamburg — teenage boy in a hoodie doing homework
-school-3  36485087   Zeynep, undergrad, Istanbul — young woman in hijab reading in a Turkish bookstore
-travel-1  30423784   Minho, engineer, Busan — young East-Asian man looking over his shoulder on a rail platform
-travel-2   4323829   Camille, solo traveller, Paris — woman in a cap and teddy coat on a Paris street
-travel-3   7582420   Amira, teacher, Casablanca — woman in hijab reading a notebook by a window
+Casting rules held: name, apparent gender and stated role/city all agree with
+the photo, and every quote states an outcome its goal's learner actually wants.
 
-Notes / compromises:
-- travel-2 and exam-1 have small blurred background figures at a distance; the
-  quoted subject is unmistakable in both. (travel-2's alternative wide shots had
-  no readable face at all.)
-- travel-3 is an everyday reading context rather than a travel scene; every
-  travel-context candidate with a clear single Arab/North-African subject was
-  posed to camera.
-- school-3 uses a top-biased crop (sips --cropOffset 100 0) so the face clears
-  the 900x690 window; all other slots are plain center crops.
-- 2026-09-03: added <slot>-face.jpg 300x300 avatar variants for every slot — square
-  face-centered crops (head/upper shoulders) taken from fresh w=1600 downloads of the
-  same Pexels IDs, for the 34px circular chat-bubble avatars.
+Each slot ships two crops, both head-anchored, cut by tests/cast-crop.mjs from
+the coordinates in tests/cast.json (fx/fy = head centre as a fraction of the
+source; fw = head-and-shoulders box width as a fraction of source width). Use
+tests/cast-measure.mjs to see the crop box drawn over the source before
+re-cutting.
+
+  <slot>-face.jpg   400x400  — the avatar. This is what the app loads.
+  <slot>.jpg        640x800  — portrait, kept for a larger layout; unreferenced.
+
+Sources are https://images.pexels.com/photos/<ID>/pexels-photo-<ID>.jpeg at
+w=1400. Note that some Pexels assets are already tightly cropped at that width
+(4227101 cuts off at the mouth) — check the frame before adding an ID.
+
+career-1     5955138   Jonas    Sales engineer, Munich         man, 40s, European
+career-2     4728851   Emre     Export sales, Izmir            man, 30s, Turkish
+career-3     9052841   Kasia    Ops lead, Krakow               woman, 30s, European
+career-4     39204883  Linh     Analyst, Hanoi                 woman, 20s-30s, East Asian, office
+exam-1       32115898  Grace    Nurse, Cebu                    woman, 20s-30s, SE Asian, scrubs + stethoscope
+exam-2       13108284  Mehmet   IELTS 7.5, Ankara              man, 20s, Turkish
+exam-3       3776185   Elena    Scholarship applicant, Milan   woman, 20s, European, campus
+personal-1   38536479  Julien   Graphic designer, Lyon         man, 30s, European, glasses
+personal-2   8788808   Keiko    Pharmacist, Osaka              woman, 30s, East Asian
+personal-3   8279932   Alvaro   Cafe owner, Seville            man, 40s-50s, Mediterranean
+school-1     5538605   Thu      Final year, Ho Chi Minh City   woman, 20s, SE Asian, books
+school-2     32076871  Lukas    Grade 12, Hamburg              teenage boy, European, classroom
+school-3     19133315  Zeynep   Undergrad, Istanbul            woman, 20s, hijab
+travel-1     9775550   Minho    Engineer, Busan                man, 20s-30s, East Asian
+travel-2     27086922  Camille  Solo traveller, Paris          woman, 30s, European
+travel-3     29791445  Amira    Teacher, Casablanca            woman, 20s, hijab, Marrakesh

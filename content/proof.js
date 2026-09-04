@@ -49,30 +49,30 @@ const OUTCOME = {
    candid solo portraits — one person, face visible, role-plausible. */
 const TESTIMONIALS = {
   career: [
-    { img:'career-1', q:'I asked for a raise in English. It came back 20% higher than I planned to ask for.', n:'Jonas',  r:'Sales engineer, Munich' },
-    { img:'career-2', q:'Foreign buyers stopped going through a middleman. I keep that margin now.',          n:'Emre',   r:'Export sales, Izmir' },
-    { img:'career-3', q:'I used to email instead of speak. Now I run the Monday call.',                       n:'Kasia',  r:'Ops lead, Kraków' },
-    { img:'career-4', q:'Two interviews in English, two offers. I took the better one.',                      n:'Linh',   r:'Analyst, Hanoi' },
+    { img:'career-1', q:'I asked for a raise in English. It came back 20% higher than I planned to ask for.', n:'Jonas',  r:'Sales engineer, Munich', s:'app' },
+    { img:'career-2', q:'Foreign buyers stopped going through a middleman. I keep that margin now.',          n:'Emre',   r:'Export sales, Izmir', s:'play' },
+    { img:'career-3', q:'I used to email instead of speak. Now I run the Monday call.',                       n:'Kasia',  r:'Ops lead, Kraków', s:'x' },
+    { img:'career-4', q:'Two interviews in English, two offers. I took the better one.',                      n:'Linh',   r:'Analyst, Hanoi', s:'tiktok' },
   ],
   exam: [
-    { img:'exam-1', q:'Band 6.0 to 7.5 in ten weeks. My visa cleared first try.',            n:'Grace',  r:'Nurse, Cebu' },
-    { img:'exam-2', q:'Speaking was my worst section. It ended up my highest.',              n:'Mehmet', r:'IELTS 7.5, Ankara' },
-    { img:'exam-3', q:'I stopped freezing in part two. Two minutes, no panic.',              n:'Elena',  r:'Scholarship applicant, Milan' },
+    { img:'exam-1', q:'Band 6.0 to 7.5 in ten weeks. My visa cleared first try.',            n:'Grace',  r:'Nurse, Cebu', s:'play' },
+    { img:'exam-2', q:'Speaking was my worst section. It ended up my highest.',              n:'Mehmet', r:'IELTS 7.5, Ankara', s:'app' },
+    { img:'exam-3', q:'I stopped freezing in part two. Two minutes, no panic.',              n:'Elena',  r:'Scholarship applicant, Milan', s:'x' },
   ],
   personal: [
-    { img:'personal-1', q:'I stopped translating in my head halfway through my own sentences.', n:'Julien', r:'Graphic designer, Lyon' },
-    { img:'personal-2', q:'My niece studies abroad. We talk properly now, not in fragments.',   n:'Keiko',  r:'Pharmacist, Osaka' },
-    { img:'personal-3', q:'I answer the tourists on my street instead of pointing.',            n:'Álvaro', r:'Cafe owner, Seville' },
+    { img:'personal-1', q:'I stopped translating in my head halfway through my own sentences.', n:'Julien', r:'Graphic designer, Lyon', s:'x' },
+    { img:'personal-2', q:'My niece studies abroad. We talk properly now, not in fragments.',   n:'Keiko',  r:'Pharmacist, Osaka', s:'app' },
+    { img:'personal-3', q:'I answer the tourists on my street instead of pointing.',            n:'Álvaro', r:'Cafe owner, Seville', s:'play' },
   ],
   school: [
-    { img:'school-1', q:'I went from silent in seminars to running them.',                  n:'Thu',    r:'Final year, Ho Chi Minh City' },
-    { img:'school-2', q:'Top marks in the oral. I had practised the exact questions.',      n:'Lukas',  r:'Grade 12, Hamburg' },
-    { img:'school-3', q:'Group projects used to be the others talking. Now I present.',     n:'Zeynep', r:'Undergrad, Istanbul' },
+    { img:'school-1', q:'I went from silent in seminars to running them.',                  n:'Thu',    r:'Final year, Ho Chi Minh City', s:'tiktok' },
+    { img:'school-2', q:'Top marks in the oral. I had practised the exact questions.',      n:'Lukas',  r:'Grade 12, Hamburg', s:'play' },
+    { img:'school-3', q:'Group projects used to be the others talking. Now I present.',     n:'Zeynep', r:'Undergrad, Istanbul', s:'app' },
   ],
   travel: [
-    { img:'travel-1', q:'Missed my connection in Doha and sorted the whole thing myself.', n:'Minho',   r:'Engineer, Busan' },
-    { img:'travel-2', q:'I argued a wrong hotel charge down to zero. In English.',         n:'Camille', r:'Solo traveller, Paris' },
-    { img:'travel-3', q:'Umrah with my mother. I handled every counter for us.',           n:'Amira',   r:'Teacher, Casablanca' },
+    { img:'travel-1', q:'Missed my connection in Doha and sorted the whole thing myself.', n:'Minho',   r:'Engineer, Busan', s:'app' },
+    { img:'travel-2', q:'I argued a wrong hotel charge down to zero. In English.',         n:'Camille', r:'Solo traveller, Paris', s:'x' },
+    { img:'travel-3', q:'Umrah with my mother. I handled every counter for us.',           n:'Amira',   r:'Teacher, Casablanca', s:'play' },
   ],
 };
 

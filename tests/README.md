@@ -19,4 +19,9 @@ the repo root (`python3 -m http.server 8901`) or point `BASE` at a deploy:
   visible string, so leftover English stands out
   (`LOC=it node tests/l10n-audit.mjs`, or pass step names to narrow it).
 
+- `cast-crop.mjs` / `cast-measure.mjs` — re-cut the testimonial
+  photography from `cast.json` (Pexels IDs + head coordinates).
+  `measure` draws the crop box over each source so it can be corrected
+  before `crop` writes into `assets/people/`.
+
 Screenshots land in `tests/out/` (gitignored).
