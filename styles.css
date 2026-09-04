@@ -3007,7 +3007,17 @@ body{
   animation:ws-pop .34s var(--ease-out) forwards;
   transition:opacity .5s var(--ease-out);
 }
-.w.hi .ws{color:var(--succ-300);background:color-mix(in srgb, var(--succ-300) 13%, transparent);}
+/* a word they got is a tick; only a word under 40 says its number, so
+   the two that slipped are the only digits on the line */
+.w.hi .ws{
+  color:var(--succ-300);
+  background:color-mix(in srgb, var(--succ-300) 14%, transparent);
+  padding:0;
+  width:17px;height:17px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:50%;
+}
+.w.hi .ws svg{width:11px;height:11px;display:block;}
 .w.lo .ws{color:var(--warn-300);background:color-mix(in srgb, var(--warn-300) 15%, transparent);}
 .w.settled .ws{animation:ws-fade .5s var(--ease-out) forwards;}
 @keyframes ws-fade{from{opacity:1;}to{opacity:0;}}

@@ -1364,6 +1364,7 @@ function scoreWord(word, isSlip, i){
 }
 
 const SCAN_BEATS = ['Heard you', 'Checking each word', 'Scoring your sounds', 'Still with you'];
+const WS_TICK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12.5 9.8 17.2 19 7.4"/></svg>';
 
 /* the loader itself. `pending` resolves when the server would have
    answered; everything before that is a sweep that can loop forever,
@@ -1402,10 +1403,12 @@ async function scoreWalk({ text, words, slip, mic, tip, latency }){
   }
   words.forEach(w => w.classList.remove('scan'));
 
-  /* pass 2 — the scores land, left to right. A long paragraph walks
-     faster than a short line so the whole thing stays under ~2.4s,
-     and only the last eight numbers stay on screen, so the line never
-     turns into a wall of digits. */
+  /* pass 2 — the marks land, left to right. A word they got is a tick,
+     not a number: a score on a word they said fine is noise, and it
+     makes the two that did slip harder to find. Only the ones under 40
+     say what they scored. A long paragraph walks faster than a short
+     line so the whole thing stays under ~2.4s, and marks roll off eight
+     words behind the cursor. */
   clearInterval(beatT);
   tip.textContent = CL(SCAN_BEATS[2]);
   const pace = Math.max(90, Math.min(165, Math.round(2400 / words.length)));
@@ -1417,7 +1420,7 @@ async function scoreWalk({ text, words, slip, mic, tip, latency }){
     const n = scoreWord(sp.textContent.replace(/[^A-Za-z]/g, ''), bad, k);
     const pill = document.createElement('i');
     pill.className = 'ws';
-    pill.textContent = n;
+    if (bad) pill.textContent = n; else pill.innerHTML = WS_TICK;
     sp.appendChild(pill);
     sp.classList.add('scored', bad ? 'lo' : 'hi');
     if (bad){ sp.classList.add('miss'); misses.push(sp); }
