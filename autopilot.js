@@ -71,6 +71,16 @@ function buildDevPanel(){
   fill('dpLvls',  DP_LVLS,  'lvl');
   fill('dpPath', [['impromptu', 'Answers impromptu'], ['hint', 'Uses the hint']], 'path',
        { clear: 'Let it play out' });
+  /* the seam after they submit: the mic becomes a loader and the words
+     score one by one. Everything from instant to awful has to read. */
+  fill('dpLat', [
+    ['0',    'Instant',   'no wait at all'],
+    ['1400', 'Typical',   '1.4s \u00b7 default'],
+    ['3000', 'Slow',      '3s'],
+    ['5000', 'Worst case', '5s'],
+    ['9000', 'Awful',     '9s'],
+  ], 'lat');
+
   fill('dpLangs', DP_LANGS, 'lang');
 
   /* branch auto-runs: one play per branch. It reloads at the very

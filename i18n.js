@@ -315,6 +315,10 @@ const STR = {
     graph_title: 'Dans les 8 prochains mois,<br>on t’emmène vers <span class="lav">« Avancé »</span>',
     graph_body: 'Au cours des 8 prochains mois, tu feras progresser ta prononciation, ta grammaire, ta fluidité et ton vocabulaire, avec des progrès visibles chaque mois.',
     content: {
+      "Checking each word": "Je vérifie chaque mot",
+      "Scoring your sounds": "J’évalue tes sons",
+      "Still with you": "Je suis toujours là",
+      "Two words to fix": "Deux mots à corriger",
       /* ---- added 2026-09-04: proof bubbles, paywall, reading aids, drill tips ---- */
       "Listen": "Écouter",
       "Translate": "Traduire",
@@ -813,6 +817,10 @@ const STR = {
     graph_title: 'Nei prossimi 8 mesi<br>ti portiamo ad <span class="lav">“Avanzato”</span>',
     graph_body: 'Nei prossimi 8 mesi migliorerai pronuncia, grammatica, fluidità e vocabolario, con progressi visibili ogni mese.',
     content: {
+      "Checking each word": "Controllo ogni parola",
+      "Scoring your sounds": "Valuto i tuoi suoni",
+      "Still with you": "Sono ancora qui",
+      "Two words to fix": "Due parole da sistemare",
       /* ---- added 2026-09-04: proof bubbles, paywall, reading aids, drill tips ---- */
       "Listen": "Ascolta",
       "Translate": "Traduci",
@@ -1311,6 +1319,10 @@ const STR = {
     graph_title: 'Nos próximos 8 meses, vamos<br>levar-te até <span class="lav">“Avançado”</span>',
     graph_body: 'Ao longo dos próximos 8 meses, vais subir de nível em pronúncia, gramática, fluência e vocabulário, com progresso visível todos os meses.',
     content: {
+      "Checking each word": "A verificar cada palavra",
+      "Scoring your sounds": "A avaliar os teus sons",
+      "Still with you": "Ainda estou contigo",
+      "Two words to fix": "Duas palavras a corrigir",
       /* ---- added 2026-09-04: proof bubbles, paywall, reading aids, drill tips ---- */
       "Listen": "Ouvir",
       "Translate": "Traduzir",

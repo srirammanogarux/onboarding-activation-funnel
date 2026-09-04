@@ -2973,6 +2973,89 @@ body{
 .stg-text .w.miss,
 .stg-line.live .w.miss{color:var(--warn-300);}
 
+/* ---- word scoring: the wait after they submit ----
+   The line opens up to make room for a number over every word, the
+   scan sweeps while the server thinks, and the scores land green or
+   amber. Green numbers fade once they have been read; the two amber
+   ones stay, because they are the next screen's whole subject. */
+.stg-text.scoring{row-gap:30px;}
+.stg-text .w{position:relative;}
+.stg-text .w.scan{color:var(--blue-300);}
+.stg-line.live .w.scan{color:var(--blue-300);}
+.stg-text .w.scored.hi,
+.stg-line.live .w.scored.hi,
+.stg-line.win .w.scored.hi{color:var(--succ-300);}
+.stg-text .w.scored.lo,
+.stg-line.live .w.scored.lo,
+.stg-line.win .w.scored.lo{color:var(--warn-300);}
+
+.ws{
+  position:absolute;
+  left:50%;
+  bottom:calc(100% - 4px);
+  transform:translateX(-50%) translateY(4px);
+  padding:1px 6px;
+  border-radius:8px;
+  font-family:var(--font-body);
+  font-weight:600;
+  font-size:11px;
+  line-height:16px;
+  letter-spacing:0;
+  font-style:normal;
+  white-space:nowrap;
+  opacity:0;
+  animation:ws-pop .34s var(--ease-out) forwards;
+  transition:opacity .5s var(--ease-out);
+}
+.w.hi .ws{color:var(--succ-300);background:color-mix(in srgb, var(--succ-300) 13%, transparent);}
+.w.lo .ws{color:var(--warn-300);background:color-mix(in srgb, var(--warn-300) 15%, transparent);}
+.w.settled .ws{animation:ws-fade .5s var(--ease-out) forwards;}
+@keyframes ws-fade{from{opacity:1;}to{opacity:0;}}
+@keyframes ws-pop{
+  0%  {opacity:0;transform:translateX(-50%) translateY(6px) scale(.8);}
+  60% {opacity:1;transform:translateX(-50%) translateY(-1px) scale(1.06);}
+  100%{opacity:1;transform:translateX(-50%) translateY(0) scale(1);}
+}
+
+/* the same, on the hint path's paragraph */
+.fw-para .w{position:relative;}
+.fw-para.scoring{line-height:56px;}
+.fw-para .w.scan{color:var(--blue-300);}
+.fw-para .w.scored.hi,
+.fw-para .w.g.scored.hi{color:var(--succ-300);}
+.fw-para .w.scored.lo,
+.fw-para .w.g.scored.lo{color:var(--warn-300);}
+#fwScreen.flagged .fw-card.readmode{border-color:color-mix(in srgb, var(--warn-300) 45%, transparent);}
+/* once the two words are named, the rest of the paragraph steps back */
+#fwScreen.flagged .fw-para .w.hi,
+#fwScreen.flagged .fw-para .w.g.scored.hi{color:var(--text-low);}
+#fwScreen.flagged .fw-para .w.lo{font-weight:700;}
+
+/* the mic while the server thinks: a ring that keeps turning */
+.convmic.scoring{
+  width:76px;
+  height:76px;
+  background:transparent;
+  border:2px solid rgba(157,150,255,.18);
+  box-shadow:none;
+}
+.convmic.scoring .cm-mic,
+.convmic.scoring .cm-cancel,
+.convmic.scoring .cm-wave,
+.convmic.scoring .cm-confirm,
+.convmic.scoring .cm-tick{opacity:0;pointer-events:none;}
+.convmic.scoring::after{
+  content:'';
+  position:absolute;
+  inset:-2px;
+  border-radius:50%;
+  border:2px solid transparent;
+  border-top-color:var(--blue-400);
+  border-right-color:var(--blue-300);
+  animation:mic-spin .9s linear infinite;
+}
+@keyframes mic-spin{to{transform:rotate(360deg);}}
+
 /* sentence 3: the two hard words are slots until you say them */
 .stg-text .gap{
   display:inline-flex;

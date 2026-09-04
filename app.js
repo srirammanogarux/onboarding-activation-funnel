@@ -54,6 +54,9 @@ const DBG = {
      FOCUS row, the first session line and the recap, so it needs to be
      switchable when reviewing the cohort. */
   focus:  QP.get('focus') || '',
+  /* how long the speech server is pretending to take, in ms. The
+     word-scoring walk has to survive anything from instant to awful. */
+  lat:    QP.has('lat') ? Math.max(0, +QP.get('lat') || 0) : 1400,
 };
 const AUTO = DBG.auto;
 let FF = DBG.step !== 'intro';   // AUTO with a step target fast-forwards to it, then plays live
@@ -1227,7 +1230,7 @@ function stgResetSaid(){
 }
 
 /* one mic turn on the stage: orb → waveform + words fill → ✓ */
-function stageTurn(){
+function stageTurn(slip){
   return new Promise(resolve => {
     const mic = $('stgMic');
     $('stgMicRow').classList.remove('gone');
@@ -1267,10 +1270,15 @@ function stageTurn(){
         mic.removeEventListener('click', onOrbTap);
         skip.removeEventListener('click', onSkip);
         stgWords().forEach(w => { w.classList.remove('now'); w.classList.add('said'); });
-        $('stgTip').classList.add('hidden');
         mic.className = 'convmic submitting';
         $('stgMicRow').classList.remove('stg-listen-glow');
-        await wait(600);
+        await wait(FF ? 0 : 260);
+        /* the line reads at full strength again — it is about to be marked */
+        $('stgLine').classList.remove('live');
+        await scoreWalk({
+          text: $('stgText'), words: stgWords(), slip,
+          mic, tip: $('stgTip'),
+        });
         resolve('spoke');
       };
       cancel.addEventListener('click', onCancel, { once: true });
@@ -1298,6 +1306,112 @@ function stgTick(caption){
   const tip = $('stgTip');
   tip.textContent = caption;
   tip.classList.remove('hidden');
+}
+
+/* ============================================================
+   WORD SCORING — the seam between "I submitted" and "here is what
+   slipped". The speech server needs 1–5s to come back, so the wait
+   is spent on the thing they just said: the mic becomes a loader,
+   Sarah's tip cycles, a scan sweeps the line, and then every word
+   lands its own score out of 100. Past 40 is green; under 40 is
+   amber, and only ever the two words they will practise.
+   ============================================================ */
+
+/* a word always scores about the same, so a replay looks like the
+   same speaker rather than a dice roll */
+function wordHash(w){
+  let h = 0;
+  for (let i = 0; i < w.length; i++) h = (h * 31 + w.charCodeAt(i)) & 0xffff;
+  return h / 0xffff;
+}
+/* slip words land 21–38. Everything else clears 40 with room to
+   spare, and a couple sit in the 50s so the line is not all 90s. */
+function scoreWord(word, isSlip, i){
+  const r = wordHash(word.toLowerCase() + ':' + i);
+  if (isSlip) return 19 + Math.round(r * 19);
+  return 52 + Math.round(r * 43);
+}
+
+const SCAN_BEATS = ['Heard you', 'Checking each word', 'Scoring your sounds', 'Still with you'];
+
+/* the loader itself. `pending` resolves when the server would have
+   answered; everything before that is a sweep that can loop forever,
+   everything after is the score walk at a pace worth watching. */
+async function scoreWalk({ text, words, slip, mic, tip, latency }){
+  const flag = (slip || []).map(w => (w.w || w).toLowerCase());
+  const isSlip = (sp) => flag.includes(sp.textContent.replace(/[.,!?\u2019']/g, '').toLowerCase());
+
+  mic.className = 'convmic scoring';
+  tip.classList.remove('hidden');
+  tip.textContent = CL(SCAN_BEATS[0]);
+  text.classList.add('scoring');
+
+  /* Sarah's line moves on its own clock, so it keeps talking however
+     long the server takes */
+  let beat = 0;
+  const beatT = setInterval(() => {
+    beat = Math.min(beat + 1, SCAN_BEATS.length - 1);
+    tip.textContent = CL(SCAN_BEATS[beat]);
+  }, 1500);
+
+  let landed = false;
+  const lat = latency === undefined ? DBG.lat : latency;
+  setTimeout(() => { landed = true; }, FF ? 0 : lat);
+
+  /* pass 1 — the scan. Skipped entirely when the server is quick;
+     loops the line as many times as a slow one needs. */
+  let i = 0;
+  while (!landed){
+    const sp = words[i % words.length];
+    sp.classList.add('scan');
+    await wait(FF ? 0 : 190);
+    sp.classList.remove('scan');
+    i++;
+    if (FF) break;
+  }
+  words.forEach(w => w.classList.remove('scan'));
+
+  /* pass 2 — the scores land, left to right. A long paragraph walks
+     faster than a short line so the whole thing stays under ~2.4s,
+     and only the last eight numbers stay on screen, so the line never
+     turns into a wall of digits. */
+  clearInterval(beatT);
+  tip.textContent = CL(SCAN_BEATS[2]);
+  const pace = Math.max(90, Math.min(165, Math.round(2400 / words.length)));
+  const WINDOW = 8;
+  const misses = [];
+  for (let k = 0; k < words.length; k++){
+    const sp = words[k];
+    const bad = isSlip(sp);
+    const n = scoreWord(sp.textContent.replace(/[^A-Za-z]/g, ''), bad, k);
+    const pill = document.createElement('i');
+    pill.className = 'ws';
+    pill.textContent = n;
+    sp.appendChild(pill);
+    sp.classList.add('scored', bad ? 'lo' : 'hi');
+    if (bad){ sp.classList.add('miss'); misses.push(sp); }
+    const gone = words[k - WINDOW];
+    if (gone && !gone.classList.contains('lo')) gone.classList.add('settled');
+    await wait(FF ? 0 : pace);
+  }
+
+  await wait(FF ? 0 : 700);
+
+  /* the green numbers have done their job and go; the two amber ones
+     stay, because they are the whole reason for the next screen */
+  words.forEach(w => { if (!w.classList.contains('lo')) w.classList.add('settled'); });
+  mic.className = 'convmic ' + (misses.length ? 'go' : 'tick');
+  return misses.length;
+}
+
+/* put the line back the way it was, for a retry or the next rung */
+function clearScores(text){
+  text.classList.remove('scoring');
+  [...text.querySelectorAll('.w')].forEach(w => {
+    w.classList.remove('scored', 'hi', 'lo', 'settled', 'scan');
+    const p = w.querySelector('.ws');
+    if (p) p.remove();
+  });
 }
 
 /* mark the sentence's two words amber on a stumble */
@@ -1344,13 +1458,14 @@ async function stageLadder(goal, level, name, famFirst, exam){
     $('stgLine').classList.remove('win', 'live');
     $('stgSay').innerHTML = CL(C.BG_LINES.inst[i]);
     bgBar(i * 33 + 4);
+    clearScores($('stgText'));
     stgRenderPhrase(fill(sen.t), []);
 
     let turn = 'spoke';
     if (FF){
       stgWords().forEach(w => w.classList.add('said'));
     } else {
-      turn = await stageTurn();
+      turn = await stageTurn(failAt === i + 1 ? sen.w : []);
     }
     if (turn === 'skipped'){ failAt = i + 1; }
 
@@ -1823,6 +1938,7 @@ async function scoreSequence(goal, famLabel){
 
 /* the 4-part framework walkthrough, then one read of it out loud */
 async function frameworkSequence(key, level, name){
+  const fwKey = C.PRACTICE[key] ? key : 'career|other';
   const sc = C.PRACTICE[key] || C.PRACTICE['career|other'];
   reach('framework');
   $('fwScreen').classList.remove('done');
@@ -1883,10 +1999,19 @@ async function frameworkSequence(key, level, name){
           b.style.height = `${4 + Math.random() * 28 * env}px`;
         }), 90);
         let n = 0;
-        const done = () => {
+        const done = async () => {
           clearInterval(iv); clearInterval(wv);
           words.forEach(w => w.classList.add('g'));
           $('fwFill').style.width = '100%';
+          mic.className = 'convmic submitting';
+          await wait(260);
+          /* same seam as the beginner ladder: the drill pair for this
+             cohort is what the server will come back saying slipped */
+          await scoreWalk({
+            text: $('fwCard').querySelector('.fw-para'), words,
+            slip: C.PRONWORDS[fwKey] || C.PRONWORDS['career|other'],
+            mic, tip: $('fwTip'),
+          });
           resolve();
         };
         iv = setInterval(() => {
@@ -1910,10 +2035,13 @@ async function frameworkSequence(key, level, name){
     $('fwFill').style.width = '100%';
   }
 
-  $('fwScreen').classList.add('done');
-  $('fwMic').className = 'convmic tick';
-  $('fwTip').textContent = CL('That is the shape of it');
-  if (!FF) JUICE.confetti(40, 'burst');
+  /* two words came back amber, so this is a handoff, not a lap of
+     honour — the confetti waits until after the drill fixes them */
+  const slipped = $('fwCard').querySelectorAll('.fw-para .w.lo').length;
+  $('fwScreen').classList.add(slipped ? 'flagged' : 'done');
+  $('fwMic').className = slipped ? 'convmic go' : 'convmic tick';
+  $('fwTip').textContent = CL(slipped ? 'Two words to fix' : 'That is the shape of it');
+  if (!FF && !slipped) JUICE.confetti(40, 'burst');
   await wait(FF ? 0 : 1600);
   hideScreen('fwScreen');
   await wait(550);
