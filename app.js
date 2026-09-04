@@ -329,6 +329,20 @@ function l10nStatics(){
   if (mute) mute.childNodes.forEach(n => { if (n.nodeType === 3 && n.textContent.trim()) n.textContent = ` ${T('mute')}`; });
   const skipPill = $('skipBtn');
   if (skipPill) skipPill.childNodes.forEach(n => { if (n.nodeType === 3 && n.textContent.trim()) n.textContent = `${T('skip')} `; });
+
+  /* the paywall / gift / offer screens are baked HTML too — same treatment.
+     Only direct text nodes move, so prices and the <i>50% OFF</i> chip
+     nested inside a plan label survive. */
+  const swap = (sel) => document.querySelectorAll(sel).forEach(n =>
+    n.childNodes.forEach(c => {
+      const t = c.nodeType === 3 && c.textContent.trim();
+      if (t) c.textContent = c.textContent.replace(t, CL(t));
+    }));
+  swap('#pwgTag1 small, #pwgTag1 b, #pwgTag2 small, #pwgTag2 b');
+  swap('.pw-feats li span');
+  swap('.pw-plan small, .pw-plan i.off, .psp-r i.off, .gc-txt b');
+  const oh = document.querySelector('.offer-h');
+  if (oh) oh.innerHTML = T('limited_time');
 }
 
 /*
@@ -350,7 +364,7 @@ function multiSelect(items, { head = CL('Select all that apply'), cta = CL('Cont
       <div class="options multi">
         <div class="ms-head">
           <p class="opt-head">${head}</p>
-          <span class="ms-count">0 selected</span>
+          <span class="ms-count">${CL('{n} selected').replace('{n}', 0)}</span>
         </div>
         <div class="opt-list"></div>
         <button class="btn-continue ms-cta">${cta}</button>
@@ -361,7 +375,7 @@ function multiSelect(items, { head = CL('Select all that apply'), cta = CL('Cont
     const chosen = new Set();
 
     const sync = () => {
-      count.textContent = `${chosen.size} selected`;
+      count.textContent = CL('{n} selected').replace('{n}', chosen.size);
       cta_.classList.toggle('ready', chosen.size > 0);
     };
 
@@ -420,7 +434,7 @@ function bandSlider({ start = 7 } = {}){
           <div class="band-note"></div>
         </div>
         <button class="btn-continue ready">Continue</button>
-        <button class="skip-link">I'm not sure yet</button>
+        <button class="skip-link">${CL("I'm not sure yet")}</button>
       </div>`);
     const input = wrap.querySelector('input');
     const val   = wrap.querySelector('.band-val');
@@ -866,7 +880,7 @@ function readingInteraction(card){
       if (e && e.target.closest('.cm-cancel,.cm-confirm')) return;
       if (!convMic.classList.contains('idle')) return;
       JUICE.setAmbient('listening');
-      setProgress(84, '84% completed');
+      setProgress(84, `${84}% ${T('completed').toLowerCase()}`);
       $('micTip').textContent = T('mic_tip_live');
       convMic.className = 'convmic expanded';
       startWave();
@@ -947,14 +961,14 @@ async function proofCard(){
     <div class="msg">
       <div class="dp"><img src="${SARAH}" alt="Sarah"></div>
       <div class="bubble">
-        <p>You're in the right place. Learners here report feeling
-           <em class="pf-hi">${M.value}${M.unit} more confident</em> speaking within a month.</p>
+        <p>${CL("You're in the right place. Learners here report feeling {hi} speaking within a month.")
+             .replace('{hi}', `<em class="pf-hi">${M.value}${M.unit} ${CL('more confident')}</em>`)}</p>
         <span class="pf-stats">
           <span class="pf-item"><b class="pf-n gold" data-to="${P.global.stars}" data-dec="1">0.0</b><i class="pf-star">\u2605</i></span>
           <i class="pf-dot"></i>
-          <span class="pf-item"><b class="pf-n" data-to="${P.global.ratings}" data-fmt="big">0</b>ratings</span>
+          <span class="pf-item"><b class="pf-n" data-to="${P.global.users}" data-fmt="big">0</b>${CL('users')}</span>
           <i class="pf-dot"></i>
-          <span class="pf-item"><b class="pf-n" data-to="${P.global.countries}" data-suf="+">0</b>countries</span>
+          <span class="pf-item"><b class="pf-n" data-to="${P.global.countries}" data-suf="+">0</b>${CL('countries')}</span>
         </span>
       </div>
     </div>`);
@@ -1002,7 +1016,8 @@ function runFor(dur, fn){
 async function goalProofCard(goal){
   const o = C.OUTCOME[goal], p = C.PROOF.byGoal[goal];
   if (!o || !p) return;
-  const claim = o.claim.replace(o.hi, `<em>${o.hi}</em>`);
+  const hi = CL(o.hi);
+  const claim = CL(o.claim).replace(hi, `<em>${hi}</em>`);
   /* the three faces are the goal's own testimonial people, so the same
      personas carry through from this bubble to the loader cards */
   const faces = (C.TESTIMONIALS[goal] || C.TESTIMONIALS.personal).slice(0, 3)
@@ -1015,7 +1030,7 @@ async function goalProofCard(goal){
         <p class="gp-claim">${claim}</p>
         <span class="gp-faces">
           <span class="gp-av">${faces}</span>
-          <span class="gp-line"><b>${Math.round(p.n/1000)}k+</b> ${o.who}<br>practising right now</span>
+          <span class="gp-line"><b>${Math.round(p.n/1000)}k+</b> ${CL(o.who)}<br>${CL('practising right now')}</span>
         </span>
       </div>
     </div>`);
@@ -1047,12 +1062,12 @@ function permissionCard(){
     <div class="ios-alert-wrap">
       <div class="ios-alert">
         <div class="ia-head">
-          <p class="ia-title">\u201CStimuler\u201D Would Like to Send You Notifications</p>
-          <p class="ia-body">Notifications may include alerts, sounds and icon badges. These can be configured in Settings.</p>
+          <p class="ia-title">${CL('\u201CStimuler\u201D Would Like to Send You Notifications')}</p>
+          <p class="ia-body">${CL('Notifications may include alerts, sounds and icon badges. These can be configured in Settings.')}</p>
         </div>
         <div class="ia-actions">
-          <button class="ia-btn">Don\u2019t Allow</button>
-          <button class="ia-btn bold">Allow</button>
+          <button class="ia-btn">${CL('Don\u2019t Allow')}</button>
+          <button class="ia-btn bold">${CL('Allow')}</button>
         </div>
       </div>
     </div>`);
@@ -1486,7 +1501,7 @@ function hsLoadWord(idx){
   });
   $('pcWord').innerHTML = `${pw.pre}<i>${pw.hot}</i>${pw.post || ''}`;
   $('pcPh').textContent = pw.ph;
-  $('pcTip').innerHTML = pw.tip.replace(/‘([^’]+)’/, '<b>‘$1’</b>');
+  $('pcTip').innerHTML = CL(pw.tip).replace(/‘([^’]+)’/, '<b>‘$1’</b>');
   $('pcScore').textContent = `${pw.start}%`;
   const card = $('pronCard');
   card.classList.remove('done');
@@ -1580,7 +1595,8 @@ async function hintSequence(level, outcome = 'weak', adv = false){
   await wait(900);
   await hsAnimateScore(0, cfg.score, FF ? 60 : 1700);
   $('hsSay').textContent = adv
-    ? `You placed yourself at ${cfg.name}. Under pressure you came in just below it. That gap is the whole game.`
+    ? CL('You placed yourself at {lv}. Under pressure you came in just below it. That gap is the whole game.')
+        .replace('{lv}', CL(cfg.name))
     : T('hs_say2', cfg.name, cfg.cefr);
   await wait(1900);
 
@@ -1841,8 +1857,7 @@ async function frameworkSequence(key, level, name){
   $('fwFill').style.width = '50%';
   $('fwNext').parentElement.style.display = 'none';
   $('fwCard').classList.add('readmode');
-  $('fwCard').innerHTML = `<p class="fw-para">${sc.parts.join(' ').split(' ')
-    .map(w => `<span class="w">${w}</span>`).join(' ')}</p>`;
+  buildReadCard(sc.parts);
   $('fwMicRow').classList.remove('gone');
   $('fwMic').className = 'convmic idle';
   $('fwTip').textContent = CL('Tap the mic and read');
@@ -1902,6 +1917,72 @@ async function frameworkSequence(key, level, name){
   await wait(FF ? 0 : 1600);
   hideScreen('fwScreen');
   await wait(550);
+}
+
+/* ------------------------------------------------------------
+   The reading card's two helpers, shared by every cohort on the
+   hint path: hear the line, and read it in your own language.
+   Translation follows the NATIVE language they picked in the
+   chat, not the app language — someone can keep the app in
+   English and still want the line explained.
+   ------------------------------------------------------------ */
+const ICON_LISTEN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6.5 9H3.5v6h3L11 19z"/><path d="M15 9.5a3.5 3.5 0 0 1 0 5"/><path d="M17.8 6.5a7.5 7.5 0 0 1 0 11"/></svg>';
+const ICON_TRANS  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 5.5h7.5M7.2 4v1.5"/><path d="M9.4 5.5c0 3.4-2.2 6.4-5.4 7.6"/><path d="M5.6 9.4c1 2.1 2.7 3.7 4.8 4.6"/><path d="M12.6 20.5l3.9-9.6 3.9 9.6M14.1 17.2h4.8"/></svg>';
+
+function buildReadCard(parts){
+  const passage = parts.join(' ');
+  const trans   = parts.map(x => NL(x)).join(' ');
+  const hasTr   = trans !== passage;
+  $('fwCard').innerHTML = `
+    <p class="fw-para">${passage.split(' ').map(w => `<span class="w">${w}</span>`).join(' ')}</p>
+    ${hasTr ? `<p class="fw-trans" id="fwTrans" hidden>${trans}</p>` : ''}
+    <div class="fw-tools">
+      <button class="fw-tool" id="fwListen" aria-label="${CL('Listen')}">${ICON_LISTEN}<span>${CL('Listen')}</span></button>
+      ${hasTr ? `<button class="fw-tool" id="fwTransBtn" aria-label="${CL('Translate')}">${ICON_TRANS}<span>${CL('Translate')}</span></button>` : ''}
+    </div>`;
+
+  /* — translate: the line in their language slides in under the English — */
+  const tBtn = $('fwTransBtn');
+  if (tBtn) tBtn.addEventListener('click', () => {
+    const pane = $('fwTrans'), on = pane.hidden;
+    pane.hidden = false;
+    requestAnimationFrame(() => pane.classList.toggle('in', on));
+    tBtn.classList.toggle('on', on);
+    if (!on) setTimeout(() => { pane.hidden = true; }, 240);
+  });
+
+  /* — listen: real speech where the browser has it, and either way the
+       words light up at speaking pace so the timing is legible — */
+  const lBtn = $('fwListen');
+  lBtn.addEventListener('click', () => {
+    if (lBtn.classList.contains('on')) return stopReadBack(lBtn);
+    lBtn.classList.add('on');
+    const words = [...$('fwCard').querySelectorAll('.fw-para .w')];
+    const were  = words.map(w => w.classList.contains('g'));
+    words.forEach(w => w.classList.remove('g'));
+    let n = 0;
+    readBackT = setInterval(() => {
+      if (n >= words.length) return stopReadBack(lBtn, words, were);
+      words[n].classList.add('lit');
+      if (n) words[n - 1].classList.remove('lit');
+      n++;
+    }, 300);
+    try {
+      const u = new SpeechSynthesisUtterance(passage);
+      u.lang = 'en-US'; u.rate = 0.86;
+      u.onend = () => stopReadBack(lBtn, words, were);
+      speechSynthesis.cancel();
+      speechSynthesis.speak(u);
+    } catch (e) { /* no speech engine — the highlight carries it alone */ }
+  });
+}
+let readBackT = null;
+function stopReadBack(btn, words, were){
+  clearInterval(readBackT);
+  try { speechSynthesis.cancel(); } catch (e) {}
+  btn.classList.remove('on');
+  const ws = words || [...$('fwCard').querySelectorAll('.fw-para .w')];
+  ws.forEach((w, i) => { w.classList.remove('lit'); if (were && were[i]) w.classList.add('g'); });
 }
 
 /* ============================================================
@@ -2090,7 +2171,7 @@ function localizePaywallChrome(){
 
 async function paywallSequence(goal){
   reach('paywall');
-  $('pwTitle').innerHTML = C.PW_TITLE[goal] || C.PW_TITLE.career;
+  $('pwTitle').innerHTML = CL(C.PW_TITLE[goal] || C.PW_TITLE.career);
   localizePaywallChrome();
   showScreen('paywallScreen');
   setTimeout(() => $('chatScreen').classList.add('is-hidden'), 600);
@@ -2201,7 +2282,7 @@ async function flow(){
   /* ---------- 1 · native language (worldwide build, Europe first) ---------- */
   reach('language');
   await sarah(T('lang_q'));
-  setProgress(0, '0% completed');
+  setProgress(0, `${0}% ${T('completed').toLowerCase()}`);
   const lang = await options([
     ...C.LANGUAGES.map(l => ({
       value: l.value, label: l.label, icon: flag(l.flag),
@@ -2210,6 +2291,7 @@ async function flow(){
     { value: 'more', label: T('other_langs'), icon: '🌎', inert: true },
   ], { chipIcons: true, forced: DBG.lang === 'en' ? 'fr' : DBG.lang });
   const L = C.LANGUAGES.find(l => l.value === lang) || C.LANGUAGES[0];
+  NATIVE = lang;                                 /* the reading card translates into this */
   setProgress(2, T('lbl_great'));
   await wait(300);
 
@@ -2224,7 +2306,7 @@ async function flow(){
   ], { wide: true, link: T('other_lang_link'), forced: DBG.lang === 'en' ? 'english' : 'native' });
   if (applang === 'native' && STR[lang]) L10N = lang;
   l10nStatics();
-  setProgress(7, '7% completed');
+  setProgress(7, `${7}% ${T('completed').toLowerCase()}`);
   await wait(300);
 
   /* ---------- 2 · name ---------- */
@@ -2236,14 +2318,14 @@ async function flow(){
   /* ---------- 2.2 · phone ---------- */
   reach('phone');
   await sarah(T('ack_name'));
-  earn(23, '23% completed');
+  earn(23, `${23}% ${T('completed').toLowerCase()}`);
   await sarah(T('phone_q'));
   const phone = await phoneInput(L.flag, L.cc);
 
   /* ---------- 3 · heard from (India's flat list, unchanged) ---------- */
   reach('source');
   await sarah(phone ? T('source_thanks') : T('source_noproblem'));
-  earn(30, '30% completed');
+  earn(30, `${30}% ${T('completed').toLowerCase()}`);
   await options([
     { value: 'play',      label: CL('Just searched on Play Store'), icon: ICONS.play },
     { value: 'tiktok',    label: 'Tiktok',                icon: ICONS.tiktok },
@@ -2269,7 +2351,7 @@ async function flow(){
     { value: '35_44', label: '35 – 44',      icon: '🏡', e: '🏡', anim: 'oa-wave' },
     { value: '45p',   label: CL('45 and above'), icon: '🧭', e: '🧭', anim: 'oa-spin' },
   ], { link: T('rather_not_say'), linkValue: 'na' });
-  setProgress(42, '42% completed');
+  setProgress(42, `${42}% ${T('completed').toLowerCase()}`);
 
   reach('gender');
   await sarah(T('gender_q'));
@@ -2303,7 +2385,7 @@ async function flow(){
   if (goal === 'exam'){
     reach('exam');
     await sarah(T('exam_q'));
-    earn(50, '50% completed');
+    earn(50, `${50}% ${T('completed').toLowerCase()}`);
     exam = await options(
       C.EXAMS.map(e => ({ value: e.value, label: e.label, icon: e.icon,
                           e: e.icon, anim: 'oa-bounce',
@@ -2313,12 +2395,12 @@ async function flow(){
     if (exam === 'other'){
       await sarah(T('exam_other_q'));
       await textInput(T('exam_other_ph'), { skip: T('skip_for_now') });
-      setProgress(61, '61% completed');
+      setProgress(61, `${61}% ${T('completed').toLowerCase()}`);
     } else if (exam === 'ielts'){
       /* the only exam that branches further */
       reach('examtype');
       await sarah(T('ielts_type_q'));
-      earn(53, '53% completed');
+      earn(53, `${53}% ${T('completed').toLowerCase()}`);
       examType = await options(
         C.IELTS_TYPES.map(t => ({ value: t.value, label: CL(t.label), desc: CL(t.desc),
                                   icon: t.icon, e: t.icon, anim: 'oa-bounce',
@@ -2327,7 +2409,7 @@ async function flow(){
 
       reach('examdate');
       await sarah(T('exam_date_q'));
-      earn(57, '57% completed');
+      earn(57, `${57}% ${T('completed').toLowerCase()}`);
       examDate = await options(
         C.examDateOptions().map(d => ({ value: d.value, label: CL(d.label), note: CL(d.note),
                                         icon: d.icon, e: d.icon, anim: 'oa-bounce',
@@ -2335,16 +2417,16 @@ async function flow(){
 
       reach('band');
       await sarah(T('band_q'));
-      earn(61, '61% completed');
+      earn(61, `${61}% ${T('completed').toLowerCase()}`);
       band = await bandSlider({ start: 7 });
     } else {
       /* TOEFL / TOEIC / PTE — recorded, then straight on */
       await sarah(T('exam_noted', (C.EXAMS.find(e => e.value === exam) || {}).label), { typingMs: 700 });
-      setProgress(61, '61% completed');
+      setProgress(61, `${61}% ${T('completed').toLowerCase()}`);
     }
   } else {
     await sarah(T(`ack_goal_${goal}`), { typingMs: 1200 });
-    setProgress(61, '61% completed');
+    setProgress(61, `${61}% ${T('completed').toLowerCase()}`);
   }
 
   await goalProofCard(goal);             /* conviction: keyed to their goal */
@@ -2352,7 +2434,7 @@ async function flow(){
   /* ---------- 6 · situation (profile only, no fork) ---------- */
   reach('situation');
   await sarah(T('situation_q'));
-  earn(69, '69% completed');
+  earn(69, `${69}% ${T('completed').toLowerCase()}`);
   const situation = await options(
     C.SITUATIONS.map(s => ({ value: s, label: CL(s),
       icon: C.SIT_FX[s], e: C.SIT_FX[s], anim: 'oa-bounce',
@@ -2371,7 +2453,7 @@ async function flow(){
   if (sc){
     reach('scenarios');
     await sarah(CL(sc.prompt));
-    earn(76, '76% completed');
+    earn(76, `${76}% ${T('completed').toLowerCase()}`);
     const labels = sc.items.map(i => CL(i.label));
     /* ?focus= puts a specific scenario first, so a reviewer can see the
        plan card and the first-session line for any of them. */
@@ -2399,7 +2481,7 @@ async function flow(){
   await sarah(T('notif_ask'));
   await permissionCard();
   await sarah(T('notif_ok'), { typingMs: 800, quick: true });
-  setProgress(84, '84% completed');
+  setProgress(84, `${84}% ${T('completed').toLowerCase()}`);
 
   /* ---------- 8 · level ---------- */
   reach('level');
@@ -2433,15 +2515,16 @@ async function flow(){
   scrollToEnd();
   if (!FF) requestAnimationFrame(() => award.classList.add('in'));
   await wait(FF ? 0 : 1100);
-  setProgress(96, '96% completed');
+  setProgress(96, `${96}% ${T('completed').toLowerCase()}`);
 
   /* the handoff — the last thing the chat ever does. Beginners are
      promised a read; everyone else is promised one real question. */
   const askNoun = C.PRACTICE_ASK[famFirst] || 'everyday question';
   await sarah(level === 'beginner'
     ? T('stage_handoff')
-    : `One last thing before your plan. You will answer one real ${askNoun} out loud, in about 20 seconds. Speak in your own words. There is no wrong answer.`);
-  setProgress(100, '100% completed');
+    : CL('One last thing before your plan. You will answer one real {ask} out loud, in about 20 seconds. Speak in your own words. There is no wrong answer.')
+        .replace('{ask}', CL(askNoun)));
+  setProgress(100, `${100}% ${T('completed').toLowerCase()}`);
   bottomBar.classList.add('gone');
   const cta = el(`<button class="btn-report">${T('stage_cta')}</button>`);
   chatStream.appendChild(cta);

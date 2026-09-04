@@ -4454,6 +4454,54 @@ body{
 }
 .fw-para .w{color:var(--text-mid);transition:color .25s var(--ease-out);}
 .fw-para .w.g{color:var(--succ-300);}
+.fw-para .w.lit{color:var(--blue-300);}
+
+/* the two reading aids, inside the card so they belong to the line */
+.fw-trans{
+  margin-top:14px;
+  padding-top:14px;
+  border-top:1px solid rgba(157,150,255,.14);
+  font-family:var(--font-body);
+  font-weight:400;
+  font-size:15px;
+  line-height:24px;
+  color:var(--text-low);
+  opacity:0;
+  transform:translateY(-4px);
+  transition:opacity .22s var(--ease-out), transform .22s var(--ease-out);
+}
+.fw-trans.in{opacity:1;transform:none;}
+.fw-tools{
+  display:flex;
+  gap:8px;
+  margin-top:16px;
+  padding-top:14px;
+  border-top:1px solid rgba(157,150,255,.12);
+}
+.fw-tool{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  height:34px;
+  padding:0 12px;
+  border-radius:17px;
+  border:1px solid rgba(157,150,255,.20);
+  background:rgba(157,150,255,.06);
+  color:var(--text-low);
+  font-family:var(--font-body);
+  font-weight:500;
+  font-size:13px;
+  letter-spacing:.01em;
+  cursor:pointer;
+  transition:color .2s var(--ease-out), border-color .2s var(--ease-out), background .2s var(--ease-out);
+}
+.fw-tool svg{width:16px;height:16px;flex:0 0 16px;}
+.fw-tool:active{transform:scale(.97);}
+.fw-tool.on{
+  color:var(--blue-300);
+  border-color:rgba(157,150,255,.55);
+  background:rgba(108,99,255,.16);
+}
 #fwScreen.done .fw-card.readmode{border-color:color-mix(in srgb, var(--succ-300) 45%, transparent);}
 .fw-microw{padding-bottom:40px;}
 .fw-microw.gone{display:none;}

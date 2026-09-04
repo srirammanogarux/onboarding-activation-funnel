@@ -15,5 +15,8 @@ the repo root (`python3 -m http.server 8901`) or point `BASE` at a deploy:
 - `l10n.mjs` — French/Italian/Portuguese takeover screens.
 - `capture-all.mjs` — every screen of the Career-at-work cohort, all
   three branches, for design review (feeds the Paper flow pages).
+- `l10n-audit.mjs` — walks the funnel in one locale and prints every
+  visible string, so leftover English stands out
+  (`LOC=it node tests/l10n-audit.mjs`, or pass step names to narrow it).
 
 Screenshots land in `tests/out/` (gitignored).

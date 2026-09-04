@@ -15,7 +15,7 @@ const PROOF = {
   /* the hero metric the counter widget animates to, then the supporting three */
   metric: { value: 32, unit: '%' },
   /* the three that count up under her sentence, in this order */
-  global: { stars: 4.9, ratings: 12000000, countries: 190 },
+  global: { stars: 4.9, users: 12000000, countries: 190 },
   byGoal: {
     exam:     { n: 214000, line: 'passed their English exam with us last year' },
     career:   { n: 380000, line: 'use Stimuler to get ahead at work' },
