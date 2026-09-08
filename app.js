@@ -1622,8 +1622,11 @@ function hsAnimateScore(from, to, dur){
     const step = (now) => {
       const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3);
       const sc = from + (to - from) * e;
+      const pos = hsPosForScore(sc);
       pct.textContent = `${Math.round(sc)}%`;
-      bub.style.top = `${hsPosForScore(sc)}%`;
+      bub.style.top = `${pos}%`;
+      /* the headline's fade follows the pill */
+      $('hsHead').style.setProperty('--bub-y', `${pos}%`);
       if (k < 1) requestAnimationFrame(step);
       else resolve();
     };
@@ -1724,6 +1727,7 @@ async function hintSequence(level, outcome = 'weak', adv = false){
   buildMeter();
   $('hsPct').textContent = '0%';
   $('hsBub').style.top = '95.5%';
+  $('hsHead').style.setProperty('--bub-y', '95.5%');
   /* localize the static hint-screen strings */
   $('hsSay').textContent = adv
     ? CL('You used the hint, so I scored your reading on pronunciation first. Here is where you stand.')
