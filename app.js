@@ -1715,7 +1715,7 @@ function hsPracticeWord(idx){
 /* Intermediate/advanced hint path: the meter quotes their own claim
    back at them, dips it a touch, and always continues into practice. */
 const SELF_METER = {
-  intermediate: { name:'Intermediate', cefr:'B1', score:56, tgt:'Advanced',   tgtScore:82 },
+  intermediate: { name:'Intermediate', cefr:'B1', score:56, tgt:'Proficient', tgtScore:93 },
   advanced:     { name:'Advanced',     cefr:'C1', score:84, tgt:'Proficient', tgtScore:93 },
 };
 
